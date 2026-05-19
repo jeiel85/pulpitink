@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## Unreleased
+
+### Documentation
+- 바이브 코딩용 `/goal` 프롬프트를 6단계에서 3단계 대형 작업 단위로 재구성했습니다.
+- `docs/vibe-coding-goals.md`와 `docs/vibe-coding-goals-3phase.md`에 동일한 3단계 Goal 문서를 포함했습니다.
+- README에 3단계 Goal 사용 안내를 추가했습니다.
+
 ## v0.2.0 - 2026-05-20
 
 ### Added

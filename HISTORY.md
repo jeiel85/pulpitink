@@ -22,3 +22,15 @@
   - Expected Assets 개념을 SermonScript의 EXE/ZIP 산출물 검증으로 변환
   - 릴리즈 노트, CHANGELOG, HISTORY 동시 갱신 규칙 반영
   - 민감 정보, 외부 SDK, 배포 산출물 확인 규칙을 데스크톱 프로젝트에 맞게 조정
+
+
+## 2026-05-20
+- 작업: 바이브 코딩 `/goal` 프롬프트를 6단계에서 3단계 대형 Goal 구조로 재구성
+- 변경 파일:
+  - docs/vibe-coding-goals.md: 3단계 대형 Goal 프롬프트로 갱신
+  - docs/vibe-coding-goals-3phase.md: 동일한 3단계 Goal 문서 추가
+  - README.md: 3단계 Goal 안내 추가
+  - CHANGELOG.md: 문서 변경 사항 기록
+- 검증: 문서 변경 내용 검토, ruff check, pytest, sermonscript doctor
+- 결과: 성공
+- 후속 작업: 실제 개발 시 Goal 1부터 순차적으로 바이브 코딩 에이전트에 입력
