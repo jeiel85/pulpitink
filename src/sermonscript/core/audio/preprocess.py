@@ -25,7 +25,6 @@ def preprocess_audio(input_path: str, output_path: str, preset_key: str = "sermo
     )
 
     if result.returncode != 0:
-        raise RuntimeError(f"FFmpeg preprocessing failed:
-{result.stderr}")
+        raise RuntimeError(f"FFmpeg preprocessing failed:\n{result.stderr}")
 
     return Path(output_path)

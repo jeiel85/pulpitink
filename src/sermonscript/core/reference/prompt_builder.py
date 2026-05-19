@@ -27,5 +27,4 @@ def build_reference_prompt(ref: ReferencePrompt) -> str:
     if terms:
         lines.append("주요 용어: " + ", ".join(terms[:40]))
 
-    return "
-".join(lines)
+    return "\n".join(lines)
