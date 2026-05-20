@@ -3,8 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { 
   Play, Pause, Volume2, Settings, List, FileAudio, 
-  HelpCircle, RefreshCw, CheckCircle2, AlertTriangle, 
-  ArrowRight, Search, FileText, Plus, Database, Sparkles
+  RefreshCw, CheckCircle2, AlertTriangle, 
+  ArrowRight, Search, Plus, Database, Sparkles
 } from "lucide-react";
 import "./App.css";
 
@@ -75,7 +75,7 @@ function App() {
   const [userDictPath, setUserDictPath] = useState("");
   const [selectedModel, setSelectedModel] = useState("small");
   const [selectedPreset, setSelectedPreset] = useState("sermon");
-  const [selectedLanguage, setSelectedLanguage] = useState("ko");
+  const [selectedLanguage] = useState("ko");
   const [isFuzzyEnabled, setIsFuzzyEnabled] = useState(true);
   const [fuzzyThreshold, setFuzzyThreshold] = useState(0.70);
   
