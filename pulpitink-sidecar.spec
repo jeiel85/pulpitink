@@ -107,6 +107,7 @@ exe = EXE(
     strip=False,
     upx=False,
     console=True,  # Console enabled for capturing stdout/stderr streams
+    icon=str(PROJECT_ROOT / "src" / "pulpitink" / "resources" / "pulpitink.ico"),
 )
 
 coll = COLLECT(

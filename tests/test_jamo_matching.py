@@ -84,3 +84,12 @@ def test_find_fuzzy_matches_success() -> None:
     # Verify exact snippet detection
     snippet_for_christ = [snip for snip, cand, _ in matches if cand == "그리스도"]
     assert "그리시도" in snippet_for_christ or "크리스토" in snippet_for_christ
+
+
+def test_find_fuzzy_matches_stop_words_exclusion() -> None:
+    # "에서"는 DEFAULT_STOP_WORDS에 포함되어 있어 "에스더" 후보 매칭 스캔 시 무시되어야 합니다.
+    text = "우리가 그곳에서 머물렀다"
+    candidates = ["에스더"]
+    matches = find_fuzzy_matches(text, candidates, threshold=0.70, min_len=3)
+    assert len(matches) == 0
+

@@ -79,6 +79,7 @@ exe = EXE(
     strip=False,
     upx=False,
     console=False,
+    icon=str(PROJECT_ROOT / "src" / "pulpitink" / "resources" / "pulpitink.ico"),
 )
 coll = COLLECT(
     exe,

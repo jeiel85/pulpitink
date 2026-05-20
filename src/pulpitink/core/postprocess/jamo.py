@@ -20,6 +20,12 @@ CHO_TABLE: tuple[str, ...] = (
     "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"
 )
 
+DEFAULT_STOP_WORDS: set[str] = {
+    "에서", "하고", "그리고", "우리", "그의", "그들", "어떤", "또한", "으로", "로써", "로서",
+    "에게", "한테", "하며", "했다", "한다", "하여", "때문", "대한", "대해", "위해", "위한",
+    "아니", "모든", "가장", "같이", "같은", "이런", "저런", "그런"
+}
+
 
 def _ratio(a: str, b: str) -> float:
     if fuzz is not None:
@@ -105,6 +111,8 @@ def find_fuzzy_matches(
             for start in range(n - w_len + 1):
                 sub = text[start : start + w_len].strip()
                 if not sub:
+                    continue
+                if sub in DEFAULT_STOP_WORDS:
                     continue
                 score = hybrid_similarity(sub, candidate)
                 if score > best_score:

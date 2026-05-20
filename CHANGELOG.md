@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## [0.4.3] - 2026-05-20
+
+### Added
+- **PulpitInk 프리미엄 공식 아이콘 탑재**: 강대상, 깃펜, 잉크 및 소리 파형을 미니멀하게 형상화한 고유의 앱 로고 png 리소스를 생성하고, 다중 규격의 `pulpitink.ico` 파일로 변환하여 `src/pulpitink/resources` 디렉토리에 통합 탑재하였습니다.
+- **PyInstaller 아이콘 연동**: `pulpitink.spec` 및 `pulpitink-sidecar.spec` 스펙 파일의 `EXE` 정의부에 고유 아이콘 리소스를 바인딩하여, 윈도우용 실행 파일 패키징 시 아이콘이 엠베딩되도록 지정하였습니다.
+
+### Fixed
+- **자모 Fuzzy 매칭 2글자 오탐 스톱워드(Stop-words) 가드 도입**: 한글 자모 Fuzzy 매칭 스캔 과정 중 "에서", "하고", "그리고", "우리", "그의" 등 단순 조사 및 접속사가 임계값을 넘겨 거짓 양성(False Positive)을 유발하는 문제를 방지하기 위해 `DEFAULT_STOP_WORDS` 제외 가드를 설계하여 postprocess 로직의 정확도를 대폭 상향시켰습니다.
+
 ## [0.4.2] - 2026-05-20
 
 ### Added

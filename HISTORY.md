@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-20 (단기 개선 및 v0.4.3 브랜드 패치 릴리즈)
+- 작업: PulpitInk 프리미엄 고유 로고 아이콘 설계 및 빌드(PyInstaller Spec) 바인딩, 자모 Fuzzy 매칭 2글자 오탐 제어용 Stop-words 가드 설계/구현 및 유닛 테스트 추가, 0.4.3 패치 버전 릴리즈.
+- 변경 파일:
+  - src/pulpitink/resources/pulpitink.png, pulpitink.ico (신규: 앱 로고 이미지 및 다중 해상도 아이콘 파일 에셋)
+  - pulpitink.spec, pulpitink-sidecar.spec (EXE 빌드 옵션에 icon 경로 엠베딩 바인딩)
+  - src/pulpitink/core/postprocess/jamo.py (DEFAULT_STOP_WORDS 정의 및 sliding window 내 stop-words skip 가드 적용)
+  - tests/test_jamo_matching.py (Fuzzy 매칭 제외 단어 예외 스킵 여부 검증 단위 테스트 추가)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.3 및 릴리즈 이력 갱신)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 101/101 PASS (신규 추가된 stop-words 검증용 단위 테스트 포함 전체 100% 통과 완료)
+  - `python -m pulpitink.cli.main doctor`: PASS (환경 진단 전체 OK)
+- 결과: 성공. 앱 브랜딩 완성도를 확보하고 한글 자모 Fuzzy 매칭의 2글자 False Positive 현상을 정밀 통제한 0.4.3 패치 릴리즈 출시.
+
 ## 2026-05-20 (CI 수정 및 v0.4.2 패치 릴리즈)
 - 작업: CI 빌드 시 PySide6 등 GUI 관련 의존성 누락 문제 해결 및 PySide6 미설치 CLI 환경에서의 유닛 테스트 가드(Skip) 고도화, 0.4.2 패치 버전 릴리즈.
 - 변경 파일:
