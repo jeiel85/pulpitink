@@ -12,10 +12,10 @@
 
 다음 세션에서 바로 잡기 좋은 기능 후보:
 
-1. [ ] CSV Export 추가
-   - 근거: `docs/product-spec.md`는 TXT, Markdown, SRT, VTT, JSON, CSV 출력을 목표로 적고 있으나 현재 구현은 TXT/JSON/MD/SRT/VTT 5종입니다.
-   - 범위: `core.export`에 CSV exporter 추가, CLI/GUI 기본 포맷 반영 여부 결정, 단위 테스트 추가, README/사용자 가이드 갱신.
-   - 추천도: 높음. 작고 명확하며 제품 명세와 실제 구현의 차이를 줄입니다.
+1. [x] CSV Export 추가 (2026-05-20 완료)
+   - `core.export.csv_exporter`, CLI/GUI/서비스 기본 포맷 csv 포함, 단위 테스트 4건 추가, README/사용자 가이드/통합 시나리오 갱신
+   - 결과: `pytest 95/95`, `ruff check .` 통과
+   - 후속(낮은 우선): 짧은 2글자 한글 false positive와 별개로 발견되는 한계 있으면 별도 정리
 
 2. [ ] 캐시 삭제 / 작업 삭제 UX 보강
    - 근거: 릴리즈 체크리스트의 `캐시 삭제 동작 확인`이 남아 있고, 현재 DB cascade 삭제 테스트는 있으나 사용자 관점의 캐시 정리 흐름이 약합니다.

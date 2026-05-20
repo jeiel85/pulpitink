@@ -456,6 +456,7 @@ class TranscriptEditorWidget(QWidget):
                 ExportFormat.MD,
                 ExportFormat.SRT,
                 ExportFormat.VTT,
+                ExportFormat.CSV,
             )
         )
         out_paths = pipeline.run(result, Path(target), self._job_id)

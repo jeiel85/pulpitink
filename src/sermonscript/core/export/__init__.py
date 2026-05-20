@@ -1,6 +1,7 @@
 """Transcript export pipeline."""
 
 from sermonscript.core.export.base import Exporter, ExportFormat, ExportRequest
+from sermonscript.core.export.csv_exporter import CsvExporter
 from sermonscript.core.export.json_exporter import JsonExporter
 from sermonscript.core.export.markdown_exporter import MarkdownExporter
 from sermonscript.core.export.pipeline import (
@@ -15,6 +16,7 @@ from sermonscript.core.export.vtt_exporter import VttExporter
 
 __all__ = [
     "EXPORTERS",
+    "CsvExporter",
     "ExportFormat",
     "ExportPipeline",
     "ExportRequest",

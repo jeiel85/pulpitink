@@ -29,7 +29,7 @@ python -m sermonscript.cli.main transcribe `
   --language ko `
   --model small `
   --preset sermon `
-  --format txt,json,md,srt,vtt `
+  --format txt,json,md,srt,vtt,csv `
   --output tests/integration/out
 ```
 
@@ -46,7 +46,7 @@ python -m sermonscript.cli.main corrections list <job-id>
 - [x] 전처리: `cache/jobs/<job-id>/processed.wav` 생성 (16kHz mono)
 - [x] STT: 세그먼트가 DB 의 `segments` 테이블에 기록되고 `raw_text` 비어 있지 않음
 - [ ] 후처리: `clean_text` 가 `raw_text` 와 다른 세그먼트가 존재 — **실제 회차 #1에서 0건**. lexicon wrong_forms 사전등록형 한계 ([results.md](results.md))
-- [x] Export: `out/<stem>.{txt,json,md,srt,vtt}` 5개 모두 생성
+- [x] Export: `out/<stem>.{txt,json,md,srt,vtt,csv}` 6개 모두 생성
 - [x] 원문 대조: `reference_documents` 1건, `alignment_pairs` 11건 (`correction_suggestions` 는 아래 참고)
 - [ ] 교정 후보: 최소 1건 이상 pending 으로 저장됨 — **실제 회차 #1에서 0건**. v1.1 후속 ([tasks #12](../../HISTORY.md))
 - [x] `raw_text` 가 절대 수정되지 않음 (스키마/리포지터리 차원에서 enforce)

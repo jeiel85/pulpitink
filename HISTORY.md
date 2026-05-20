@@ -1,5 +1,28 @@
 # HISTORY.md
 
+## 2026-05-20 (기능 추가 — CSV Export 지원)
+- 작업: `docs/product-spec.md`에 명시된 CSV 출력을 실제로 지원. core.export에 CSV exporter 추가하고 CLI/GUI/서비스 기본 포맷에 포함.
+- 변경 파일:
+  - src/sermonscript/core/export/csv_exporter.py (신규)
+  - src/sermonscript/core/export/base.py (`ExportFormat.CSV` 추가)
+  - src/sermonscript/core/export/pipeline.py, src/sermonscript/core/export/__init__.py (EXPORTERS/공개 API 등록)
+  - src/sermonscript/cli/main.py (`--format` 기본값에 csv 추가)
+  - src/sermonscript/services/transcribe_service.py, src/sermonscript/ui/main_window.py, src/sermonscript/ui/transcript_editor.py (기본 포맷에 csv 포함)
+  - tests/test_exporters.py (CSV 단위 테스트 4건 추가 + 파이프라인/포맷 파싱 갱신)
+  - tests/test_pipeline_integration.py, tests/integration/verify_run.py, tests/integration/README.md (Export 6종 검증)
+  - README.md, docs/user-guide.md, docs/release/release-checklist.md (사용자 안내/체크리스트 갱신)
+  - HISTORY.md
+- 설계 결정:
+  - 컬럼: `index, start_sec, end_sec, start, end, text, raw_text, clean_text, edited_text, speaker`
+  - `text`는 Export 우선순위(`edited_text > clean_text > raw_text`)로 채움. raw/clean/edited는 분석 용도로 각각 별도 컬럼 유지
+  - 한국어 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM(`utf-8-sig`) + `\r\n` 라인 종결자 사용
+  - 콤마/따옴표/개행은 표준 `csv.writer` `QUOTE_MINIMAL`로 이스케이프
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 95/95 PASS (CSV 신규 테스트 4건 포함)
+- 후속 작업:
+  - 다음 후보(캐시 삭제/작업 삭제 UX, 최근 작업 기록 비활성화 옵션, Jamo fuzzy 문서 정리, 오디오 싱크 플레이어, 다중 작업 큐, `frontend/` 정책)
+
 ## 2026-05-20 (핸드오프 정리 — 다음 작업 후보)
 - 작업: 최신 CI/릴리즈 검증 상태와 이전 세션의 남은 기능 후보를 확인하고, 다음 세션에서 이어받기 쉬운 우선순위 목록을 `docs/roadmap-tasks.md` 상단에 정리.
 - 변경 파일:

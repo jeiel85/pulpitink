@@ -312,6 +312,7 @@ class MainWindow(QMainWindow):
                 ExportFormat.MD,
                 ExportFormat.SRT,
                 ExportFormat.VTT,
+                ExportFormat.CSV,
             ),
             fuzzy_matching_enabled=fuzzy_enabled,
             fuzzy_threshold=fuzzy_threshold,

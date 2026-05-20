@@ -8,6 +8,7 @@ from pathlib import Path
 
 from sermonscript.app.exceptions import ExportError
 from sermonscript.core.export.base import Exporter, ExportFormat, ExportRequest
+from sermonscript.core.export.csv_exporter import CsvExporter
 from sermonscript.core.export.json_exporter import JsonExporter
 from sermonscript.core.export.markdown_exporter import MarkdownExporter
 from sermonscript.core.export.srt_exporter import SrtExporter
@@ -23,6 +24,7 @@ EXPORTERS: dict[ExportFormat, type[Exporter]] = {
     ExportFormat.MD: MarkdownExporter,
     ExportFormat.SRT: SrtExporter,
     ExportFormat.VTT: VttExporter,
+    ExportFormat.CSV: CsvExporter,
 }
 
 

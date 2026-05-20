@@ -77,10 +77,10 @@ def verify(job_id: str | None = None) -> int:
 
         exports = repo.list_exports(job.id)
         formats = sorted({e.format for e in exports})
-        expected = {"txt", "json", "md", "srt", "vtt"}
+        expected = {"txt", "json", "md", "srt", "vtt", "csv"}
         missing = expected - set(formats)
         print(_row(
-            "Export 5종",
+            "Export 6종",
             "PASS" if not missing else "FAIL",
             f"생성={','.join(formats) or '(없음)'} / 누락={','.join(sorted(missing)) or '없음'}",
         ))

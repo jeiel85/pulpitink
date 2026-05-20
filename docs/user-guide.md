@@ -84,7 +84,7 @@ sermonscript doctor
 sermonscript transcribe sermon.mp3
 ```
 
-기본값은 `--language ko --model small --preset sermon` 이며, `./exports/sermon.{txt,json,md,srt,vtt}` 를 생성하고 결과를 SQLite DB 에도 기록합니다.
+기본값은 `--language ko --model small --preset sermon` 이며, `./exports/sermon.{txt,json,md,srt,vtt,csv}` 를 생성하고 결과를 SQLite DB 에도 기록합니다.
 
 자주 쓰는 옵션:
 
@@ -93,7 +93,7 @@ sermonscript transcribe sermon.mp3 `
   --language ko `
   --model small `
   --preset sermon `
-  --format txt,json,md,srt,vtt `
+  --format txt,json,md,srt,vtt,csv `
   --output .\exports `
   --device auto `
   --compute-type int8 `
@@ -133,8 +133,13 @@ sermonscript models cache-dir
 
 ### 3.3 출력 포맷
 
-`--format` 은 콤마로 구분합니다. 지원: `txt`, `json`, `md`, `srt`, `vtt`.
+`--format` 은 콤마로 구분합니다. 지원: `txt`, `json`, `md`, `srt`, `vtt`, `csv`.
 출력 파일명은 입력 파일의 stem 을 따릅니다.
+
+CSV 는 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM 으로 저장되며, 다음 컬럼을 포함합니다:
+`index`, `start_sec`, `end_sec`, `start`, `end`, `text`, `raw_text`, `clean_text`, `edited_text`, `speaker`.
+`text` 컬럼은 Export 우선순위(`edited_text > clean_text > raw_text`)를 따른 표시용 값이고,
+`raw_text` / `clean_text` / `edited_text` 는 각 단계의 원본 텍스트입니다.
 
 ---
 

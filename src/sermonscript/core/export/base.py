@@ -16,6 +16,7 @@ class ExportFormat(StrEnum):
     MD = "md"
     SRT = "srt"
     VTT = "vtt"
+    CSV = "csv"
 
     @classmethod
     def parse(cls, value: str) -> ExportFormat:

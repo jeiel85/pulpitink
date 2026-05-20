@@ -10,7 +10,7 @@
 - [x] `python -m ruff check .` 통과 (2026-05-20)
 - [x] CLI `sermonscript doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
-- [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
+- [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt/csv) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
 - [x] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인 (회귀 테스트로 보장: `tests/test_transcript_editor_repo.py`)
 - [ ] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능 — **회차 #1에서 0건 발견, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10) 참고**
 

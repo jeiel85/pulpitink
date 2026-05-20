@@ -88,6 +88,7 @@ class TranscribeRequest:
         ExportFormat.MD,
         ExportFormat.SRT,
         ExportFormat.VTT,
+        ExportFormat.CSV,
     )
     device: str = "auto"
     compute_type: str = "int8"

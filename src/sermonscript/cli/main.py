@@ -139,7 +139,7 @@ def transcribe(
         Path("./exports"), "--output", "-o", help="변환 결과를 저장할 디렉터리"
     ),
     fmt: str = typer.Option(
-        "txt,json,md,srt,vtt",
+        "txt,json,md,srt,vtt,csv",
         "--format",
         "-f",
         help="콤마로 구분된 출력 포맷 목록",
@@ -325,7 +325,7 @@ def jobs_export(
         Path("./exports"), "--output", "-o", help="export 결과를 저장할 디렉터리"
     ),
     fmt: str = typer.Option(
-        "txt,json,md,srt,vtt", "--format", "-f", help="콤마로 구분된 포맷 목록"
+        "txt,json,md,srt,vtt,csv", "--format", "-f", help="콤마로 구분된 포맷 목록"
     ),
 ) -> None:
     """저장된 작업을 다시 export 합니다 (원본 오디오 재처리 없이 세그먼트 사용)."""

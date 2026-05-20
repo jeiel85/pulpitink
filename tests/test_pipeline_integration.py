@@ -57,6 +57,7 @@ def test_run_transcribe_end_to_end(tmp_path: Path):
             ExportFormat.MD,
             ExportFormat.SRT,
             ExportFormat.VTT,
+            ExportFormat.CSV,
         ),
         cache_root=tmp_path / "cache" / "jobs",
     )
@@ -66,7 +67,7 @@ def test_run_transcribe_end_to_end(tmp_path: Path):
 
     assert result.processed_audio.exists()
     assert result.processed_audio.stat().st_size > 0
-    assert {p.suffix for p in result.exports} == {".txt", ".json", ".md", ".srt", ".vtt"}
+    assert {p.suffix for p in result.exports} == {".txt", ".json", ".md", ".srt", ".vtt", ".csv"}
     assert any("전처리 완료" in line for line in progress)
     assert any("Export" in line for line in progress)
     assert src.exists()  # original must remain untouched
