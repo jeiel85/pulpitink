@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.app.exceptions import SermonScriptError, UnsupportedFormatError
-from sermonscript.services.transcribe_service import (
+from pulpitink.app.exceptions import PulpitInkError, UnsupportedFormatError
+from pulpitink.services.transcribe_service import (
     SUPPORTED_INPUT_EXTENSIONS,
     validate_input_path,
 )
@@ -16,7 +16,7 @@ def test_supported_extensions_match_spec():
 
 
 def test_missing_file_raises(tmp_path: Path):
-    with pytest.raises(SermonScriptError):
+    with pytest.raises(PulpitInkError):
         validate_input_path(tmp_path / "missing.mp3")
 
 
@@ -28,7 +28,7 @@ def test_unsupported_extension_raises(tmp_path: Path):
 
 
 def test_directory_not_accepted(tmp_path: Path):
-    with pytest.raises(SermonScriptError):
+    with pytest.raises(PulpitInkError):
         validate_input_path(tmp_path)
 
 

@@ -1,22 +1,22 @@
 # AGENTS.md
 
-이 문서는 AI 코딩 에이전트가 SermonScript 저장소에서 작업할 때 따라야 하는 공통 작업 규칙입니다.
+이 문서는 AI 코딩 에이전트가 PulpitInk 저장소에서 작업할 때 따라야 하는 공통 작업 규칙입니다.
 
 ---
 
 ## 1. 프로젝트 설정값
 
 ```text
-Project Name: SermonScript
-Repository: https://github.com/jeiel85/sermonscript.git
+Project Name: PulpitInk
+Repository: https://github.com/jeiel85/pulpitink.git
 Main Branch: main
 Primary Spec: docs/product-spec.md
 History Document: HISTORY.md
 Changelog: CHANGELOG.md
 Task Document: docs/roadmap-tasks.md
 Decision Log: docs/decision-log.md
-Version Files: pyproject.toml, src/sermonscript/__init__.py, CHANGELOG.md
-Build/Test Commands: pytest, ruff check ., sermonscript doctor
+Version Files: pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md
+Build/Test Commands: pytest, ruff check ., pulpitink doctor
 Release Trigger: tag push
 CI System: GitHub Actions
 Expected Assets: EXE, ZIP
@@ -28,7 +28,7 @@ Primary Language: Python 3.11+
 
 ## 2. 프로젝트 범위
 
-SermonScript는 로컬 PC에서 설교, 강의, 회의 녹음 파일을 전처리하고 STT 변환한 뒤 검수·편집·출력하는 오픈소스 데스크톱 프로그램입니다.
+PulpitInk는 로컬 PC에서 설교, 강의, 회의 녹음 파일을 전처리하고 STT 변환한 뒤 검수·편집·출력하는 오픈소스 데스크톱 프로그램입니다.
 
 v1.0에서 지원하는 입력은 로컬 파일입니다.
 
@@ -189,7 +189,7 @@ git status
 ```bash
 ruff check .
 pytest
-sermonscript doctor
+pulpitink doctor
 ```
 
 실행하지 않은 테스트를 성공한 것처럼 기록하지 않습니다.

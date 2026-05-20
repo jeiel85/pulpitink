@@ -1,8 +1,8 @@
-# Product Spec: SermonScript
+# Product Spec: PulpitInk
 
 ## 1. 제품 정의
 
-SermonScript는 설교, 강의, 회의 녹음 파일을 로컬 PC에서 전처리하고 텍스트로 변환한 뒤, 검수·편집·출력까지 지원하는 오픈소스 데스크톱 STT 프로그램입니다.
+PulpitInk는 설교, 강의, 회의 녹음 파일을 로컬 PC에서 전처리하고 텍스트로 변환한 뒤, 검수·편집·출력까지 지원하는 오픈소스 데스크톱 STT 프로그램입니다.
 
 ## 2. 핵심 사용자
 

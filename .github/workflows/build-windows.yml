@@ -58,7 +58,7 @@ jobs:
       - name: Generate SHA256 checksums
         shell: pwsh
         run: |
-          $files = Get-ChildItem "dist" -Filter "SermonScript_Portable_*.zip" -File
+          $files = Get-ChildItem "dist" -Filter "PulpitInk_Portable_*.zip" -File
           if ($files.Count -eq 0) {
             throw "No portable ZIP found under dist/."
           }
@@ -72,9 +72,9 @@ jobs:
       - name: Upload portable ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: SermonScript-Portable
+          name: PulpitInk-Portable
           path: |
-            dist/SermonScript_Portable_*.zip
+            dist/PulpitInk_Portable_*.zip
             dist/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
@@ -91,7 +91,7 @@ jobs:
       - name: Download portable artifact
         uses: actions/download-artifact@v4
         with:
-          name: SermonScript-Portable
+          name: PulpitInk-Portable
           path: artifacts/
 
       - name: Extract changelog for this version
@@ -119,5 +119,5 @@ jobs:
           name: ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.NOTES }}
           files: |
-            artifacts/SermonScript_Portable_*.zip
+            artifacts/PulpitInk_Portable_*.zip
             artifacts/SHA256SUMS.txt

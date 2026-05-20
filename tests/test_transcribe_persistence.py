@@ -6,20 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.app.exceptions import SermonScriptError
-from sermonscript.core.audio.enhancement_presets import AudioEnhancementPreset
-from sermonscript.core.export.base import ExportFormat
-from sermonscript.core.transcription.base import (
+from pulpitink.app.exceptions import PulpitInkError
+from pulpitink.core.audio.enhancement_presets import AudioEnhancementPreset
+from pulpitink.core.export.base import ExportFormat
+from pulpitink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from sermonscript.services.transcribe_service import (
+from pulpitink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )
-from sermonscript.storage.database import connect
-from sermonscript.storage.job_repository import JobRepository
+from pulpitink.storage.database import connect
+from pulpitink.storage.job_repository import JobRepository
 
 
 class _StubEngine(TranscriptionEngine):
@@ -171,7 +171,7 @@ def test_run_transcribe_persists_validation_failure(tmp_path: Path) -> None:
         cache_root=tmp_path / "cache" / "jobs",
     )
     db = tmp_path / "db.sqlite"
-    with pytest.raises(SermonScriptError):
+    with pytest.raises(PulpitInkError):
         run_transcribe(
             request,
             engine=_StubEngine(),

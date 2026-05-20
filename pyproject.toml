@@ -3,16 +3,16 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sermonscript"
+name = "pulpitink"
 version = "0.3.0"
-description = "Local-first desktop app for transcribing sermons, lectures, and meetings."
+description = "설교필기 — 로컬 우선 설교/강의/회의 녹음 STT 데스크톱 앱"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 authors = [
   { name = "Aiden Park" }
 ]
-keywords = ["stt", "whisper", "sermon", "transcription"]
+keywords = ["stt", "whisper", "sermon", "transcription", "pulpitink"]
 classifiers = [
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: Microsoft :: Windows",
@@ -41,11 +41,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://jeiel85.github.io/sermon-script/"
-Issues = "https://github.com/jeiel85/sermon-script/issues"
+Homepage = "https://jeiel85.github.io/pulpitink/"
+Issues = "https://github.com/jeiel85/pulpitink/issues"
 
 [project.scripts]
-sermonscript = "sermonscript.cli.main:app"
+pulpitink = "pulpitink.cli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -69,7 +69,7 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["B018"]
-"src/sermonscript/cli/*.py" = ["B008"]
+"src/pulpitink/cli/*.py" = ["B008"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

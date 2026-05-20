@@ -17,7 +17,7 @@
 
 - [x] `python -m pytest` 통과 (2026-05-20, 91/91)
 - [x] `python -m ruff check .` 통과 (2026-05-20)
-- [x] CLI `sermonscript doctor` 통과 (2026-05-20)
+- [x] CLI `PulpitInk doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
 - [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt/csv) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
 - [x] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인 (회귀 테스트로 보장: `tests/test_transcript_editor_repo.py`)
@@ -44,7 +44,7 @@
 
 - [x] PyInstaller 번들 생성: `scripts/build_windows.ps1` (2026-05-20)
 - [x] Portable ZIP 생성: `scripts/make_portable_zip.ps1` (2026-05-20)
-- [x] 산출물 파일명이 `SermonScript_Portable_{version}.zip` 패턴 (2026-05-20, `SermonScript_Portable_0.3.0.zip`)
+- [x] 산출물 파일명이 `PulpitInk_Portable_{version}.zip` 패턴 (2026-05-20, `PulpitInk_Portable_0.3.0.zip`)
 - [x] FFmpeg, 모델 파일이 번들에 포함되지 않았는지 확인 (2026-05-20, ZIP 내 `ffmpeg.exe`/`ffprobe.exe` 없음, STT 모델 파일 미발견)
 - [x] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작 (2026-05-20, `v0.3.0`)
 - [x] GitHub Release 자동 생성 규칙 정의 (2026-05-20, `build-windows.yml`)

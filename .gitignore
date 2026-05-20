@@ -19,7 +19,8 @@ dist/
 wheels/
 *.manifest
 *.spec
-!sermonscript.spec
+!pulpitink.spec
+!pulpitink-sidecar.spec
 
 # ----- Test/Lint caches -----
 .pytest_cache/
@@ -47,7 +48,7 @@ desktop.ini
 *.zip
 installer/output/
 
-# ----- SermonScript runtime -----
+# ----- PulpitInk runtime -----
 exports/
 cache/
 logs/

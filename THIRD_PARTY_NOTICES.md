@@ -31,7 +31,7 @@ Goal 3 패키징 시점 기준으로 ``scripts/build_windows.ps1`` 가 PyInstall
 | Component | Why excluded | User action |
 |---|---|---|
 | FFmpeg | LGPL/GPL 빌드 옵션이 배포 정책에 따라 달라 사용자가 직접 설치 | ``ffmpeg.exe`` / ``ffprobe.exe`` 를 PATH 또는 실행 폴더에 둘 것 |
-| faster-whisper 모델 (`tiny`–`large-v3`) | 파일 크기, 사용자 선택권, huggingface 캐시 정책 | 최초 실행 시 자동 다운로드. 오프라인은 `sermonscript settings` 로 `model_cache_dir` 지정 |
+| faster-whisper 모델 (`tiny`–`large-v3`) | 파일 크기, 사용자 선택권, huggingface 캐시 정책 | 최초 실행 시 자동 다운로드. 오프라인은 `pulpitink settings` 로 `model_cache_dir` 지정 |
 | CUDA / cuDNN | NVIDIA 라이선스, 사용자 환경 의존 | 사용자가 해당 드라이버 설치 |
 
 ## Distribution Policy
@@ -41,6 +41,6 @@ Goal 3 패키징 시점 기준으로 ``scripts/build_windows.ps1`` 가 PyInstall
   라이선스 (LGPL/GPL) 를 명시해야 합니다.
 - PySide6 는 LGPL 동적 링크 형태로 사용합니다. Qt 자체를 정적 링크하거나
   수정 빌드를 배포하지 않습니다.
-- 산출물: ``dist/SermonScript_Portable_{version}.zip``.
+- 산출물: ``dist/PulpitInk_Portable_{version}.zip``.
   내부 구조는 ``scripts/make_portable_zip.ps1`` 가 PORTABLE-README.txt 와
   함께 묶어 명시합니다.

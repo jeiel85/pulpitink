@@ -6,7 +6,7 @@
 
 ## 1. 문제
 
-`CorrectionEngine.suggestions_for` ([src/sermonscript/core/reference/corrections.py:92](../../src/sermonscript/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
+`CorrectionEngine.suggestions_for` ([src/pulpitink/core/reference/corrections.py:92](../../src/pulpitink/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
 
 | kind | 매칭 방식 | 회차 #1 적중 |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ similarity(a, b) =
 ### 5.1 신규 모듈: `core.postprocess.jamo`
 
 ```text
-src/sermonscript/core/postprocess/
+src/pulpitink/core/postprocess/
 └── jamo.py
     - jamo_seq(s)        -> str
     - choseong(s)        -> str
@@ -91,7 +91,7 @@ src/sermonscript/core/postprocess/
 
 ### 5.2 `CorrectionEngine` 통합
 
-기존 `proper_noun` 매칭 ([corrections.py:144](../../src/sermonscript/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
+기존 `proper_noun` 매칭 ([corrections.py:144](../../src/pulpitink/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
 
 1. 정확 매칭 (현행) — 가장 신뢰도 높음
 2. squeeze 매칭 (현행) — 공백/대소문자 변형용
@@ -108,7 +108,7 @@ src/sermonscript/core/postprocess/
     "fuzzy_threshold": 0.70
   }
   ```
-- CLI: `sermonscript transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
+- CLI: `PulpitInk transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
 - GUI: 설정 패널에 토글 + 슬라이더(0.6~0.9)
 
 ### 5.4 데이터/스키마 영향
@@ -160,6 +160,6 @@ src/sermonscript/core/postprocess/
 ## 10. 참고
 
 - 회차 #1 실측 데이터 추출: [tests/integration/results.md](../../tests/integration/results.md)
-- 현행 매칭 코드: [src/sermonscript/core/reference/corrections.py](../../src/sermonscript/core/reference/corrections.py)
-- 현행 lexicon: [src/sermonscript/core/postprocess/lexicon.py](../../src/sermonscript/core/postprocess/lexicon.py)
+- 현행 매칭 코드: [src/pulpitink/core/reference/corrections.py](../../src/pulpitink/core/reference/corrections.py)
+- 현행 lexicon: [src/pulpitink/core/postprocess/lexicon.py](../../src/pulpitink/core/postprocess/lexicon.py)
 - PoC 스크립트 (커밋 안 함, 본 노트의 §3 표 산출): 작업 디렉터리에서 인라인 실행. 재현 필요 시 본 노트 §4 알고리즘으로 1시간 내 재구성 가능.

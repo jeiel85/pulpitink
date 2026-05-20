@@ -19,7 +19,7 @@ Storage / Export
 ## 2. 주요 모듈
 
 ```text
-src/sermonscript/
+src/pulpitink/
   app/
   cli/
   ui/

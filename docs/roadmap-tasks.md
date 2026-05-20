@@ -6,7 +6,7 @@
 
 - GitHub Actions `Test`: 성공 (`fix: Windows 빌드 spec 파일 추적`)
 - GitHub Actions `Build Windows Portable`: 태그 `v0.3.0` 실행 성공, GitHub Release 생성 및 artifact 업로드 확인
-- 로컬 기록: `ruff check .`, `pytest 91/91`, `sermonscript doctor`, `scripts/build_windows.ps1 -SkipChecks` 통과
+- 로컬 기록: `ruff check .`, `pytest 91/91`, `PulpitInk doctor`, `scripts/build_windows.ps1 -SkipChecks` 통과
 - 완료: `Build Windows Portable`의 태그 푸시 트리거는 `v0.3.0`에서 검증되었습니다.
 - 주의: 작업트리에 untracked `frontend/` 산출물이 남아 있습니다. 다음 작업자가 보존/분리/정리 정책을 먼저 확인해야 합니다.
 
@@ -50,9 +50,9 @@
 ## Phase 0: 저장소 초기화
 
 - [ ] pyproject.toml 작성
-- [ ] src/sermonscript 패키지 생성
+- [ ] src/pulpitink 패키지 생성
 - [ ] Typer CLI 생성
-- [ ] sermonscript doctor 구현
+- [ ] PulpitInk doctor 구현
 - [ ] pytest/ruff 설정
 - [ ] README 개발 실행법 정리
 

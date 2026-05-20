@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.core.postprocess import (
+from pulpitink.core.postprocess import (
     Lexicon,
     load_user_lexicon,
     normalise_bible_reference,
     postprocess_text,
 )
-from sermonscript.core.postprocess.lexicon import default_lexicon
+from pulpitink.core.postprocess.lexicon import default_lexicon
 
 
 def test_normalise_bible_reference_sino_numerals() -> None:

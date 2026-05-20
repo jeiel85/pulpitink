@@ -5,17 +5,17 @@ The CLI should be implemented before the GUI.
 ## Commands
 
 ```bash
-sermonscript doctor
-sermonscript transcribe input.mp3
-sermonscript transcribe input.mp3 --language ko --model medium
-sermonscript transcribe input.mp3 --preset sermon
-sermonscript transcribe input.mp3 --output ./exports --format txt,md,json
-sermonscript transcribe input.mp3 --reference sermon.md
-sermonscript transcribe input.mp3 --compare-enhancement
-sermonscript models list
-sermonscript models download medium
-sermonscript models remove medium
-sermonscript licenses check
+PulpitInk doctor
+PulpitInk transcribe input.mp3
+PulpitInk transcribe input.mp3 --language ko --model medium
+PulpitInk transcribe input.mp3 --preset sermon
+PulpitInk transcribe input.mp3 --output ./exports --format txt,md,json
+PulpitInk transcribe input.mp3 --reference sermon.md
+PulpitInk transcribe input.mp3 --compare-enhancement
+PulpitInk models list
+PulpitInk models download medium
+PulpitInk models remove medium
+PulpitInk licenses check
 ```
 
 ## doctor Checks

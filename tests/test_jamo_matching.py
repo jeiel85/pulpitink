@@ -6,8 +6,8 @@ import unicodedata
 
 import pytest
 
-from sermonscript.core.postprocess import jamo
-from sermonscript.core.postprocess.jamo import (
+from pulpitink.core.postprocess import jamo
+from pulpitink.core.postprocess.jamo import (
     choseong,
     find_fuzzy_matches,
     hybrid_similarity,

@@ -1,4 +1,4 @@
-from sermonscript.core.export.timestamps import (
+from pulpitink.core.export.timestamps import (
     format_srt_timestamp,
     format_vtt_timestamp,
 )

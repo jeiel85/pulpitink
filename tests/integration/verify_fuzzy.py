@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-from sermonscript.core.postprocess.lexicon import default_lexicon
-from sermonscript.core.reference.corrections import CorrectionEngine
-from sermonscript.storage.database import connect, initialise_database
-from sermonscript.storage.job_repository import JobRepository
+from pulpitink.core.postprocess.lexicon import default_lexicon
+from pulpitink.core.reference.corrections import CorrectionEngine
+from pulpitink.storage.database import connect, initialise_database
+from pulpitink.storage.job_repository import JobRepository
 
 
 def run_fuzzy_verification():

@@ -3,7 +3,7 @@ import io
 import json
 from pathlib import Path
 
-from sermonscript.core.export import (
+from pulpitink.core.export import (
     CsvExporter,
     ExportFormat,
     JsonExporter,
@@ -12,10 +12,10 @@ from sermonscript.core.export import (
     TxtExporter,
     VttExporter,
 )
-from sermonscript.core.export.base import ExportRequest
-from sermonscript.core.export.csv_exporter import CSV_COLUMNS
-from sermonscript.core.export.pipeline import ExportPipeline
-from sermonscript.core.transcription.base import (
+from pulpitink.core.export.base import ExportRequest
+from pulpitink.core.export.csv_exporter import CSV_COLUMNS
+from pulpitink.core.export.pipeline import ExportPipeline
+from pulpitink.core.transcription.base import (
     TranscriptionResult,
     TranscriptSegment,
     segment_display_text,

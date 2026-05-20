@@ -12,13 +12,13 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.core.export.base import ExportFormat
-from sermonscript.core.transcription.base import (
+from pulpitink.core.export.base import ExportFormat
+from pulpitink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from sermonscript.services.transcribe_service import (
+from pulpitink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )

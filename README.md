@@ -1,19 +1,19 @@
-# SermonScript
+# PulpitInk
 
 설교, 강의, 회의 녹음 파일을 로컬 PC에서 전처리하고 텍스트로 변환한 뒤 검수, 편집, 출력까지 지원하는 Windows 데스크톱 STT 도구입니다.
 
-[![Test](https://github.com/jeiel85/sermon-script/actions/workflows/test.yml/badge.svg)](https://github.com/jeiel85/sermon-script/actions/workflows/test.yml)
-[![Build Windows Portable](https://github.com/jeiel85/sermon-script/actions/workflows/build-windows.yml/badge.svg)](https://github.com/jeiel85/sermon-script/actions/workflows/build-windows.yml)
+[![Test](https://github.com/jeiel85/pulpitink/actions/workflows/test.yml/badge.svg)](https://github.com/jeiel85/pulpitink/actions/workflows/test.yml)
+[![Build Windows Portable](https://github.com/jeiel85/pulpitink/actions/workflows/build-windows.yml/badge.svg)](https://github.com/jeiel85/pulpitink/actions/workflows/build-windows.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
 
-- 공식 랜딩 페이지: <https://jeiel85.github.io/sermon-script/>
-- 릴리즈 다운로드: <https://github.com/jeiel85/sermon-script/releases>
+- 공식 랜딩 페이지: <https://jeiel85.github.io/pulpitink/>
+- 릴리즈 다운로드: <https://github.com/jeiel85/pulpitink/releases>
 - 사용자 가이드: [docs/user-guide.md](docs/user-guide.md)
 
 ## 개요
 
-SermonScript는 긴 한국어 설교 녹음처럼 검수가 필요한 STT 작업을 로컬 우선 방식으로 처리합니다. 오디오와 변환 텍스트는 기본적으로 외부 서버로 전송하지 않으며, 원본 오디오와 STT 원문(`raw_text`)을 보존합니다. 사용자가 고친 내용은 별도의 `edited_text`로 저장됩니다.
+PulpitInk는 긴 한국어 설교 녹음처럼 검수가 필요한 STT 작업을 로컬 우선 방식으로 처리합니다. 오디오와 변환 텍스트는 기본적으로 외부 서버로 전송하지 않으며, 원본 오디오와 STT 원문(`raw_text`)을 보존합니다. 사용자가 고친 내용은 별도의 `edited_text`로 저장됩니다.
 
 현재 입력 범위는 로컬 파일입니다. YouTube URL, 온라인 다운로드, 클라우드 동기화, 실시간 녹음은 v1.0 범위에 포함되지 않습니다.
 
@@ -43,8 +43,8 @@ SermonScript는 긴 한국어 설교 녹음처럼 검수가 필요한 STT 작업
 ### 소스 설치
 
 ```powershell
-git clone https://github.com/jeiel85/sermon-script.git
-cd sermon-script
+git clone https://github.com/jeiel85/pulpitink.git
+cd pulpitink
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[gui,reference,dev]"
@@ -58,20 +58,20 @@ Extra 설명:
 
 ### Portable ZIP
 
-릴리즈 페이지에서 `SermonScript_Portable_<version>.zip`을 받을 수 있습니다. FFmpeg와 STT 모델은 기본 번들에 포함되지 않으므로 사용 환경에서 별도로 준비해야 합니다.
+릴리즈 페이지에서 `PulpitInk_Portable_<version>.zip`을 받을 수 있습니다. FFmpeg와 STT 모델은 기본 번들에 포함되지 않으므로 사용 환경에서 별도로 준비해야 합니다.
 
 ## 사용
 
 ### 환경 점검
 
 ```powershell
-sermonscript doctor
+pulpitink doctor
 ```
 
 ### GUI 실행
 
 ```powershell
-python -m sermonscript.app.main
+python -m pulpitink.app.main
 ```
 
 파일을 추가하고 언어, 모델, 전처리 프리셋, 출력 폴더를 선택한 뒤 변환을 시작합니다. 변환은 worker thread에서 실행되어 UI가 멈추지 않습니다.
@@ -79,31 +79,31 @@ python -m sermonscript.app.main
 ### CLI 변환
 
 ```powershell
-sermonscript transcribe sermon.mp3 --language ko --model small --preset sermon `
+pulpitink transcribe sermon.mp3 --language ko --model small --preset sermon `
   --format txt,json,md,srt,vtt,csv --output .\exports
 ```
 
 원문 대조와 사용자 사전:
 
 ```powershell
-sermonscript transcribe sermon.mp3 --reference sermon.md --user-dict my-dict.json
+pulpitink transcribe sermon.mp3 --reference sermon.md --user-dict my-dict.json
 ```
 
 교정 후보 확인/적용/무시:
 
 ```powershell
-sermonscript corrections list <job-id>
-sermonscript corrections apply <suggestion-id>
-sermonscript corrections ignore <suggestion-id>
+pulpitink corrections list <job-id>
+pulpitink corrections apply <suggestion-id>
+pulpitink corrections ignore <suggestion-id>
 ```
 
 ## 데이터 저장 위치
 
 Windows 기본 위치:
 
-- DB / 설정 / 모델 캐시: `%LOCALAPPDATA%\SermonScript\SermonScript\`
+- DB / 설정 / 모델 캐시: `%LOCALAPPDATA%\PulpitInk\PulpitInk\`
 - 전처리 캐시: 작업 디렉터리 또는 `--cache-root` 아래 `cache/jobs/<job_id>/`
-- DB 경로 확인: `sermonscript db-path`
+- DB 경로 확인: `pulpitink db-path`
 
 데이터 원칙:
 
@@ -119,7 +119,7 @@ Windows 기본 위치:
 ```powershell
 python -m ruff check .
 python -m pytest
-python -m sermonscript.cli.main doctor
+python -m pulpitink.cli.main doctor
 ```
 
 Windows Portable ZIP 로컬 빌드:
@@ -133,7 +133,7 @@ Windows Portable ZIP 로컬 빌드:
 ## 프로젝트 구조
 
 ```text
-src/sermonscript/
+src/pulpitink/
   app/              GUI 진입점
   cli/              Typer CLI
   core/             오디오, STT, export, 후처리, 원문 대조 로직

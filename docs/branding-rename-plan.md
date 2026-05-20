@@ -1,4 +1,4 @@
-# SermonScript → 설교필기 (PulpitInk) 브랜딩 변경 구현 계획
+# PulpitInk → 설교필기 (PulpitInk) 브랜딩 변경 구현 계획
 
 > **상태**: ✅ 이름 확정 / 🟡 구현 대기 (후속 세션에서 실행)
 > **확정 일자**: 2026-05-20
@@ -38,13 +38,13 @@
 ## 3. 미결 사항 (실행 전 확인 필요)
 
 ### Q1. GitHub 저장소 이름 변경 여부
-- 현재: `jeiel85/sermon-script`
+- 현재: `jeiel85/pulpitink`
 - 옵션 A: `jeiel85/pulpitink`로 변경 (기존 URL은 GitHub이 리다이렉트)
 - 옵션 B: 유지 (내부 이름만 변경)
 - **영향**: CI 설정, 외부 링크, README 배지 등
 
 ### Q2. Python 패키지명 변경 여부
-- 현재: `pip install sermonscript`, CLI 명령 `sermonscript`
+- 현재: `pip install pulpitink`, CLI 명령 `PulpitInk`
 - 옵션 A: `pip install pulpitink`, CLI 명령 `pulpitink`
 - 옵션 B: 패키지명/CLI 유지, 표시 이름만 변경
 - **참고**: PyPI에 아직 미배포 상태라면 자유롭게 변경 가능
@@ -79,15 +79,15 @@
 | 파일 | 변경 내용 |
 |------|-----------|
 | `pyproject.toml` | `project.description`, `project.urls` (name은 Q2 답변에 따라) |
-| `src/sermonscript/__init__.py` | `APP_NAME` 상수 |
-| `src/sermonscript/cli/main.py` | CLI 헤더/배너 |
-| `src/sermonscript/app/main.py` | 윈도우 타이틀 |
+| `src/pulpitink/__init__.py` | `APP_NAME` 상수 |
+| `src/pulpitink/cli/main.py` | CLI 헤더/배너 |
+| `src/pulpitink/app/main.py` | 윈도우 타이틀 |
 
 ### 4.4 Windows 빌드 / 패키징
 
 | 파일 | 변경 내용 |
 |------|-----------|
-| `sermonscript.spec` | EXE 이름 |
+| `pulpitink.spec` | EXE 이름 |
 | `scripts/build_windows.ps1` | 출력 파일명 |
 | `scripts/make_portable_zip.ps1` | ZIP 파일명 |
 | `.github/workflows/build-windows.yml` | artifact 이름, Release 산출물 |
@@ -137,7 +137,7 @@
 - [ ] 앱 기동 시 타이틀바에 새 이름 표시
 - [ ] 사이드바 브랜드 영역에 한글명 표시
 - [ ] CLI `--version` 출력에 새 이름 반영
-- [ ] `sermonscript doctor` 헤더에 새 이름 반영
+- [ ] `PulpitInk doctor` 헤더에 새 이름 반영
 - [ ] README, CHANGELOG, 문서 전체 일관성
 - [ ] GitHub 저장소 About/Description 갱신
 - [ ] Windows EXE 파일명 및 속성에 반영

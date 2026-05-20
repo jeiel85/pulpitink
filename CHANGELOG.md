@@ -13,17 +13,17 @@
 - GitHub Pages에서 정적 파일을 그대로 제공하도록 `docs/.nojekyll`을 추가했습니다.
 
 ### Changed
-- README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/sermon-script/` 기준으로 갱신했습니다.
+- README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/pulpitink/` 기준으로 갱신했습니다.
 
 ## Unreleased - 2026-05-20 (Documentation: GitHub landing page)
 
 ### Changed
 - `README.md`를 GitHub 랜딩 페이지 역할에 맞게 갱신했습니다.
   사용자가 제공한 랜딩 이미지를 상단에 배치하고, 현재 구현된 GUI/CLI/STT/편집/Export/배포 상태를 기준으로 빠른 시작과 기능표를 정리했습니다.
-- 프로젝트 메타데이터의 GitHub URL을 실제 저장소인 `https://github.com/jeiel85/sermon-script`로 정정했습니다.
+- 프로젝트 메타데이터의 GitHub URL을 실제 저장소인 `https://github.com/jeiel85/pulpitink`로 정정했습니다.
 
 ### Added
-- `docs/assets/sermonscript-landing.png` 랜딩 이미지를 추가했습니다.
+- `docs/assets/pulpitink-landing.png` 랜딩 이미지를 추가했습니다.
 
 ## [0.3.0] - 2026-05-20
 
@@ -43,9 +43,9 @@
 ## Unreleased - 2026-05-20 (Release validation)
 
 ### Fixed
-- GitHub Actions `build-windows.yml` 수동 실행에서 `sermonscript.spec`가 저장소에 포함되지 않아
-  PyInstaller 단계가 `Spec file "sermonscript.spec" not found!`로 실패하던 문제를 수정했습니다.
-  `.gitignore`의 일반 `*.spec` 제외는 유지하되 루트 `sermonscript.spec`만 추적 대상으로 허용했습니다.
+- GitHub Actions `build-windows.yml` 수동 실행에서 `pulpitink.spec`가 저장소에 포함되지 않아
+  PyInstaller 단계가 `Spec file "pulpitink.spec" not found!`로 실패하던 문제를 수정했습니다.
+  `.gitignore`의 일반 `*.spec` 제외는 유지하되 루트 `pulpitink.spec`만 추적 대상으로 허용했습니다.
 
 ### Changed
 - `ruff check .`가 로컬 실험/번들 산출물인 untracked `frontend/` 디렉터리를 스캔하지 않도록 Ruff 제외 목록에 `frontend`를 추가했습니다.
@@ -56,24 +56,24 @@
 ### Tests
 - `python -m ruff check .`: PASS
 - `python -m pytest`: 91/91 PASS
-- `python -m sermonscript.cli.main doctor`: PASS
-- `./scripts/build_windows.ps1 -SkipChecks`: PASS, `dist/SermonScript_Portable_0.3.0.zip` 생성 확인.
+- `python -m pulpitink.cli.main doctor`: PASS
+- `./scripts/build_windows.ps1 -SkipChecks`: PASS, `dist/PulpitInk_Portable_0.3.0.zip` 생성 확인.
 
 ## Unreleased - 2026-05-20 (Feature: Korean Jamo-based Fuzzy Matching)
 
 ### Added
-- **한국어 자모(Jamo) Fuzzy 매칭 구현** (`src/sermonscript/core/postprocess/jamo.py`):
+- **한국어 자모(Jamo) Fuzzy 매칭 구현** (`src/pulpitink/core/postprocess/jamo.py`):
   - 한글 유니코드 NFD 자모 분해(`jamo_seq`) 및 초성 추출(`choseong`) 헬퍼 구현.
   - 자모 매칭 비율(60%) 및 초성 매칭 비율(40%)을 결합한 **Hybrid 유사도 Scorer** 탑재.
   - 슬라이딩 윈도우 스캔 및 Double-pass Jamo ratio 검사(>= 50%)를 통한 거짓 양성(False Positive) 방지 및 최소 음절 길이 3 미만 게이트 적용.
-- **CorrectionEngine 연동** (`src/sermonscript/core/reference/corrections.py`):
+- **CorrectionEngine 연동** (`src/pulpitink/core/reference/corrections.py`):
   - `CorrectionEngine` 파라미터로 `fuzzy_matching_enabled`와 `fuzzy_threshold` 추가.
   - `suggestions_for`에서 고유명사 및 lexicon 단어들을 대상으로 Fuzzy 매치 수행 후 `reference+fuzzy:<score>` 소스의 `proper_noun` 제안 생성.
 - **설정 및 영속화 확장**:
   - `Settings` 데이터클래스에 `fuzzy_matching_enabled`와 `fuzzy_threshold` 기본값(True, 0.70) 적용.
   - `SettingsService` 및 `TranscribeRequest` 필드 연동 완료.
 - **CLI/GUI 제어 패널**:
-  - `sermonscript transcribe` CLI 인자 `--fuzzy/--no-fuzzy` 및 `--fuzzy-threshold` 추가.
+  - `pulpitink transcribe` CLI 인자 `--fuzzy/--no-fuzzy` 및 `--fuzzy-threshold` 추가.
   - PySide6 GUI 설정 영역에 체크박스 및 더블 스핀박스(0.60~0.90) 위젯 연동 완료.
 
 ### Improved
@@ -128,7 +128,7 @@
 - `docs/known-limitations.md` — v1.0 범위 제외/플랫폼/데이터 정책 SSOT.
 
 ### Changed
-- `README.md` 를 번들 안내 문서에서 SermonScript 본 프로젝트의 진입점으로 재작성
+- `README.md` 를 번들 안내 문서에서 PulpitInk 본 프로젝트의 진입점으로 재작성
   (빠른 시작, 주요 기능, 데이터 저장 위치, v1.0 제외 항목, 라이선스/문서 링크).
 - `docs/release/release-checklist.md` — Documentation 섹션의 README/사용자 가이드/
   알려진 제한사항 항목을 완료로 표시. 스크린샷 갱신만 남김.
@@ -139,11 +139,11 @@
 ## Unreleased - 2026-05-20 (Goal 3)
 
 ### Added
-- 후처리 파이프라인 (`sermonscript.core.postprocess`):
+- 후처리 파이프라인 (`pulpitink.core.postprocess`):
   - 기본 설교/성경 용어 사전 + 사용자 사전(JSON) 누적 적용.
   - 성경 구절 정규화: `로마서 일장 일절` → `로마서 1장 1절`, `고린도 전서` → `고린도전서`.
   - `clean_text` 채움(라우 텍스트는 절대 변경하지 않음).
-- 원문 대조 파이프라인 (`sermonscript.core.reference`):
+- 원문 대조 파이프라인 (`pulpitink.core.reference`):
   - TXT/Markdown 설교 원문에서 제목, 성경 본문, 주요 용어, 고유명사 추출.
   - faster-whisper `initial_prompt` 를 핵심 용어 위주로 짧게 구성 (≤ 280자).
   - STT 세그먼트와 원문 문단을 `rapidfuzz` 기반 유사도 매칭(없을 시 difflib).
@@ -157,12 +157,12 @@
   - 시작/종료/확인/텍스트 컬럼 + 검색·치환.
   - edited_text 저장(즉시 영속), needs_review 토글, 교정 후보 패널 적용/무시 버튼.
   - Export 우선순위: edited_text > clean_text > raw_text.
-- CLI 옵션 `sermonscript transcribe --reference sermon.md --user-dict dict.json`.
-- CLI 서브커맨드 `sermonscript corrections list/apply/ignore`.
+- CLI 옵션 `pulpitink transcribe --reference sermon.md --user-dict dict.json`.
+- CLI 서브커맨드 `pulpitink corrections list/apply/ignore`.
 - Windows 패키징 일체:
-  - `sermonscript.spec` (PyInstaller).
+  - `pulpitink.spec` (PyInstaller).
   - `scripts/build_windows.ps1` (ruff + pytest + PyInstaller + ZIP).
-  - `scripts/make_portable_zip.ps1` → `dist/SermonScript_Portable_{version}.zip`.
+  - `scripts/make_portable_zip.ps1` → `dist/PulpitInk_Portable_{version}.zip`.
   - GitHub Actions `build-windows.yml` (태그 푸시 / 수동 트리거).
 - `docs/deferred-youtube-import.md` (v1.0 비포함 정책 SSOT).
 
@@ -181,7 +181,7 @@
 ## Unreleased - 2026-05-20
 
 ### Added
-- SQLite 기반 영속 계층 (`sermonscript.storage`): `jobs`, `segments`, `exports` 테이블과
+- SQLite 기반 영속 계층 (`pulpitink.storage`): `jobs`, `segments`, `exports` 테이블과
   `JobRepository` CRUD 헬퍼. DB 경로는 `platformdirs`로 사용자 데이터 디렉터리 아래에 자동 생성.
 - `SettingsService`로 기본 언어/모델/전처리 프리셋/출력 폴더/모델 캐시 경로를 JSON에 저장·로드.
 - `model_service`에서 지원 STT 모델 목록과 캐시 경로를 노출.
@@ -189,7 +189,7 @@
   실패 시 `status=failed` + `error_message`를 남깁니다. `raw_text`는 항상 보존됩니다.
 - CLI 서브커맨드: `jobs list/show/export`, `settings show/set`, `models list/cache-dir`, `db-path`.
   `transcribe`는 기본적으로 DB에 결과를 기록합니다.
-- PySide6 GUI (`python -m sermonscript.app.main`): 파일 추가/드래그 앤 드롭, 작업 큐, 언어·모델·
+- PySide6 GUI (`python -m pulpitink.app.main`): 파일 추가/드래그 앤 드롭, 작업 큐, 언어·모델·
   프리셋·출력 폴더 설정, 변환 시작, 진행률·로그, 결과 미리보기, 최근 작업 목록.
   변환은 QThread 워커에서 실행되어 UI가 멈추지 않습니다.
 
@@ -200,7 +200,7 @@
 ### Notes
 - 스키마는 `schema_meta`에 버전(현재 `1`)을 기록합니다. 사용자 데이터 손실 가능성이
   있는 변경은 별도 마이그레이션 단계로 진행할 예정입니다.
-- PySide6는 옵션 의존성입니다. `pip install "sermonscript[gui]"`로 설치하세요.
+- PySide6는 옵션 의존성입니다. `pip install "pulpitink[gui]"`로 설치하세요.
 
 ## Unreleased - 2026-05-19
 

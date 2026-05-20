@@ -1,7 +1,7 @@
 import pytest
 
-from sermonscript.app.exceptions import SermonScriptError
-from sermonscript.core.audio.enhancement_presets import (
+from pulpitink.app.exceptions import PulpitInkError
+from pulpitink.core.audio.enhancement_presets import (
     PRESETS,
     build_ffmpeg_filter,
     get_preset,
@@ -41,5 +41,5 @@ def test_none_preset_is_minimal():
 
 
 def test_unknown_preset_raises():
-    with pytest.raises(SermonScriptError):
+    with pytest.raises(PulpitInkError):
         get_preset("does-not-exist")

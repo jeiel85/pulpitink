@@ -23,7 +23,7 @@
 PowerShell 기준:
 
 ```powershell
-python -m sermonscript.cli.main transcribe `
+python -m pulpitink.cli.main transcribe `
   "D:\Media\2026-05-13 수요밤설교 _ 로마서 1장 1-15절 _ 로마서의 서론.mp3" `
   --reference tests/integration/fixtures/sermon.md `
   --language ko `
@@ -36,9 +36,9 @@ python -m sermonscript.cli.main transcribe `
 변환 후 확인:
 
 ```powershell
-python -m sermonscript.cli.main jobs list --limit 5
-python -m sermonscript.cli.main jobs show <job-id>
-python -m sermonscript.cli.main corrections list <job-id>
+python -m pulpitink.cli.main jobs list --limit 5
+python -m pulpitink.cli.main jobs show <job-id>
+python -m pulpitink.cli.main corrections list <job-id>
 ```
 
 ## 검증 항목

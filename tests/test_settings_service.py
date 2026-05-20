@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.services.settings_service import Settings, SettingsService
+from pulpitink.services.settings_service import Settings, SettingsService
 
 
 def test_load_returns_defaults_when_missing(tmp_path: Path) -> None:

@@ -33,7 +33,7 @@
 ## 2026-05-20: PC 데스크톱 우선
 
 결정:
-- SermonScript는 Windows PC 데스크톱 앱으로 먼저 개발합니다.
+- PulpitInk는 Windows PC 데스크톱 앱으로 먼저 개발합니다.
 
 근거:
 - 긴 설교 녹음 처리에는 PC의 CPU/GPU, 메모리, 파일 관리, 편집 UI가 유리합니다.

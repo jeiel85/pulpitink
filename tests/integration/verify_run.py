@@ -14,8 +14,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from sermonscript.storage.database import connect, default_db_path, initialise_database
-from sermonscript.storage.job_repository import JobRepository
+from pulpitink.storage.database import connect, default_db_path, initialise_database
+from pulpitink.storage.job_repository import JobRepository
 
 
 def _row(label: str, status: str, detail: str = "") -> str:

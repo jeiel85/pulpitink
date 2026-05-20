@@ -25,7 +25,7 @@
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
+  - `python -m pulpitink.cli.main doctor`: PASS
 - 결과: 성공
 - 후속 작업:
   - README와 docs/user-guide.md 내용이 장기적으로 중복되지 않도록 사용자 상세 설명은 user-guide로 유지
@@ -36,16 +36,16 @@
   - docs/index.html (GitHub Pages용 랜딩 페이지 신규)
   - docs/.nojekyll (GitHub Pages 정적 파일 직접 제공)
   - README.md (공식 랜딩 페이지 링크 추가)
-  - pyproject.toml (Homepage URL을 `https://jeiel85.github.io/sermon-script/`로 변경)
+  - pyproject.toml (Homepage URL을 `https://jeiel85.github.io/pulpitink/`로 변경)
   - CHANGELOG.md
   - HISTORY.md
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
+  - `python -m pulpitink.cli.main doctor`: PASS
 - GitHub Pages:
-  - `gh api repos/jeiel85/sermon-script/pages`: `status=built`, source `main` `/docs`
-  - `Invoke-WebRequest https://jeiel85.github.io/sermon-script/`: HTTP 200, title/image 참조 확인
+  - `gh api repos/jeiel85/pulpitink/pages`: `status=built`, source `main` `/docs`
+  - `Invoke-WebRequest https://jeiel85.github.io/pulpitink/`: HTTP 200, title/image 참조 확인
 - 결과: 성공. GitHub Pages 랜딩 페이지 공개 완료.
 - 후속 작업:
   - GitHub Actions Node.js 20 deprecation 경고 대응
@@ -54,21 +54,21 @@
 - 작업: 현재 `main` 기준 기능 범위와 사용자가 제공한 랜딩 이미지를 반영해 GitHub README 첫 화면을 최신화하고, 저장소 메타데이터와 맞도록 프로젝트 URL을 정정.
 - 변경 파일:
   - README.md (랜딩 이미지, 배지, 핵심 기능표, GUI/CLI 빠른 시작, 프라이버시/배포 안내 갱신)
-  - docs/assets/sermonscript-landing.png (사용자 제공 랜딩 이미지 추가)
-  - pyproject.toml (GitHub URL을 `jeiel85/sermon-script`로 정정)
+  - docs/assets/pulpitink-landing.png (사용자 제공 랜딩 이미지 추가)
+  - pyproject.toml (GitHub URL을 `jeiel85/pulpitink`로 정정)
   - CHANGELOG.md
   - HISTORY.md
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
-  - `gh repo view jeiel85/sermon-script --json description,homepageUrl,repositoryTopics,url`: description/homepage/topics 반영 확인
+  - `python -m pulpitink.cli.main doctor`: PASS
+  - `gh repo view jeiel85/pulpitink --json description,homepageUrl,repositoryTopics,url`: description/homepage/topics 반영 확인
 - 결과: 성공
 - 후속 작업:
   - GitHub 저장소 social preview 이미지는 웹 UI/추가 API 권한이 필요하면 별도 확인
 
 ## 2026-05-20 (배포 규칙 정비 — GitHub Release 자동화)
-- 작업: 참고 프로젝트 `D:\Project\claude-usage-tray-windows`의 태그 기반 릴리즈 흐름을 참고해 SermonScript Windows 배포 규칙을 정비.
+- 작업: 참고 프로젝트 `D:\Project\claude-usage-tray-windows`의 태그 기반 릴리즈 흐름을 참고해 PulpitInk Windows 배포 규칙을 정비.
 - 변경 파일:
   - .github/workflows/build-windows.yml (태그 버전 검증, SHA256SUMS 생성, GitHub Release 자동 생성)
   - docs/release/release-checklist.md (릴리즈 규칙 명문화)
@@ -78,12 +78,12 @@
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
+  - `python -m pulpitink.cli.main doctor`: PASS
   - PyYAML 기반 workflow 파일 파싱: PASS (`build-windows.yml`, `test.yml`)
   - GitHub Actions `Test` (`main`): PASS (`26149646461`)
   - GitHub Actions `Test` (`v0.3.0`): PASS (`26149651698`)
   - GitHub Actions `Build Windows Portable` (`v0.3.0`): PASS (`26149651701`)
-- 결과: `v0.3.0` GitHub Release 생성 완료. 첨부 파일 `SermonScript_Portable_0.3.0.zip`, `SHA256SUMS.txt` 업로드 확인.
+- 결과: `v0.3.0` GitHub Release 생성 완료. 첨부 파일 `PulpitInk_Portable_0.3.0.zip`, `SHA256SUMS.txt` 업로드 확인.
 - 후속 작업:
   - GitHub Actions Node.js 20 deprecation 경고 대응
   - `windows-latest`가 `windows-2025-vs2026`으로 전환되는 공지 추적
@@ -91,11 +91,11 @@
 ## 2026-05-20 (기능 추가 — CSV Export 지원)
 - 작업: `docs/product-spec.md`에 명시된 CSV 출력을 실제로 지원. core.export에 CSV exporter 추가하고 CLI/GUI/서비스 기본 포맷에 포함.
 - 변경 파일:
-  - src/sermonscript/core/export/csv_exporter.py (신규)
-  - src/sermonscript/core/export/base.py (`ExportFormat.CSV` 추가)
-  - src/sermonscript/core/export/pipeline.py, src/sermonscript/core/export/__init__.py (EXPORTERS/공개 API 등록)
-  - src/sermonscript/cli/main.py (`--format` 기본값에 csv 추가)
-  - src/sermonscript/services/transcribe_service.py, src/sermonscript/ui/main_window.py, src/sermonscript/ui/transcript_editor.py (기본 포맷에 csv 포함)
+  - src/pulpitink/core/export/csv_exporter.py (신규)
+  - src/pulpitink/core/export/base.py (`ExportFormat.CSV` 추가)
+  - src/pulpitink/core/export/pipeline.py, src/pulpitink/core/export/__init__.py (EXPORTERS/공개 API 등록)
+  - src/pulpitink/cli/main.py (`--format` 기본값에 csv 추가)
+  - src/pulpitink/services/transcribe_service.py, src/pulpitink/ui/main_window.py, src/pulpitink/ui/transcript_editor.py (기본 포맷에 csv 포함)
   - tests/test_exporters.py (CSV 단위 테스트 4건 추가 + 파이프라인/포맷 파싱 갱신)
   - tests/test_pipeline_integration.py, tests/integration/verify_run.py, tests/integration/README.md (Export 6종 검증)
   - README.md, docs/user-guide.md, docs/release/release-checklist.md (사용자 안내/체크리스트 갱신)
@@ -118,7 +118,7 @@
   - HISTORY.md
 - 검증:
   - `gh run list --limit 12`: 최신 `Test` 성공, 최신 `Build Windows Portable` 수동 실행 성공 확인
-  - `gh run view 26146847983`: `SermonScript-Portable` artifact 업로드 확인
+  - `gh run view 26146847983`: `PulpitInk-Portable` artifact 업로드 확인
   - 코드 변경 없음 — 테스트/린트는 실행하지 않음
 - 결과: 다음 세션 후보를 CSV Export, 캐시 삭제/작업 삭제 UX, 최근 작업 기록 비활성화, Jamo fuzzy 문서 정리, 오디오 싱크 플레이어, 다중 작업 큐, `frontend/` 산출물 정책 순으로 정리.
 - 후속 작업:
@@ -128,16 +128,16 @@
 ## 2026-05-20 (CI Hotfix #14 — Windows 빌드 workflow spec 누락)
 - 작업: 핸드오프 후속 항목 중 GitHub Actions `build-windows.yml` 검증을 진행하고, 수동 실행 실패 원인을 수정.
 - 변경 파일:
-  - .gitignore (`sermonscript.spec`만 추적 가능하도록 예외 추가)
-  - sermonscript.spec (Windows PyInstaller GUI 번들 spec을 저장소에 포함)
+  - .gitignore (`pulpitink.spec`만 추적 가능하도록 예외 추가)
+  - pulpitink.spec (Windows PyInstaller GUI 번들 spec을 저장소에 포함)
   - HISTORY.md
   - CHANGELOG.md
 - 검증:
-  - `gh workflow run build-windows.yml --ref main`: 실패 재현 (`Spec file "sermonscript.spec" not found!`)
+  - `gh workflow run build-windows.yml --ref main`: 실패 재현 (`Spec file "pulpitink.spec" not found!`)
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 91/91 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
-- 결과: CI 실패 원인은 PyInstaller spec 파일이 `.gitignore`의 `*.spec`에 의해 미추적 상태였기 때문으로 확인. 루트 `sermonscript.spec`를 추적 대상에 포함하도록 수정.
+  - `python -m pulpitink.cli.main doctor`: PASS
+- 결과: CI 실패 원인은 PyInstaller spec 파일이 `.gitignore`의 `*.spec`에 의해 미추적 상태였기 때문으로 확인. 루트 `pulpitink.spec`를 추적 대상에 포함하도록 수정.
 - 후속 작업:
   - 수정 커밋 푸시 후 GitHub Actions `build-windows.yml` 재실행 결과 확인
   - 깨끗한 Windows VM에서 GUI 실행 수동 검증
@@ -147,7 +147,7 @@
 - 작업: 핸드오프 후보 문서와 릴리즈 체크리스트를 확인하고, 현재 `main` 기준 로컬 품질 검사와 Windows Portable ZIP 생성을 재검증.
 - 변경 파일:
   - pyproject.toml (`frontend/` untracked Tauri/번들 산출물이 `ruff check .` 대상에 섞이지 않도록 제외)
-  - src/sermonscript/core/postprocess/jamo.py (`rapidfuzz` 미설치 기본 CI 환경에서 `difflib` fallback 사용)
+  - src/pulpitink/core/postprocess/jamo.py (`rapidfuzz` 미설치 기본 CI 환경에서 `difflib` fallback 사용)
   - tests/integration/verify_fuzzy.py (Ruff import 정렬/공백 정리)
   - docs/release/release-checklist.md (검증 완료 항목 갱신)
   - HISTORY.md
@@ -155,9 +155,9 @@
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 91/91 PASS
-  - `python -m sermonscript.cli.main doctor`: PASS
+  - `python -m pulpitink.cli.main doctor`: PASS
   - `./scripts/build_windows.ps1 -SkipChecks`: PASS
-  - 산출물: `dist/SermonScript_Portable_0.3.0.zip` (172,800,567 bytes)
+  - 산출물: `dist/PulpitInk_Portable_0.3.0.zip` (172,800,567 bytes)
 - 결과: 로컬 품질 검사와 PyInstaller/Portable ZIP 생성 검증 완료. 기본 설치 CI에서 `rapidfuzz`가 없어도 Jamo fuzzy 유틸이 import 가능하도록 보완.
 - 후속 작업:
   - 깨끗한 Windows VM에서 GUI 실행 수동 검증
@@ -167,12 +167,12 @@
 ## 2026-05-20 (구현 #12 — jamo fuzzy matching 통합 및 검증)
 - 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의 설계 및 구현 완료. 한글 NFD 자모 분해 및 초성 가중 평균 기반의 Hybrid Scorer를 탑재한 Fuzzy 매칭 알고리즘을 `CorrectionEngine`에 연동. CLI 옵션(`--fuzzy/--no-fuzzy`, `--fuzzy-threshold`) 및 PySide6 GUI(체크박스, 더블 스핀박스)로 완전 노출 및 영속화 파이프라인 통합.
 - 변경 파일:
-  - src/sermonscript/core/postprocess/jamo.py (신규)
-  - src/sermonscript/core/reference/corrections.py (CorrectionEngine 연동)
-  - src/sermonscript/services/settings_service.py (Settings schema 확장 및 Coercion 보장)
-  - src/sermonscript/services/transcribe_service.py (Fuzzy 파라미터 전파)
-  - src/sermonscript/cli/main.py (CLI 인수 추가)
-  - src/sermonscript/ui/main_window.py (GUI 설정 컨트롤 셋 연동)
+  - src/pulpitink/core/postprocess/jamo.py (신규)
+  - src/pulpitink/core/reference/corrections.py (CorrectionEngine 연동)
+  - src/pulpitink/services/settings_service.py (Settings schema 확장 및 Coercion 보장)
+  - src/pulpitink/services/transcribe_service.py (Fuzzy 파라미터 전파)
+  - src/pulpitink/cli/main.py (CLI 인수 추가)
+  - src/pulpitink/ui/main_window.py (GUI 설정 컨트롤 셋 연동)
   - tests/test_jamo_matching.py (신규)
   - tests/integration/verify_fuzzy.py (신규: 인메모리 시뮬레이터)
   - tests/integration/results.md (회차 #2 추가)
@@ -191,7 +191,7 @@
   `로마서 3: 21~22` 콜론 표기를 잡지 못해 reference_documents.bible_refs 가
   0건이 되던 문제.
 - 변경 파일:
-  - src/sermonscript/core/reference/parser.py (`_BIBLE_REF_COLON_RE` 추가,
+  - src/pulpitink/core/reference/parser.py (`_BIBLE_REF_COLON_RE` 추가,
     `_extract_bible_refs` 가 두 정규식을 통합·중복 제거)
   - tests/test_reference_parser.py (test_parse_extracts_bible_refs_colon_notation,
     test_parse_deduplicates_jang_and_colon_overlap)
@@ -251,28 +251,28 @@
 ## 2026-05-20 (Goal 3)
 - 작업: Goal 3 — 편집기/후처리/사용자 사전 + 원문 대조 + Windows 릴리즈 패키징.
 - 변경 파일:
-  - src/sermonscript/storage/database.py (schema v2 + 신규 테이블)
-  - src/sermonscript/storage/job_repository.py (reference/alignment/correction CRUD + 세그먼트 패치)
-  - src/sermonscript/core/postprocess/__init__.py
-  - src/sermonscript/core/postprocess/bible_refs.py
-  - src/sermonscript/core/postprocess/lexicon.py
-  - src/sermonscript/core/postprocess/pipeline.py
-  - src/sermonscript/core/reference/__init__.py
-  - src/sermonscript/core/reference/parser.py
-  - src/sermonscript/core/reference/aligner.py (rapidfuzz fallback + 안정성)
-  - src/sermonscript/core/reference/prompt_builder.py
-  - src/sermonscript/core/reference/corrections.py
-  - src/sermonscript/services/transcribe_service.py (reference flow + needs_review + 영속화)
-  - src/sermonscript/cli/main.py (transcribe --reference / --user-dict, corrections 서브커맨드)
-  - src/sermonscript/ui/transcript_editor.py (편집기 위젯)
-  - src/sermonscript/ui/main_window.py (편집기 탭 + 작업 로드 연결)
+  - src/pulpitink/storage/database.py (schema v2 + 신규 테이블)
+  - src/pulpitink/storage/job_repository.py (reference/alignment/correction CRUD + 세그먼트 패치)
+  - src/pulpitink/core/postprocess/__init__.py
+  - src/pulpitink/core/postprocess/bible_refs.py
+  - src/pulpitink/core/postprocess/lexicon.py
+  - src/pulpitink/core/postprocess/pipeline.py
+  - src/pulpitink/core/reference/__init__.py
+  - src/pulpitink/core/reference/parser.py
+  - src/pulpitink/core/reference/aligner.py (rapidfuzz fallback + 안정성)
+  - src/pulpitink/core/reference/prompt_builder.py
+  - src/pulpitink/core/reference/corrections.py
+  - src/pulpitink/services/transcribe_service.py (reference flow + needs_review + 영속화)
+  - src/pulpitink/cli/main.py (transcribe --reference / --user-dict, corrections 서브커맨드)
+  - src/pulpitink/ui/transcript_editor.py (편집기 위젯)
+  - src/pulpitink/ui/main_window.py (편집기 탭 + 작업 로드 연결)
   - tests/test_postprocess.py
   - tests/test_reference_parser.py
   - tests/test_correction_engine.py
   - tests/test_transcript_editor_repo.py (편집기-DB 헤드리스 검증)
   - tests/test_storage.py (schema v2 회귀)
   - tests/test_transcribe_persistence.py (reference + correction 영속화 회귀)
-  - sermonscript.spec
+  - pulpitink.spec
   - scripts/build_windows.ps1
   - scripts/make_portable_zip.ps1
   - .github/workflows/build-windows.yml
@@ -283,8 +283,8 @@
 - 검증:
   - `python -m pytest`
   - `python -m ruff check .`
-  - CLI: `sermonscript transcribe sermon.mp3 --reference sermon.md --language ko`
-  - CLI: `sermonscript corrections list/apply/ignore`
+  - CLI: `pulpitink transcribe sermon.mp3 --reference sermon.md --language ko`
+  - CLI: `pulpitink corrections list/apply/ignore`
 - 결과: 진행 중 (이번 커밋 작성 시점)
 - 후속 작업:
   - 실제 Windows VM 에서 PyInstaller 산출물 수동 검증
@@ -293,18 +293,18 @@
 ## 2026-05-20
 - 작업: Goal 2 — 로컬 SQLite DB, 설정/모델 서비스, jobs/settings/models CLI, PySide6 GUI 기반 구현
 - 변경 파일:
-  - src/sermonscript/storage/__init__.py
-  - src/sermonscript/storage/database.py
-  - src/sermonscript/storage/job_repository.py
-  - src/sermonscript/services/settings_service.py
-  - src/sermonscript/services/model_service.py
-  - src/sermonscript/services/transcribe_service.py
-  - src/sermonscript/services/__init__.py
-  - src/sermonscript/cli/main.py
-  - src/sermonscript/ui/__init__.py
-  - src/sermonscript/ui/main_window.py
-  - src/sermonscript/ui/worker.py
-  - src/sermonscript/app/main.py
+  - src/pulpitink/storage/__init__.py
+  - src/pulpitink/storage/database.py
+  - src/pulpitink/storage/job_repository.py
+  - src/pulpitink/services/settings_service.py
+  - src/pulpitink/services/model_service.py
+  - src/pulpitink/services/transcribe_service.py
+  - src/pulpitink/services/__init__.py
+  - src/pulpitink/cli/main.py
+  - src/pulpitink/ui/__init__.py
+  - src/pulpitink/ui/main_window.py
+  - src/pulpitink/ui/worker.py
+  - src/pulpitink/app/main.py
   - tests/conftest.py
   - tests/test_storage.py
   - tests/test_settings_service.py
@@ -314,15 +314,15 @@
 - 검증:
   - `python -m pytest`: 49 tests passed (신규 17개 포함)
   - `python -m ruff check .`: All checks passed
-  - `python -m sermonscript.cli.main --help`: jobs / settings / models / db-path 명령 등록 확인
-  - `python -m sermonscript.app.main`: PySide6 미설치 시 친절한 안내 메시지 출력 확인
+  - `python -m pulpitink.cli.main --help`: jobs / settings / models / db-path 명령 등록 확인
+  - `python -m pulpitink.app.main`: PySide6 미설치 시 친절한 안내 메시지 출력 확인
 - 결과: 성공
 - 후속 작업:
   - 실제 PySide6 설치 환경에서 GUI 수동 검증
   - segments 편집(`clean_text`/`edited_text`) UI는 Goal 3 범위에서 진행
 
 ## 2026-05-19
-- 작업: SermonScript 3-Goal 프롬프트 중 Goal 2의 4000자 제한 초과 문제 수정
+- 작업: PulpitInk 3-Goal 프롬프트 중 Goal 2의 4000자 제한 초과 문제 수정
 - 변경 파일:
   - docs/vibe-coding-goal-1.md
   - docs/vibe-coding-goal-2-fixed.md
