@@ -60,6 +60,7 @@ extend-exclude = [
   "cache",
   "models",
   "original_templates",
+  "frontend",
 ]
 
 [tool.ruff.lint]

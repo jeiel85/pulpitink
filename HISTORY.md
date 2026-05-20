@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (릴리즈 검증 #13 — 로컬 품질/패키징 체크)
+- 작업: 핸드오프 후보 문서와 릴리즈 체크리스트를 확인하고, 현재 `main` 기준 로컬 품질 검사와 Windows Portable ZIP 생성을 재검증.
+- 변경 파일:
+  - pyproject.toml (`frontend/` untracked Tauri/번들 산출물이 `ruff check .` 대상에 섞이지 않도록 제외)
+  - tests/integration/verify_fuzzy.py (Ruff import 정렬/공백 정리)
+  - docs/release/release-checklist.md (검증 완료 항목 갱신)
+  - HISTORY.md
+  - CHANGELOG.md
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 90/90 PASS
+  - `python -m sermonscript.cli.main doctor`: PASS
+  - `./scripts/build_windows.ps1 -SkipChecks`: PASS
+  - 산출물: `dist/SermonScript_Portable_0.3.0.zip` (172,799,783 bytes)
+- 결과: 로컬 품질 검사와 PyInstaller/Portable ZIP 생성 검증 완료.
+- 후속 작업:
+  - 깨끗한 Windows VM에서 GUI 실행 수동 검증
+  - GitHub Actions `build-windows.yml` 태그/수동 실행 검증
+  - `frontend/` untracked 산출물의 보존/정리 정책 결정
+
 ## 2026-05-20 (구현 #12 — jamo fuzzy matching 통합 및 검증)
 - 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의 설계 및 구현 완료. 한글 NFD 자모 분해 및 초성 가중 평균 기반의 Hybrid Scorer를 탑재한 Fuzzy 매칭 알고리즘을 `CorrectionEngine`에 연동. CLI 옵션(`--fuzzy/--no-fuzzy`, `--fuzzy-threshold`) 및 PySide6 GUI(체크박스, 더블 스핀박스)로 완전 노출 및 영속화 파이프라인 통합.
 - 변경 파일:

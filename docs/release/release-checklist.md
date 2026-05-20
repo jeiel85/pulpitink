@@ -6,8 +6,8 @@
 
 ## Code
 
-- [ ] `python -m pytest` 통과
-- [ ] `python -m ruff check .` 통과
+- [x] `python -m pytest` 통과 (2026-05-20, 90/90)
+- [x] `python -m ruff check .` 통과 (2026-05-20)
 - [x] CLI `sermonscript doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
 - [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
@@ -24,23 +24,23 @@
 
 ## Licensing
 
-- [ ] LICENSE 동봉
+- [x] LICENSE 동봉 (2026-05-20, Portable ZIP 내 `LICENSE.txt`)
 - [ ] THIRD_PARTY_NOTICES.md 가 실제 의존성과 일치
 - [ ] FFmpeg 정책 (번들 미포함) 명시
 - [ ] PySide6 LGPL 정책 명시
 - [ ] 모델 파일 정책 (번들 미포함) 명시
-- [ ] Binary artifact 구성 문서화 (PORTABLE-README.txt)
+- [x] Binary artifact 구성 문서화 (2026-05-20, Portable ZIP 내 `PORTABLE-README.txt`)
 
 ## Packaging
 
-- [ ] PyInstaller 번들 생성: `scripts/build_windows.ps1`
-- [ ] Portable ZIP 생성: `scripts/make_portable_zip.ps1`
-- [ ] 산출물 파일명이 `SermonScript_Portable_{version}.zip` 패턴
-- [ ] FFmpeg, 모델 파일이 번들에 포함되지 않았는지 확인
+- [x] PyInstaller 번들 생성: `scripts/build_windows.ps1` (2026-05-20)
+- [x] Portable ZIP 생성: `scripts/make_portable_zip.ps1` (2026-05-20)
+- [x] 산출물 파일명이 `SermonScript_Portable_{version}.zip` 패턴 (2026-05-20, `SermonScript_Portable_0.3.0.zip`)
+- [x] FFmpeg, 모델 파일이 번들에 포함되지 않았는지 확인 (2026-05-20, ZIP 내 `ffmpeg.exe`/`ffprobe.exe` 없음, STT 모델 파일 미발견)
 - [ ] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작
 - [ ] 앱 아이콘 포함 (선택)
 - [ ] pyproject.toml 버전 업데이트
-- [ ] CHANGELOG.md / HISTORY.md 업데이트
+- [x] CHANGELOG.md / HISTORY.md 업데이트 (2026-05-20)
 
 ## Documentation
 
