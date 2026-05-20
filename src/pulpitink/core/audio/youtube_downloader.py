@@ -56,10 +56,10 @@ def download_youtube_audio(url: str, output_dir: Path) -> Path:
                 for p in output_dir.glob(f"{base_pattern}*.wav"):
                     wav_path = p
                     break
-            
+
             if not wav_path.exists():
                 raise FileNotFoundError(f"추출된 WAV 오디오 파일을 찾을 수 없습니다: {wav_path}")
-                
+
             logger.info("YouTube audio successfully downloaded and extracted: %s", wav_path)
             return wav_path
     except Exception as exc:
