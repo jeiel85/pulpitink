@@ -77,3 +77,7 @@ tests/integration/fixtures/*
 .env
 .env.*
 !.env.example
+
+# ----- AI tool & Experimental -----
+.antigravitycli/
+frontend/

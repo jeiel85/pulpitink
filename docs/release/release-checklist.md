@@ -15,29 +15,29 @@
 
 ## Code
 
-- [x] `python -m pytest` 통과 (2026-05-20, 91/91)
+- [x] `python -m pytest` 통과 (2026-05-20, 100/100)
 - [x] `python -m ruff check .` 통과 (2026-05-20)
 - [x] CLI `PulpitInk doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
 - [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt/csv) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
 - [x] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인 (회귀 테스트로 보장: `tests/test_transcript_editor_repo.py`)
-- [ ] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능 — **회차 #1에서 0건 발견, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10) 참고**
+- [x] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능 (Fuzzy 매칭 도입으로 적중률 확보 완료, 2026-05-20, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10) 참고)
 
 ## Security and Privacy
 
-- [ ] 비공개 오디오 파일 미포함
-- [ ] 트랜스크립트 미포함
-- [ ] 기본 로그에 전체 transcript 가 남지 않음
-- [ ] 캐시 삭제 동작 확인
-- [ ] 최근 파일 기록을 사용자가 비활성화할 수 있음
+- [x] 비공개 오디오 파일 미포함 (2026-05-20)
+- [x] 트랜스크립트 미포함 (2026-05-20)
+- [x] 기본 로그에 전체 transcript 가 남지 않음 (2026-05-20)
+- [x] 캐시 삭제 동작 확인 (CLI clean-cache 및 GUI 컨텍스트 메뉴 검증 완료, 2026-05-20)
+- [x] 최근 파일 기록을 사용자가 비활성화할 수 있음 (keep_history 설정 검증 완료, 2026-05-20)
 
 ## Licensing
 
 - [x] LICENSE 동봉 (2026-05-20, Portable ZIP 내 `LICENSE.txt`)
-- [ ] THIRD_PARTY_NOTICES.md 가 실제 의존성과 일치
-- [ ] FFmpeg 정책 (번들 미포함) 명시
-- [ ] PySide6 LGPL 정책 명시
-- [ ] 모델 파일 정책 (번들 미포함) 명시
+- [x] THIRD_PARTY_NOTICES.md 가 실제 의존성과 일치 (2026-05-20)
+- [x] FFmpeg 정책 (번들 미포함) 명시 (2026-05-20)
+- [x] PySide6 LGPL 정책 명시 (2026-05-20)
+- [x] 모델 파일 정책 (번들 미포함) 명시 (2026-05-20)
 - [x] Binary artifact 구성 문서화 (2026-05-20, Portable ZIP 내 `PORTABLE-README.txt`)
 
 ## Packaging
@@ -50,7 +50,7 @@
 - [x] GitHub Release 자동 생성 규칙 정의 (2026-05-20, `build-windows.yml`)
 - [x] SHA256 checksum artifact 생성 규칙 정의 (2026-05-20, `SHA256SUMS.txt`)
 - [ ] 앱 아이콘 포함 (선택)
-- [ ] pyproject.toml 버전 업데이트
+- [x] pyproject.toml 버전 업데이트 (2026-05-20, v0.4.0 및 v0.4.1)
 - [x] CHANGELOG.md / HISTORY.md 업데이트 (2026-05-20)
 
 ## Documentation

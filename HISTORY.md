@@ -1,5 +1,17 @@
 # HISTORY.md
 
+## 2026-05-20 (단기 저장소 정비 및 v0.4.1 패치 릴리즈)
+- 작업: 단기 저장소 정비(untracked 파일 차단), 알려진 제한사항 문서 최신화, 릴리즈 체크리스트 갱신, 패치 버전 릴리즈.
+- 변경 파일:
+  - .gitignore (임시 `.antigravitycli/` 및 실험용 `frontend/` 무시 설정 반영)
+  - docs/known-limitations.md (싱크 플레이어, 배치 큐, 기록 비활성화 옵션을 "구현 완료" 상태로 최신화)
+  - docs/release/release-checklist.md (0.4.0 및 0.4.1 대응 체크리스트 갱신 완료)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.1 및 이력 갱신)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 100/100 PASS
+- 결과: 성공. 임시 산출물 격리 및 알려진 문서들의 최신성(v0.4.0 기준 완비)을 보장하는 정밀 0.4.1 패치 배포 완료.
+
 ## 2026-05-20 (기능 추가 — 오디오 싱크 플레이어 및 다중 배치 큐)
 - 작업: 편집기 내 오디오 싱크 플레이어 연동 개발 (Audio Sync Player), 메인 화면 다중 작업 배치 큐 UX 개선 (Batch Queue UX).
 - 변경 파일:
