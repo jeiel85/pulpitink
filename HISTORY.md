@@ -1,5 +1,20 @@
 # HISTORY.md
 
+## 2026-05-20 (기능 추가 — 오디오 싱크 플레이어 및 다중 배치 큐)
+- 작업: 편집기 내 오디오 싱크 플레이어 연동 개발 (Audio Sync Player), 메인 화면 다중 작업 배치 큐 UX 개선 (Batch Queue UX).
+- 변경 파일:
+  - src/pulpitink/ui/transcript_editor.py (QMediaPlayer 및 QAudioOutput 통합, 하단 재생 컨트롤러 구성, 세그먼트 더블클릭 seek & 자동 재생 연동, positionChanged 시 테이블 행 하이라이트 및 오토 스크롤 연동, wav 캐시 우선 로드 및 SQLite source_path 예외 가드 구현)
+  - src/pulpitink/ui/main_window.py (순차 처리 큐 루프 구현, 배치 기동 시 file_list 위젯에 실시간 대기 상태 프리픽스 `[대기]`, `[진행 중]`, `[완료]`, `[실패]` 시각화 구현, 변환 중단 취소 질문 상자 및 terminate() 정지 구현, 큐 진행 중 위젯 동작 안전 제어)
+  - tests/test_batch_queue.py (신규: 다중 파일 배치 큐 가동, 순차 변환, 실패 시 연속성 기동, 중단 및 큐 일괄 파기 유닛 테스트 3건 추가)
+  - CHANGELOG.md (릴리즈 및 Unreleased 변경점 반영)
+  - HISTORY.md (작업 이력 반영)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 100/100 PASS (추가된 신규 테스트 3건 포함 전체 유닛 테스트 100% 통과 완료)
+- 결과: 성공. v1.0 정식 배포 수준의 다중 파일 배치 연쇄 변환 및 오디오 실시간 동기화 탐색 편집기 완비.
+- 후속 작업:
+  - 배포 사양 검증 및 GUI 최종 마무리.
+
 ## 2026-05-20 (기능 추가 — 캐시/작업 삭제 및 프라이버시 보강)
 - 작업: 캐시 및 작업 삭제 UX 보강 (Delete UX), 최근 작업 기록 비활성화 옵션 (Privacy Control), Jamo Fuzzy 문서 최신화 (Doc Alignment).
 - 변경 파일:

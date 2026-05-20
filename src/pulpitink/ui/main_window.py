@@ -70,6 +70,8 @@ class MainWindow(QMainWindow):
         self._settings = self._settings_service.load()
 
         self._files: list[Path] = []
+        self._queue_files: list[Path] = []
+        self._current_queue_index: int = -1
         self._thread = None
         self._worker = None
 
@@ -215,6 +217,9 @@ class MainWindow(QMainWindow):
     # ---------- file queue ----------
 
     def _on_add_files(self) -> None:
+        if self._thread is not None:
+            QMessageBox.information(self, "설교필기", "변환 진행 중에는 새 파일을 추가할 수 없습니다.")
+            return
         filters = " ".join(f"*{ext}" for ext in sorted(SUPPORTED_INPUT_EXTENSIONS))
         paths, _ = QFileDialog.getOpenFileNames(
             self, "오디오/비디오 파일 선택", "", f"미디어 파일 ({filters})"
@@ -223,6 +228,10 @@ class MainWindow(QMainWindow):
             self._add_files([Path(p) for p in paths])
 
     def _add_files(self, paths: list[Path]) -> None:
+        if self._thread is not None:
+            QMessageBox.information(self, "설교필기", "변환 진행 중에는 새 파일을 추가할 수 없습니다.")
+            return
+
         added = 0
         for path in paths:
             if path.suffix.lower() not in SUPPORTED_INPUT_EXTENSIONS:
@@ -231,7 +240,7 @@ class MainWindow(QMainWindow):
             if path in self._files:
                 continue
             self._files.append(path)
-            item = QListWidgetItem(f"{path.name}  —  {path}")
+            item = QListWidgetItem(f"[대기] {path.name}  —  {path}")
             item.setData(Qt.ItemDataRole.UserRole, str(path))
             self.file_list.addItem(item)
             added += 1
@@ -239,6 +248,10 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"{added}개 파일 추가됨 (총 {len(self._files)}개)")
 
     def _on_remove_selected(self) -> None:
+        if self._thread is not None:
+            QMessageBox.information(self, "설교필기", "변환 진행 중에는 파일 큐를 수정할 수 없습니다.")
+            return
+
         for item in self.file_list.selectedItems():
             row = self.file_list.row(item)
             self.file_list.takeItem(row)
@@ -248,8 +261,19 @@ class MainWindow(QMainWindow):
                 pass
 
     def _on_clear_files(self) -> None:
+        if self._thread is not None:
+            QMessageBox.information(self, "설교필기", "변환 진행 중에는 파일 큐를 비울 수 없습니다.")
+            return
+
         self.file_list.clear()
         self._files.clear()
+
+    def _update_file_status_text(self, index: int, status: str) -> None:
+        if 0 <= index < self.file_list.count():
+            item = self.file_list.item(index)
+            path_str = item.data(Qt.ItemDataRole.UserRole)
+            path = Path(path_str)
+            item.setText(f"[{status}] {path.name}  —  {path}")
 
     # ---------- drag-and-drop ----------
 
@@ -281,13 +305,52 @@ class MainWindow(QMainWindow):
 
     def _on_run(self) -> None:
         if self._thread is not None:
-            QMessageBox.information(self, "설교필기", "이미 변환이 진행 중입니다.")
+            confirm = QMessageBox.question(
+                self,
+                "변환 중단",
+                "현재 진행 중인 변환 작업과 남은 대기 파일들의 처리를 모두 중단하시겠습니까?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if confirm == QMessageBox.StandardButton.Yes:
+                self._append_log("사용자 요청에 의해 배치 변환이 중단되었습니다.")
+                self._queue_files = []
+                if 0 <= self._current_queue_index < self.file_list.count():
+                    self._update_file_status_text(self._current_queue_index, "중단")
+                self._current_queue_index = -1
+
+                if self._thread is not None:
+                    self._thread.terminate()
+                    self._thread.wait()
             return
+
         if not self._files:
             QMessageBox.information(self, "설교필기", "변환할 파일을 추가하세요.")
             return
 
-        target = self._files[0]
+        self._queue_files = list(self._files)
+        self._current_queue_index = 0
+
+        for idx in range(len(self._queue_files)):
+            self._update_file_status_text(idx, "대기")
+
+        self.log_view.clear()
+        self.preview_view.clear()
+        self._start_next_queue_item()
+
+    def _start_next_queue_item(self) -> None:
+        if self._current_queue_index < 0 or self._current_queue_index >= len(self._queue_files):
+            self._append_log("\n=== 모든 배치 변환 작업 완료 ===")
+            self._queue_files = []
+            self._current_queue_index = -1
+            self._set_running(False)
+            return
+
+        target = self._queue_files[self._current_queue_index]
+        self._update_file_status_text(self._current_queue_index, "진행 중")
+        self._set_running(True)
+        self._append_log(f"\n[큐 {self._current_queue_index + 1}/{len(self._queue_files)}] 변환 시작: {target.name}")
+
         language = self.language_combo.currentData()
         model = self.model_combo.currentData()
         preset = self.preset_combo.currentData()
@@ -295,7 +358,6 @@ class MainWindow(QMainWindow):
         fuzzy_enabled = self.fuzzy_checkbox.isChecked()
         fuzzy_threshold = self.fuzzy_spin.value()
 
-        # Persist the latest choices so the next launch starts from where the user left off.
         try:
             self._settings_service.update(
                 language=language,
@@ -326,11 +388,6 @@ class MainWindow(QMainWindow):
             fuzzy_threshold=fuzzy_threshold,
         )
 
-        self.log_view.clear()
-        self.preview_view.clear()
-        self._set_running(True)
-        self._append_log(f"변환 시작: {target.name}")
-
         thread, worker = start_worker(request)
         worker.progress.connect(self._append_log)
         worker.finished_ok.connect(self._on_worker_done)
@@ -341,11 +398,16 @@ class MainWindow(QMainWindow):
         thread.start()
 
     def _set_running(self, running: bool) -> None:
-        self.run_btn.setEnabled(not running)
-        self.progress_bar.setVisible(running)
         if running:
+            self.run_btn.setText("변환 중단")
+            self.run_btn.setStyleSheet("background-color: #fce4ec; color: #c2185b; font-weight: bold;")
+            self.progress_bar.setVisible(True)
             self.statusBar().showMessage("변환 중…")
         else:
+            self.run_btn.setText("변환 시작")
+            self.run_btn.setStyleSheet("")
+            self.run_btn.setEnabled(True)
+            self.progress_bar.setVisible(False)
             self.statusBar().showMessage("대기 중")
 
     def _append_log(self, msg: str) -> None:
@@ -353,25 +415,36 @@ class MainWindow(QMainWindow):
 
     def _on_worker_done(self, result: TranscribeResult) -> None:
         self._append_log(f"완료: {result.job_id} ({result.elapsed_seconds:.2f}s)")
+
+        if 0 <= self._current_queue_index < len(self._queue_files):
+            self._update_file_status_text(self._current_queue_index, "완료")
+
         if result.transcription is not None:
             preview = "\n".join(seg.text for seg in result.transcription.segments[:200])
             self.preview_view.setPlainText(preview)
             self.tabs.setCurrentWidget(self.preview_view)
-        if self._files:
-            done_path = self._files.pop(0)
-            if self.file_list.count():
-                self.file_list.takeItem(0)
-            self._append_log(f"큐에서 제거: {done_path.name}")
+
         try:
             self.editor.load_job(result.job_id)
         except Exception as exc:  # noqa: BLE001
             self._append_log(f"편집기 로드 실패: {exc}")
+
         self._refresh_recent_jobs()
+
+        if self._current_queue_index != -1:
+            self._current_queue_index += 1
 
     def _on_worker_failed(self, message: str) -> None:
         self._append_log(f"오류: {message}")
+
+        if 0 <= self._current_queue_index < len(self._queue_files):
+            self._update_file_status_text(self._current_queue_index, "실패")
+
         QMessageBox.warning(self, "설교필기", f"변환 실패:\n{message}")
         self._refresh_recent_jobs()
+
+        if self._current_queue_index != -1:
+            self._current_queue_index += 1
 
     def _on_thread_finished(self) -> None:
         if self._thread is not None:
@@ -380,7 +453,17 @@ class MainWindow(QMainWindow):
             self._worker.deleteLater()
         self._thread = None
         self._worker = None
-        self._set_running(False)
+
+        if self._current_queue_index != -1 and self._current_queue_index < len(self._queue_files):
+            self._start_next_queue_item()
+        else:
+            if self._current_queue_index == -1:
+                self._append_log("\n=== 배치 변환 중단됨 ===")
+            else:
+                self._append_log("\n=== 모든 배치 변환 작업 완료 ===")
+            self._queue_files = []
+            self._current_queue_index = -1
+            self._set_running(False)
 
     # ---------- recent jobs ----------
 

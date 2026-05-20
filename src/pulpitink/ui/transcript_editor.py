@@ -22,8 +22,9 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtGui import QBrush, QColor
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
@@ -36,6 +37,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QSlider,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
@@ -84,6 +86,12 @@ class TranscriptEditorWidget(QWidget):
         self._segments: list[SegmentRecord] = []
         self._suggestions: list[CorrectionSuggestionRecord] = []
         self._suppress_table_change = False
+        self._suppress_slider_change = False
+
+        self._player = QMediaPlayer()
+        self._audio_output = QAudioOutput()
+        self._player.setAudioOutput(self._audio_output)
+
         self._build_ui()
 
     # ---------- UI ----------
@@ -165,6 +173,39 @@ class TranscriptEditorWidget(QWidget):
         self.status_label = QLabel("작업이 선택되지 않았습니다.")
         layout.addWidget(self.status_label)
 
+        # 오디오 싱크 플레이어 UI 바 구성
+        player_row = QHBoxLayout()
+        self.play_btn = QPushButton("재생")
+        self.play_btn.clicked.connect(self._on_play_clicked)
+        self.play_btn.setEnabled(False)
+
+        self.position_slider = QSlider(Qt.Orientation.Horizontal)
+        self.position_slider.setRange(0, 0)
+        self.position_slider.sliderMoved.connect(self._on_slider_moved)
+        self.position_slider.setEnabled(False)
+
+        self.time_label = QLabel("00:00.00 / 00:00.00")
+
+        self.play_segment_btn = QPushButton("선택 구간 재생")
+        self.play_segment_btn.clicked.connect(self._on_play_segment_clicked)
+        self.play_segment_btn.setEnabled(False)
+
+        self.sync_scroll_check = QCheckBox("재생 싱크 스크롤 활성화")
+        self.sync_scroll_check.setChecked(True)
+
+        player_row.addWidget(self.play_btn)
+        player_row.addWidget(self.position_slider, 1)
+        player_row.addWidget(self.time_label)
+        player_row.addWidget(self.play_segment_btn)
+        player_row.addWidget(self.sync_scroll_check)
+
+        layout.addLayout(player_row)
+
+        # 플레이어 시그널 연동
+        self._player.positionChanged.connect(self._on_player_position_changed)
+        self._player.durationChanged.connect(self._on_player_duration_changed)
+        self.segment_table.cellDoubleClicked.connect(self._on_table_double_clicked)
+
     # ---------- DB helpers ----------
 
     def _open_repo(self) -> tuple[object, JobRepository]:
@@ -191,13 +232,137 @@ class TranscriptEditorWidget(QWidget):
             f"교정 후보 {sum(1 for s in self._suggestions if s.status == 'pending')}개 pending"
         )
 
+        # 오디오 소스 자동 매핑
+        processed_path = Path("cache") / "jobs" / job_id / "processed.wav"
+        audio_source = None
+        if processed_path.exists():
+            audio_source = str(processed_path.resolve())
+        else:
+            conn, repo = self._open_repo()
+            try:
+                job_rec = repo.get_job(job_id)
+                if job_rec and job_rec.source_path:
+                    audio_source = job_rec.source_path
+            finally:
+                conn.close()
+
+        if audio_source:
+            self._player.setSource(QUrl.fromLocalFile(audio_source))
+            self.play_btn.setEnabled(True)
+            self.position_slider.setEnabled(True)
+            self.play_segment_btn.setEnabled(True)
+        else:
+            self._player.setSource(QUrl())
+            self.play_btn.setEnabled(False)
+            self.position_slider.setEnabled(False)
+            self.play_segment_btn.setEnabled(False)
+
+        self.play_btn.setText("재생")
+        self.position_slider.setRange(0, 0)
+        self.time_label.setText("00:00.00 / 00:00.00")
+
     def clear(self) -> None:
+        self._player.stop()
+        self._player.setSource(QUrl())
+        self.play_btn.setText("재생")
+        self.play_btn.setEnabled(False)
+        self.position_slider.setRange(0, 0)
+        self.position_slider.setEnabled(False)
+        self.time_label.setText("00:00.00 / 00:00.00")
+        self.play_segment_btn.setEnabled(False)
+
         self._job_id = None
         self._segments = []
         self._suggestions = []
         self._refresh_segment_view()
         self._refresh_suggestion_view()
         self.status_label.setText("작업이 선택되지 않았습니다.")
+
+    # ---------- 오디오 싱크 플레이어 제어 ----------
+
+    def _on_play_clicked(self) -> None:
+        if self._player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            self._player.pause()
+            self.play_btn.setText("재생")
+        else:
+            self._player.play()
+            self.play_btn.setText("일시정지")
+
+    def _on_player_position_changed(self, position: int) -> None:
+        if self._suppress_slider_change:
+            return
+        self._suppress_slider_change = True
+        try:
+            self.position_slider.setValue(position)
+        finally:
+            self._suppress_slider_change = False
+
+        self._update_time_label(position, self._player.duration())
+
+        # 테이블 싱크 및 자동 스크롤
+        if not self._segments:
+            return
+
+        curr_sec = position / 1000.0
+        visible = [
+            seg
+            for seg in self._segments
+            if not self.review_only.isChecked() or seg.needs_review
+        ]
+
+        target_row = -1
+        for idx, seg in enumerate(visible):
+            if seg.start_sec <= curr_sec <= seg.end_sec:
+                target_row = idx
+                break
+
+        if target_row != -1:
+            self._suppress_table_change = True
+            try:
+                self.segment_table.selectRow(target_row)
+                if self.sync_scroll_check.isChecked():
+                    item = self.segment_table.item(target_row, 3)
+                    if item:
+                        self.segment_table.scrollToItem(item, QAbstractItemView.ScrollHint.PositionAtCenter)
+            finally:
+                self._suppress_table_change = False
+
+    def _on_player_duration_changed(self, duration: int) -> None:
+        self.position_slider.setRange(0, duration)
+        self._update_time_label(self._player.position(), duration)
+
+    def _on_slider_moved(self, position: int) -> None:
+        self._player.setPosition(position)
+
+    def _update_time_label(self, position: int, duration: int) -> None:
+        pos_sec = position / 1000.0
+        dur_sec = duration / 1000.0
+        self.time_label.setText(f"{_format_time(pos_sec)} / {_format_time(dur_sec)}")
+
+    def _on_table_double_clicked(self, row: int, column: int) -> None:
+        visible = [
+            seg
+            for seg in self._segments
+            if not self.review_only.isChecked() or seg.needs_review
+        ]
+        if 0 <= row < len(visible):
+            seg = visible[row]
+            self._player.setPosition(int(seg.start_sec * 1000))
+            self._player.play()
+            self.play_btn.setText("일시정지")
+
+    def _on_play_segment_clicked(self) -> None:
+        row = self.segment_table.currentRow()
+        visible = [
+            seg
+            for seg in self._segments
+            if not self.review_only.isChecked() or seg.needs_review
+        ]
+        if 0 <= row < len(visible):
+            seg = visible[row]
+            self._player.setPosition(int(seg.start_sec * 1000))
+            self._player.play()
+            self.play_btn.setText("일시정지")
 
     # ---------- segment view ----------
 

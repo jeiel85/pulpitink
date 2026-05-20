@@ -1,5 +1,26 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Feature: Audio Sync Player & Batch Queue UX)
+
+### Added
+- **편집기 탭 내 오디오 싱크 플레이어 연동 (Audio Sync Player)**:
+  - `TranscriptEditorWidget` 내에 `PySide6.QtMultimedia` 기반 `QMediaPlayer` 및 `QAudioOutput` 객체 탑재.
+  - 플레이어 제어 바 UI 추가: 재생/일시정지 버튼, 수평 방향 `QSlider` 진행 바, 재생 시간 표시 레이블, 선택 구간 재생 버튼, 재생 싱크 스크롤 활성화 체크박스.
+  - 작업 오디오 소스 자동 매핑: `load_job(job_id)` 호출 시 `cache/jobs/<job_id>/processed.wav` (전처리 캐시) 존재를 최우선 점검하고, 미발견 시 SQLite DB에서 job의 `source_path`를 쿼리하여 원본 미디어 재생 소스로 대체 재생.
+  - 세그먼트 테이블 행 더블클릭(`cellDoubleClicked`) 및 "선택 구간 재생" 시 해당 세그먼트의 `start_sec`로 플레이어 seek 및 자동 재생.
+  - 플레이어 재생 시간 변화(`positionChanged`) 시 현재 위치에 해당하는 테이블 행을 하이라이트(Select) 처리하며, 스크롤 싱크 옵션이 활성화된 경우 해당 행이 중앙에 오도록 자동 스크롤(`scrollToItem`) 연동.
+- **메인 화면 다중 작업 배치 큐 UX 개선 (Batch Queue UX)**:
+  - 파일 큐 처리 상태 머신 구현: 대기 목록 내 아이템들에 대기 상태 문자열(`[대기]`, `[진행 중]`, `[완료]`, `[실패]`)을 추가하여 실시간 시각화.
+  - 순차 처리 기동 루프(`_start_next_queue_item`): 스레드가 완전히 해제된 시점(`_on_thread_finished`)에 다음 파일의 변환을 기동시켜 리소스 경합 방지.
+  - 연속성 정책 반영: 다중 파일 변환 도중 특정 개별 파일 변환이 실패하더라도 전체 배치 처리를 멈추지 않고, 해당 행만 `[실패]` 표기 후 다음 작업을 연쇄 변환.
+  - 변환 중단(Cancel) 기능: 진행 중 "변환 중단" 버튼 클릭 시 확인 다이얼로그를 통해 대기 중인 모든 큐를 일괄 파기하고 워커 스레드를 정지(`terminate()`).
+  - 변환 진행 중 파일 추가/제거/비우기 동작 시도에 대한 안전 가드 팝업 경고 추가.
+
+### Tests
+- `tests/test_batch_queue.py`를 신규 추가하여, 다중 파일 배치 큐 가동, 순차 변환, 실패 시의 연속성 기동, 변환 중환 및 큐 일괄 파기 등 상태 머신 시뮬레이션 테스트 3건 작성 완료.
+- `python -m pytest`: 100/100 PASS (총 100개 테스트)
+- `python -m ruff check .`: PASS
+
 ## Unreleased - 2026-05-20 (Feature: Delete UX & Privacy Control & Doc Alignment)
 
 ### Added
