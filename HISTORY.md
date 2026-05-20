@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-20 (문서 — README 저장소 안내형 재정비)
+- 작업: GitHub Pages 랜딩 페이지가 별도로 운영되도록 된 뒤, README를 랜딩형 문서에서 저장소 안내/개발 문서형으로 재정비.
+- 변경 파일:
+  - README.md (대형 랜딩 이미지 제거, 개요/주요 기능/설치/사용/데이터/개발/구조/문서 링크 중심으로 재작성)
+  - CHANGELOG.md
+  - HISTORY.md
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 95/95 PASS
+  - `python -m sermonscript.cli.main doctor`: PASS
+- 결과: 성공
+- 후속 작업:
+  - README와 docs/user-guide.md 내용이 장기적으로 중복되지 않도록 사용자 상세 설명은 user-guide로 유지
+
 ## 2026-05-20 (문서 — GitHub Pages 랜딩 설정)
 - 작업: GitHub Pages(`github.io`)에서 사용할 정적 랜딩 페이지를 `docs/index.html`로 추가하고, 저장소 홈페이지 URL을 Pages 주소로 전환.
 - 변경 파일:

@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Documentation: README repository guide)
+
+### Changed
+- GitHub Pages 랜딩 페이지가 별도로 생긴 뒤 README를 저장소 안내 문서 역할에 맞게 재정비했습니다.
+- 상단 대형 랜딩 이미지를 제거하고 설치, 사용, 데이터 저장 위치, 개발 검증, 프로젝트 구조 중심으로 구성했습니다.
+
 ## Unreleased - 2026-05-20 (Documentation: GitHub Pages landing)
 
 ### Added
