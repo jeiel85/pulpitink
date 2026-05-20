@@ -13,9 +13,12 @@
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
   - `python -m sermonscript.cli.main doctor`: PASS
-- 결과: 로컬 검증 통과. GitHub Pages 설정 및 배포 확인 진행 예정.
+- GitHub Pages:
+  - `gh api repos/jeiel85/sermon-script/pages`: `status=built`, source `main` `/docs`
+  - `Invoke-WebRequest https://jeiel85.github.io/sermon-script/`: HTTP 200, title/image 참조 확인
+- 결과: 성공. GitHub Pages 랜딩 페이지 공개 완료.
 - 후속 작업:
-  - GitHub Pages 배포 완료 후 공개 URL 접속 확인
+  - GitHub Actions Node.js 20 deprecation 경고 대응
 
 ## 2026-05-20 (문서 — GitHub 랜딩/README 최신화)
 - 작업: 현재 `main` 기준 기능 범위와 사용자가 제공한 랜딩 이미지를 반영해 GitHub README 첫 화면을 최신화하고, 저장소 메타데이터와 맞도록 프로젝트 URL을 정정.
