@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 
 from pulpitink.core.audio.enhancement_presets import PRESETS
 from pulpitink.core.export.base import ExportFormat
+from pulpitink.core.utils.i18n import tr
 from pulpitink.services.model_service import list_models
 from pulpitink.services.settings_service import SettingsService
 from pulpitink.services.transcribe_service import (
@@ -62,7 +63,6 @@ class MainWindow(QMainWindow):
 
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("설교필기 (PulpitInk)")
         self.resize(1100, 720)
         self.setAcceptDrops(True)
 
@@ -76,6 +76,7 @@ class MainWindow(QMainWindow):
         self._worker = None
 
         self._build_ui()
+        self._retranslate_ui()
         self._refresh_recent_jobs()
 
     # ---------- UI ----------
@@ -88,26 +89,28 @@ class MainWindow(QMainWindow):
         left = QVBoxLayout()
         self.file_list = QListWidget()
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
-        left.addWidget(QLabel("변환 대기 파일"))
+        self.file_title_label = QLabel("")
+        left.addWidget(self.file_title_label)
         left.addWidget(self.file_list, 1)
 
         file_buttons = QHBoxLayout()
-        add_btn = QPushButton("파일 추가…")
-        add_btn.clicked.connect(self._on_add_files)
-        remove_btn = QPushButton("선택 제거")
-        remove_btn.clicked.connect(self._on_remove_selected)
-        clear_btn = QPushButton("모두 비우기")
-        clear_btn.clicked.connect(self._on_clear_files)
-        file_buttons.addWidget(add_btn)
-        file_buttons.addWidget(remove_btn)
-        file_buttons.addWidget(clear_btn)
+        self.add_btn = QPushButton("")
+        self.add_btn.clicked.connect(self._on_add_files)
+        self.remove_btn = QPushButton("")
+        self.remove_btn.clicked.connect(self._on_remove_selected)
+        self.clear_btn = QPushButton("")
+        self.clear_btn.clicked.connect(self._on_clear_files)
+        file_buttons.addWidget(self.add_btn)
+        file_buttons.addWidget(self.remove_btn)
+        file_buttons.addWidget(self.clear_btn)
         left.addLayout(file_buttons)
 
-        left.addWidget(QLabel("최근 작업 (DB)"))
+        self.recent_db_label = QLabel("")
         self.recent_list = QListWidget()
         self.recent_list.itemSelectionChanged.connect(self._on_recent_selected)
         self.recent_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.recent_list.customContextMenuRequested.connect(self._show_recent_context_menu)
+        left.addWidget(self.recent_db_label)
         left.addWidget(self.recent_list, 1)
 
         # Right column: options + run + tabs
@@ -115,7 +118,7 @@ class MainWindow(QMainWindow):
         right.addWidget(self._build_options_group())
 
         run_row = QHBoxLayout()
-        self.run_btn = QPushButton("변환 시작")
+        self.run_btn = QPushButton("")
         self.run_btn.clicked.connect(self._on_run)
         run_row.addWidget(self.run_btn)
 
@@ -131,9 +134,9 @@ class MainWindow(QMainWindow):
         self.preview_view = QPlainTextEdit()
         self.preview_view.setReadOnly(True)
         self.editor = TranscriptEditorWidget()
-        self.tabs.addTab(self.log_view, "로그")
-        self.tabs.addTab(self.preview_view, "결과 미리보기")
-        self.tabs.addTab(self.editor, "편집기")
+        self.tabs.addTab(self.log_view, "")
+        self.tabs.addTab(self.preview_view, "")
+        self.tabs.addTab(self.editor, "")
         right.addWidget(self.tabs, 1)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -150,46 +153,56 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
 
         self.setStatusBar(QStatusBar())
-        self.statusBar().showMessage(
-            "파일을 추가하거나 드래그하여 변환을 시작하세요."
-        )
 
     def _build_options_group(self) -> QGroupBox:
-        group = QGroupBox("변환 설정")
+        self.options_group = QGroupBox("")
         form = QFormLayout()
 
+        self.app_lang_label = QLabel("")
+        self.app_language_combo = QComboBox()
+        self.app_language_combo.addItem("한국어 (ko)", userData="ko")
+        self.app_language_combo.addItem("English (en)", userData="en")
+        self._select_combo_value(self.app_language_combo, self._settings.app_language)
+        self.app_language_combo.currentIndexChanged.connect(self._on_app_language_changed)
+        form.addRow(self.app_lang_label, self.app_language_combo)
+
+        self.lang_label = QLabel("")
         self.language_combo = QComboBox()
         for code, label in _LANGUAGES:
             self.language_combo.addItem(f"{label} ({code})", userData=code)
         self._select_combo_value(self.language_combo, self._settings.language)
-        form.addRow("언어", self.language_combo)
+        form.addRow(self.lang_label, self.language_combo)
 
+        self.model_label = QLabel("")
         self.model_combo = QComboBox()
         for model in list_models():
             self.model_combo.addItem(f"{model.name} — {model.size_label}", userData=model.name)
         self._select_combo_value(self.model_combo, self._settings.model)
-        form.addRow("모델", self.model_combo)
+        form.addRow(self.model_label, self.model_combo)
 
+        self.preset_label = QLabel("")
         self.preset_combo = QComboBox()
         for preset in PRESETS.values():
             self.preset_combo.addItem(f"{preset.name} — {preset.description}", userData=preset.name)
         self._select_combo_value(self.preset_combo, self._settings.preset)
-        form.addRow("전처리", self.preset_combo)
+        form.addRow(self.preset_label, self.preset_combo)
 
         output_row = QHBoxLayout()
         self.output_label = QLabel(str(self._settings.resolved_output_dir()))
         self.output_label.setWordWrap(True)
-        choose_btn = QPushButton("폴더 선택…")
-        choose_btn.clicked.connect(self._on_choose_output)
+        self.choose_btn = QPushButton("")
+        self.choose_btn.clicked.connect(self._on_choose_output)
         output_row.addWidget(self.output_label, 1)
-        output_row.addWidget(choose_btn)
+        output_row.addWidget(self.choose_btn)
         wrapper = QWidget()
         wrapper.setLayout(output_row)
-        form.addRow("출력 폴더", wrapper)
+        self.output_dir_label_title = QLabel("")
+        form.addRow(self.output_dir_label_title, wrapper)
 
-        self.fuzzy_checkbox = QCheckBox("자모 Fuzzy 매칭 활성화")
+        self.fuzzy_checkbox = QCheckBox("")
         self.fuzzy_checkbox.setChecked(self._settings.fuzzy_matching_enabled)
-        form.addRow("Fuzzy 매칭", self.fuzzy_checkbox)
+        self.fuzzy_label_title = QLabel("")
+        form.addRow(self.fuzzy_label_title, self.fuzzy_checkbox)
 
         self.fuzzy_spin = QDoubleSpinBox()
         self.fuzzy_spin.setRange(0.60, 0.90)
@@ -197,15 +210,54 @@ class MainWindow(QMainWindow):
         self.fuzzy_spin.setValue(self._settings.fuzzy_threshold)
         self.fuzzy_spin.setEnabled(self._settings.fuzzy_matching_enabled)
         self.fuzzy_checkbox.toggled.connect(self.fuzzy_spin.setEnabled)
-        form.addRow("Fuzzy 임계값", self.fuzzy_spin)
+        self.fuzzy_spin_label_title = QLabel("")
+        form.addRow(self.fuzzy_spin_label_title, self.fuzzy_spin)
 
-        self.history_checkbox = QCheckBox("최근 작업 기록 저장 및 표시")
+        self.history_checkbox = QCheckBox("")
         self.history_checkbox.setChecked(self._settings.keep_history)
         self.history_checkbox.toggled.connect(self._on_history_toggled)
-        form.addRow("작업 기록", self.history_checkbox)
+        self.history_label_title = QLabel("")
+        form.addRow(self.history_label_title, self.history_checkbox)
 
-        group.setLayout(form)
-        return group
+        self.options_group.setLayout(form)
+        return self.options_group
+
+    def _retranslate_ui(self) -> None:
+        self.setWindowTitle(tr("설교필기") + " (PulpitInk)")
+        self.statusBar().showMessage(tr("파일을 추가하거나 드래그하여 변환을 시작하세요."))
+
+        self.file_title_label.setText(tr("변환 대기 파일"))
+        self.add_btn.setText(tr("파일 추가…"))
+        self.remove_btn.setText(tr("선택 제거"))
+        self.clear_btn.setText(tr("모두 비우기"))
+        self.recent_db_label.setText(tr("최근 작업"))
+        self.run_btn.setText(tr("변환 시작"))
+
+        self.options_group.setTitle(tr("변환 설정"))
+        self.app_lang_label.setText(tr("인터페이스 언어"))
+        self.lang_label.setText(tr("인식 언어"))
+        self.model_label.setText(tr("음성인식 모델"))
+        self.preset_label.setText(tr("전처리 프리셋"))
+        self.output_dir_label_title.setText(tr("출력 폴더"))
+        self.fuzzy_label_title.setText(tr("성경 구절 교정 (Fuzzy)"))
+        self.fuzzy_spin_label_title.setText(tr("임계값"))
+        self.history_label_title.setText(tr("최근 작업 기록 저장"))
+
+        self.fuzzy_checkbox.setText(tr("성경 구절 교정 (Fuzzy)") + " " + tr("활성화"))
+        self.history_checkbox.setText(tr("최근 작업 기록 저장"))
+        self.choose_btn.setText(tr("폴더 선택…"))
+
+        self.tabs.setTabText(0, tr("로그"))
+        self.tabs.setTabText(1, tr("결과 미리보기"))
+        self.tabs.setTabText(2, tr("편집기"))
+
+    def _on_app_language_changed(self) -> None:
+        lang = self.app_language_combo.currentData()
+        try:
+            self._settings = self._settings_service.update(app_language=lang)
+            self._retranslate_ui()
+        except Exception as e:
+            pass
 
     @staticmethod
     def _select_combo_value(combo: QComboBox, value: str) -> None:

@@ -14,6 +14,7 @@ from pathlib import Path
 
 from pulpitink.app.paths import get_app_paths
 from pulpitink.core.audio.ffmpeg_runner import DEFAULT_PRESET
+from pulpitink.core.utils.i18n import set_language
 
 logger = logging.getLogger("pulpitink.settings")
 
@@ -25,6 +26,7 @@ class Settings:
     """User preferences exposed by ``settings show/set``."""
 
     language: str = "ko"
+    app_language: str = "ko"  # "ko" or "en" for UI translation
     model: str = "small"
     preset: str = DEFAULT_PRESET
     output_dir: str = ""  # empty -> resolved to <data_dir>/exports
@@ -63,15 +65,19 @@ class SettingsService:
 
     def load(self) -> Settings:
         if not self._path.exists():
+            set_language("ko")
             return Settings()
         try:
             raw = json.loads(self._path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             logger.warning("settings.json 읽기 실패, 기본값 사용: %s", exc)
+            set_language("ko")
             return Settings()
 
         clean = {k: v for k, v in raw.items() if k in _KNOWN_FIELDS}
-        return Settings(**clean)
+        settings = Settings(**clean)
+        set_language(settings.app_language)
+        return settings
 
     def save(self, settings: Settings) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
@@ -101,11 +107,16 @@ class SettingsService:
                     converted[k] = float(v)  # type: ignore
                 except (ValueError, TypeError):
                     raise ValueError(f"'{v}'는 유효한 float 임계값이 아닙니다.") from None
+            elif k == "app_language":
+                if v not in ("ko", "en"):
+                    raise ValueError(f"'{v}'는 유효하지 않은 언어 코드입니다. 'ko' 또는 'en'만 지원됩니다.")
+                converted[k] = str(v)
             else:
                 converted[k] = v
 
         merged = replace(self.load(), **converted)  # type: ignore[arg-type]
         self.save(merged)
+        set_language(merged.app_language)
         return merged
 
     @staticmethod
