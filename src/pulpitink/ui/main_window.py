@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, Qt, QThread, Signal
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -62,13 +62,23 @@ _LANGUAGES = (
 )
 
 
+class YtdlpInstallWorker(QThread):
+    """Worker thread to install yt-dlp via pip without freezing the UI."""
+    finished_signal = Signal(bool)
+
+    def run(self) -> None:
+        from pulpitink.core.audio.youtube_downloader import install_yt_dlp
+        success = install_yt_dlp()
+        self.finished_signal.emit(success)
+
+
 class DisclaimerDialog(QDialog):
     """YouTube copyright and usage disclaimer dialog."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle(tr("YouTube 저작권 동의"))
-        self.resize(450, 300)
+        self.resize(460, 360)
 
         layout = QVBoxLayout(self)
 
@@ -85,6 +95,15 @@ class DisclaimerDialog(QDialog):
         )
         layout.addWidget(doc)
 
+        # Status and installation UI
+        self.status_label = QLabel()
+        self.status_label.setWordWrap(True)
+        layout.addWidget(self.status_label)
+
+        self.install_btn = QPushButton(tr("yt-dlp 자동 설치"))
+        self.install_btn.clicked.connect(self._on_install_click)
+        layout.addWidget(self.install_btn)
+
         self.buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
             self,
@@ -95,6 +114,53 @@ class DisclaimerDialog(QDialog):
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
         layout.addWidget(self.buttons)
+
+        self.worker = None
+        self._check_status()
+
+    def _check_status(self) -> None:
+        from pulpitink.core.audio.youtube_downloader import is_yt_dlp_available
+        if is_yt_dlp_available():
+            self.status_label.setText(
+                f"<font color='green'><b>✓ {tr('yt-dlp 라이브러리가 준비되었습니다.')}</b></font>"
+            )
+            self.install_btn.hide()
+            self.buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
+        else:
+            self.status_label.setText(
+                f"<font color='red'><b>✗ {tr('YouTube 다운로드를 위해 yt-dlp 라이브러리가 필요합니다.')}</b></font>"
+            )
+            self.install_btn.show()
+            self.buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+
+    def _on_install_click(self) -> None:
+        self.status_label.setText(
+            f"<b>{tr('yt-dlp 설치 중... 잠시만 기다려 주세요 (인터넷 연결 필요)')}</b>"
+        )
+        self.install_btn.setEnabled(False)
+        self.buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+        self.buttons.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(False)
+
+        self.worker = YtdlpInstallWorker(self)
+        self.worker.finished_signal.connect(self._on_install_finished)
+        self.worker.start()
+
+    def _on_install_finished(self, success: bool) -> None:
+        self.buttons.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(True)
+        if success:
+            QMessageBox.information(
+                self, tr("설치 성공"), tr("yt-dlp 라이브러리가 성공적으로 설치되었습니다!")
+            )
+            self._check_status()
+        else:
+            QMessageBox.critical(
+                self,
+                tr("설치 실패"),
+                tr("yt-dlp 설치 중 오류가 발생했습니다.\n인터넷 연결 상태를 확인하거나 터미널에서 'pip install yt-dlp'를 시도해 주세요.")
+            )
+            self.install_btn.setEnabled(True)
+            self._check_status()
+
 
 
 class MainWindow(QMainWindow):

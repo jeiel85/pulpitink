@@ -7,9 +7,41 @@ on the user's system, raising a helpful error message instead.
 from __future__ import annotations
 
 import logging
+import subprocess
+import sys
 from pathlib import Path
 
 logger = logging.getLogger("pulpitink.youtube")
+
+
+def is_yt_dlp_available() -> bool:
+    """Check if yt-dlp library is installed and importable."""
+    try:
+        import yt_dlp  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def install_yt_dlp() -> bool:
+    """Install yt-dlp using python's pip module synchronously.
+
+    Usually called from background worker threads to prevent UI freezes.
+    """
+    logger.info("Attempting to auto-install yt-dlp via pip...")
+    try:
+        # Use sys.executable to run pip in the same python environment
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "yt-dlp"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        logger.info("yt-dlp auto-install successful: %s", result.stdout)
+        return True
+    except Exception:
+        logger.exception("Failed to auto-install yt-dlp")
+        return False
 
 
 def download_youtube_audio(url: str, output_dir: Path) -> Path:
@@ -65,3 +97,4 @@ def download_youtube_audio(url: str, output_dir: Path) -> Path:
     except Exception as exc:
         logger.exception("Failed to download YouTube audio from %s", url)
         raise RuntimeError(f"YouTube 오디오 다운로드 중 오류가 발생했습니다: {exc}") from exc
+

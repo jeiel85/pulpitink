@@ -69,6 +69,14 @@ TRANSLATIONS: dict[str, str] = {
     "YouTube 저작권 동의": "YouTube Copyright Disclaimer",
     "동의 및 계속": "Agree and Continue",
     "취소": "Cancel",
+    "yt-dlp 자동 설치": "Auto-install yt-dlp",
+    "yt-dlp 라이브러리가 준비되었습니다.": "yt-dlp library is ready.",
+    "YouTube 다운로드를 위해 yt-dlp 라이브러리가 필요합니다.": "yt-dlp library is required for YouTube downloads.",
+    "yt-dlp 설치 중... 잠시만 기다려 주세요 (인터넷 연결 필요)": "Installing yt-dlp... Please wait (Internet connection required)",
+    "설치 성공": "Installation Success",
+    "yt-dlp 라이브러리가 성공적으로 설치되었습니다!": "yt-dlp library has been successfully installed!",
+    "설치 실패": "Installation Failed",
+    "yt-dlp 설치 중 오류가 발생했습니다.\n인터넷 연결 상태를 확인하거나 터미널에서 'pip install yt-dlp'를 시도해 주세요.": "An error occurred while installing yt-dlp.\nPlease check your internet connection or try running 'pip install yt-dlp' in your terminal.",
 }
 
 

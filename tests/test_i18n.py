@@ -25,6 +25,14 @@ def test_i18n_translation_en() -> None:
     assert tr("unknown key") == "unknown key"
 
 
+def test_i18n_yt_dlp_install_keys_en() -> None:
+    set_language("en")
+    assert tr("yt-dlp 자동 설치") == "Auto-install yt-dlp"
+    assert tr("yt-dlp 라이브러리가 준비되었습니다.") == "yt-dlp library is ready."
+    assert tr("설치 성공") == "Installation Success"
+    assert tr("설치 실패") == "Installation Failed"
+
+
 def test_i18n_fallback_on_unsupported_language() -> None:
     set_language("fr")  # 지원되지 않는 언어
     assert get_language() == "ko"
