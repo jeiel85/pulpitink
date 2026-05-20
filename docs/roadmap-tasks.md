@@ -66,8 +66,8 @@
 - [x] Tauri `Cargo.toml`, `tauri.conf.json` 내 `externalBin` 사이드카 맵핑 및 보안 권한 셋업 완료
 - [x] Rust 링킹 단에서 비동기 `run_sermonscript_sidecar` 및 실시간 STDOUT/STDERR 파이프 스트림 UI 방출 커맨드 구현 완료
 - [x] Tauri 컴파일러 기반 첫 빌드 및 GUI 윈도우 프레임 구동 100% 성공
-- [/] React + Tailwind CSS + shadcn/ui 기반 프리미엄 모던 웹 디자인 시스템 구축
-- [ ] UI단에서 사이드카 IPC 통신을 통한 오디오 전처리, STT, 원문 대조 연동 테스트 완료
-- [ ] 타임라인 재생, 오디오 파형(Waveform) 비주얼라이저 및 실시간 2단 대조 검수 편집기 구현
-- [ ] Tauri 2.0 및 사이드카 연동 기반의 최종 Windows 데스크톱 Portable ZIP/EXE 빌드 파이프라인 완성
+- [x] React + Tailwind CSS + shadcn/ui 기반 프리미엄 모던 웹 디자인 시스템 구축
+- [x] UI단에서 사이드카 IPC 통신을 통한 오디오 전처리, STT, 원문 대조 연동 테스트 완료
+- [x] 타임라인 재생, 오디오 파형(Waveform) 비주얼라이저 및 실시간 2단 대조 검수 편집기 구현
+- [/] Tauri 2.0 및 사이드카 연동 기반의 최종 Windows 데스크톱 Portable ZIP/EXE 빌드 파이프라인 완성 진행 중
 

@@ -49,12 +49,40 @@ async fn run_sermonscript_sidecar(
     Ok("Sidecar spawned successfully".to_string())
 }
 
+#[tauri::command]
+async fn run_sermonscript_sidecar_sync(
+    app: tauri::AppHandle,
+    args: Vec<String>,
+) -> Result<String, String> {
+    let shell = app.shell();
+    
+    let sidecar = shell
+        .sidecar("sermonscript-sidecar")
+        .map_err(|e| e.to_string())?
+        .args(args);
+
+    let output = sidecar.output().await.map_err(|e| e.to_string())?;
+    
+    if output.status.success() {
+        let text = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
+        Ok(text)
+    } else {
+        let err_text = String::from_utf8(output.stderr).map_err(|e| e.to_string())?;
+        Err(err_text)
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init()) // Initialize tauri-plugin-shell
-        .invoke_handler(tauri::generate_handler![greet, run_sermonscript_sidecar])
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            run_sermonscript_sidecar,
+            run_sermonscript_sidecar_sync
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+

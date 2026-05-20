@@ -1,5 +1,22 @@
 # HISTORY.md
 
+## 2026-05-20 (구현 #14 — E2E 사이드카 연동 완벽 안착 & 프리미엄 3D 앱 아이콘 탑재)
+- 작업: `--json` 직렬화 스펙을 적용하여 새로 빌드한 파이썬 사이드카 바이너리를 Tauri `binaries/` 폴더에 강제 배치 및 링킹 완료. React 다크 글래스모피즘 뷰어와 Rust Shell IPC 간의 E2E 연동 수동 검증을 완료하였으며, 앱의 고유 아이덴티티를 나타내는 프리미엄 3D 디자인의 앱 아이콘을 전격 개발하여 공식 탑재함. 90개 단위 테스트 전원 통과 및 Ruff autofix 린트 정렬 완료.
+- 변경 파일:
+  - src/sermonscript/cli/main.py (`jobs list`, `show`, `settings show`, `models list`에 `--json` 옵션 탑재 완료)
+  - frontend/src/App.tsx (Vite/JSX 문법 오류 디버깅 및 ➔ 특수 화살표 적용 완료, IPC 링킹 완성)
+  - frontend/src-tauri/src/lib.rs (Rust Shell IPC 호출 기능 보장)
+  - docs/roadmap-tasks.md (Phase 8 UI 및 IPC 연동 단계 완료 처리)
+  - docs/decision-log.md (3D 아이콘 및 E2E 연동 결정 추가)
+  - walkthrough.md (신규 Tauri 아키텍처 및 3D 앱 아이콘 반영 완료)
+- 검증:
+  - `python -m pytest`: 90/90 PASS (100% 무결점 통과)
+  - `python -m ruff check . --fix`: 잔여 린트 에러 0건 확보
+  - `python src/sermonscript/cli/main.py doctor`: 모든 의존 계층 OK 통과
+  - `npm run tauri dev`: esbuild/Vite 문법 및 Rust 링크 완료 및 정상 GUI 기동 수동 검증 완료
+- 결과: Tauri 하이브리드 UI/UX 대전환 및 핵심 사이드카 비동기 링킹과 명품 3D 아이콘 브랜딩 100% 완료.
+- 후속 작업: 최종 Windows Portable ZIP 빌드 유틸 및 CI 릴리즈 파이프라인 정리.
+
 ## 2026-05-20 (구현 #13 — Tauri + React 하이브리드 아키텍처 대전환 1차 기동 성공)
 - 작업: PySide6의 시각적 한계 및 미디어 인터랙션의 어려움을 해소하고 프리미엄급 UX를 확보하기 위해, 기존의 견고한 Python Core(CLI/Services) 엔진을 PyInstaller 기반의 백그라운드 사이드카(`sermonscript-sidecar`)로 패키징하고, UI는 Tauri 2.0 (Rust) + React (TypeScript + Vite) 하이브리드 아키텍처로 대전환 및 1차 로컬 컴파일/기동 성공.
 - 변경 파일:

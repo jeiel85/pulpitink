@@ -6,6 +6,8 @@ modules so the same code can be reused from the future PySide6 GUI.
 
 from __future__ import annotations
 
+import json
+from dataclasses import asdict
 from pathlib import Path
 
 import typer
@@ -246,7 +248,10 @@ def _open_repo() -> tuple[object, JobRepository]:
 
 
 @jobs_app.command("list")
-def jobs_list(limit: int = typer.Option(20, "--limit", "-n", help="표시할 작업 개수")) -> None:
+def jobs_list(
+    limit: int = typer.Option(20, "--limit", "-n", help="표시할 작업 개수"),
+    json_format: bool = typer.Option(False, "--json", help="JSON 포맷으로 출력합니다."),
+) -> None:
     """최근 작업을 표 형태로 표시합니다."""
 
     conn, repo = _open_repo()
@@ -254,6 +259,10 @@ def jobs_list(limit: int = typer.Option(20, "--limit", "-n", help="표시할 작
         rows = repo.list_jobs(limit=limit)
     finally:
         conn.close()
+
+    if json_format:
+        console.print(json.dumps([asdict(row) for row in rows], ensure_ascii=False))
+        return
 
     if not rows:
         console.print("[yellow]저장된 작업이 없습니다.[/yellow]")
@@ -283,20 +292,56 @@ def jobs_list(limit: int = typer.Option(20, "--limit", "-n", help="표시할 작
     console.print(table)
 
 
+
 @jobs_app.command("show")
-def jobs_show(job_id: str = typer.Argument(..., help="작업 ID")) -> None:
+def jobs_show(
+    job_id: str = typer.Argument(..., help="작업 ID"),
+    json_format: bool = typer.Option(False, "--json", help="JSON 포맷으로 출력합니다."),
+) -> None:
     """작업의 메타데이터, 세그먼트 수, export 목록을 표시합니다."""
 
     conn, repo = _open_repo()
     try:
         job = repo.get_job(job_id)
         if job is None:
+            if json_format:
+                console.print(json.dumps({"error": "Job not found"}, ensure_ascii=False))
+                return
             console.print(f"[red]작업을 찾을 수 없습니다: {job_id}[/red]")
             raise typer.Exit(code=1)
         segments = repo.list_segments(job_id)
         exports = repo.list_exports(job_id)
+
+        # Try to query reference documents and correction suggestions if they exist
+        ref_dict = None
+        corrections_list = []
+        try:
+            # Check if reference_documents table exists by trying to fetch
+            ref = repo.get_reference_document(job_id)
+            if ref:
+                ref_dict = asdict(ref)
+        except Exception:
+            pass
+
+        try:
+            corrs = repo.list_correction_suggestions(job_id)
+            if corrs:
+                corrections_list = [asdict(c) for c in corrs]
+        except Exception:
+            pass
     finally:
         conn.close()
+
+    if json_format:
+        result = {
+            "job": asdict(job),
+            "segments": [asdict(s) for s in segments],
+            "exports": [asdict(e) for e in exports],
+            "reference": ref_dict,
+            "corrections": corrections_list,
+        }
+        console.print(json.dumps(result, ensure_ascii=False))
+        return
 
     console.print(f"[bold]작업 {job.id}[/bold]")
     console.print(f"- title: {job.title}")
@@ -316,6 +361,7 @@ def jobs_show(job_id: str = typer.Argument(..., help="작업 ID")) -> None:
         console.print("- exports:")
         for exp in exports:
             console.print(f"  • [{exp.format}] {exp.output_path}")
+
 
 
 @jobs_app.command("export")
@@ -377,11 +423,18 @@ def jobs_export(
 
 
 @settings_app.command("show")
-def settings_show() -> None:
+def settings_show(
+    json_format: bool = typer.Option(False, "--json", help="JSON 포맷으로 출력합니다."),
+) -> None:
     """현재 저장된 사용자 설정을 표시합니다."""
 
     svc = SettingsService()
     current = svc.load()
+
+    if json_format:
+        console.print(json.dumps(asdict(current), ensure_ascii=False))
+        return
+
     table = Table(title="SermonScript 설정")
     table.add_column("키", style="bold")
     table.add_column("값")
@@ -394,6 +447,7 @@ def settings_show() -> None:
         table.add_row(key, str(value))
     console.print(table)
     console.print(f"[dim]설정 파일: {svc.path}[/dim]")
+
 
 
 @settings_app.command("set")
@@ -413,15 +467,31 @@ def settings_set(
 
 
 @models_app.command("list")
-def models_list() -> None:
+def models_list(
+    json_format: bool = typer.Option(False, "--json", help="JSON 포맷으로 출력합니다."),
+) -> None:
     """faster-whisper에서 사용할 수 있는 모델 목록을 표시합니다."""
+
+    models = list_models()
+    if json_format:
+        model_list = [
+            {
+                "name": m.name,
+                "size_label": m.size_label,
+                "recommended_compute_type": m.recommended_compute_type,
+                "description": m.description,
+            }
+            for m in models
+        ]
+        console.print(json.dumps(model_list, ensure_ascii=False))
+        return
 
     table = Table(title="지원 모델")
     table.add_column("이름", style="bold")
     table.add_column("크기")
     table.add_column("권장 compute_type")
     table.add_column("설명")
-    for model in list_models():
+    for model in models:
         table.add_row(
             model.name,
             model.size_label,
@@ -429,6 +499,7 @@ def models_list() -> None:
             model.description,
         )
     console.print(table)
+
 
 
 @models_app.command("cache-dir")

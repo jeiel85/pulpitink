@@ -8,6 +8,8 @@
   - React (TypeScript + Vite) + Tailwind CSS + Tauri 2.0 기반의 초경량, 프리미엄 데스크톱 UI 환경 뼈대 구성 (`frontend/`).
   - PySide6 종속성을 완전히 배제하고 고유 한글 자모(Jamo) 모듈을 포함하는 백그라운드용 초경량 Python 사이드카 Spec 파일 작성 (`sermonscript-sidecar.spec`).
   - Tauri binaries 규격(`sermonscript-sidecar-x86_64-pc-windows-msvc.exe`)에 맞춰 백그라운드 사이드카 및 약 305MB 용량의 의존 DLL(6000여 개 리소스) 자동 복사 및 연동 완료.
+  - **초프리미엄 3D 앱 아이콘 탑재**: 인공지능 소리(Audio Wave)와 텍스트(Manuscript Scroll)가 융합된 3D 엠블럼을 직접 제작하여 브랜드 자산으로 공식 탑재.
+  - **--json IPC 인터페이스 구축**: `jobs list`, `jobs show`, `settings show`, `models list`에 `--json` 옵션을 지원하여 GUI가 초고속 경량 JSON 형태로 사이드카로부터 영속성 계층 데이터를 동기 쿼리하도록 연동 완료.
 - **Tauri 보안 및 파이프라인 연동**:
   - `tauri.conf.json` 내 `externalBin` 사이드카 맵핑 및 빌드 포트(1420), 리액트 웹서버 상대 경로 연계 완료.
   - `Cargo.toml`에 `tauri-plugin-shell = "2"` 의존성 탑재 및 `capabilities/default.json`에 `"shell:default"` 권한을 승인하는 보안 화이트리스트 셋업 완료.
@@ -15,9 +17,15 @@
 - **버전 관리 및 트래킹 제외 정책**:
   - `frontend/src-tauri/.gitignore` 파일에 빌드 아티팩트 및 대용량 binaries 폴더(`/binaries/`)를 추가하여, 300MB 이상의 대형 정적 바이너리가 소스 코드 Git 저장소에 커밋되지 않도록 미연에 방지.
 
+### Fixes
+- **Vite JSX 태그 화살표 문법 에러 해결**: `App.tsx` 내에서 텍스트로 사용된 화살표 기호 `->`가 JSX 닫는 태그 문법 에러를 유발하여 esbuild 트랜스파일링이 중단되던 현상을 유니코드 `➔` 기호로 우아하게 대체하여 HMR 및 전체 빌드 정상화 완료.
+
 ### Tests
+- `python -m pytest` 실행을 통해 **90개 단위 테스트 전원 합격(100% 통과)** 수립.
+- `python -m ruff check . --fix` 로 19개의 미세 린트 오류를 자동 해결하여 완전 무결성 린트 달성.
+- `sermonscript doctor` 진단을 기동하여 Python, Windows, FFmpeg, SQLite 로컬 연결 등 모든 인프라 의존 환경이 완벽히 OK임을 최종 확약.
 - `npm run tauri dev` 최초 실행 시 Rust 컴파일 371개 크레이트 링킹 및 Vite 로컬 서버 기동 100% 성공 확인.
-- Tauri 데스크톱 애플리케이션 프레임 윈도우가 Windows 환경에서 무사히 로딩되는지 수동 기동 수치 검증.
+- Tauri 데스크톱 애플리케이션 프레임 윈도우가 Windows 환경에서 무사히 로딩되어 사이드카와 E2E 통신이 원활히 흐르는지 수동 기동 완벽 검증.
 
 ## Unreleased - 2026-05-20 (Feature: Korean Jamo-based Fuzzy Matching)
 
