@@ -1,5 +1,78 @@
 # HISTORY.md
 
+## 2026-05-20 (Goal 3)
+- 작업: Goal 3 — 편집기/후처리/사용자 사전 + 원문 대조 + Windows 릴리즈 패키징.
+- 변경 파일:
+  - src/sermonscript/storage/database.py (schema v2 + 신규 테이블)
+  - src/sermonscript/storage/job_repository.py (reference/alignment/correction CRUD + 세그먼트 패치)
+  - src/sermonscript/core/postprocess/__init__.py
+  - src/sermonscript/core/postprocess/bible_refs.py
+  - src/sermonscript/core/postprocess/lexicon.py
+  - src/sermonscript/core/postprocess/pipeline.py
+  - src/sermonscript/core/reference/__init__.py
+  - src/sermonscript/core/reference/parser.py
+  - src/sermonscript/core/reference/aligner.py (rapidfuzz fallback + 안정성)
+  - src/sermonscript/core/reference/prompt_builder.py
+  - src/sermonscript/core/reference/corrections.py
+  - src/sermonscript/services/transcribe_service.py (reference flow + needs_review + 영속화)
+  - src/sermonscript/cli/main.py (transcribe --reference / --user-dict, corrections 서브커맨드)
+  - src/sermonscript/ui/transcript_editor.py (편집기 위젯)
+  - src/sermonscript/ui/main_window.py (편집기 탭 + 작업 로드 연결)
+  - tests/test_postprocess.py
+  - tests/test_reference_parser.py
+  - tests/test_correction_engine.py
+  - tests/test_transcript_editor_repo.py (편집기-DB 헤드리스 검증)
+  - tests/test_storage.py (schema v2 회귀)
+  - tests/test_transcribe_persistence.py (reference + correction 영속화 회귀)
+  - sermonscript.spec
+  - scripts/build_windows.ps1
+  - scripts/make_portable_zip.ps1
+  - .github/workflows/build-windows.yml
+  - THIRD_PARTY_NOTICES.md
+  - docs/release/release-checklist.md
+  - docs/deferred-youtube-import.md
+  - CHANGELOG.md
+- 검증:
+  - `python -m pytest`
+  - `python -m ruff check .`
+  - CLI: `sermonscript transcribe sermon.mp3 --reference sermon.md --language ko`
+  - CLI: `sermonscript corrections list/apply/ignore`
+- 결과: 진행 중 (이번 커밋 작성 시점)
+- 후속 작업:
+  - 실제 Windows VM 에서 PyInstaller 산출물 수동 검증
+  - 30분 분량 MP3 + 원문 대조 시나리오 통합 회귀
+
+## 2026-05-20
+- 작업: Goal 2 — 로컬 SQLite DB, 설정/모델 서비스, jobs/settings/models CLI, PySide6 GUI 기반 구현
+- 변경 파일:
+  - src/sermonscript/storage/__init__.py
+  - src/sermonscript/storage/database.py
+  - src/sermonscript/storage/job_repository.py
+  - src/sermonscript/services/settings_service.py
+  - src/sermonscript/services/model_service.py
+  - src/sermonscript/services/transcribe_service.py
+  - src/sermonscript/services/__init__.py
+  - src/sermonscript/cli/main.py
+  - src/sermonscript/ui/__init__.py
+  - src/sermonscript/ui/main_window.py
+  - src/sermonscript/ui/worker.py
+  - src/sermonscript/app/main.py
+  - tests/conftest.py
+  - tests/test_storage.py
+  - tests/test_settings_service.py
+  - tests/test_model_service.py
+  - tests/test_transcribe_persistence.py
+  - CHANGELOG.md
+- 검증:
+  - `python -m pytest`: 49 tests passed (신규 17개 포함)
+  - `python -m ruff check .`: All checks passed
+  - `python -m sermonscript.cli.main --help`: jobs / settings / models / db-path 명령 등록 확인
+  - `python -m sermonscript.app.main`: PySide6 미설치 시 친절한 안내 메시지 출력 확인
+- 결과: 성공
+- 후속 작업:
+  - 실제 PySide6 설치 환경에서 GUI 수동 검증
+  - segments 편집(`clean_text`/`edited_text`) UI는 Goal 3 범위에서 진행
+
 ## 2026-05-19
 - 작업: SermonScript 3-Goal 프롬프트 중 Goal 2의 4000자 제한 초과 문제 수정
 - 변경 파일:

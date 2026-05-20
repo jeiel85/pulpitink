@@ -1,0 +1,49 @@
+name: Build Windows Portable
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version_override:
+        description: "Override version string used in the artifact name."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg (build-time only — not bundled)
+        shell: pwsh
+        run: choco install -y ffmpeg --no-progress
+
+      - name: Build portable bundle
+        shell: pwsh
+        run: |
+          $extra = @{}
+          if ('${{ github.event.inputs.version_override }}' -ne '') {
+            $extra["Version"] = '${{ github.event.inputs.version_override }}'
+          }
+          ./scripts/build_windows.ps1 @extra
+
+      - name: Upload portable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: SermonScript-Portable
+          path: dist/SermonScript_Portable_*.zip
+          if-no-files-found: error
+          retention-days: 30
