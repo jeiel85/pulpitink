@@ -1,5 +1,24 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Feature: Tauri + React Hybrid Architecture Transition)
+
+### Added
+- **Tauri 하이브리드 아키텍처 도입**:
+  - `docs/design/tauri-hybrid-architecture.md` 상세 설계서 작성 및 로드맵 구축.
+  - React (TypeScript + Vite) + Tailwind CSS + Tauri 2.0 기반의 초경량, 프리미엄 데스크톱 UI 환경 뼈대 구성 (`frontend/`).
+  - PySide6 종속성을 완전히 배제하고 고유 한글 자모(Jamo) 모듈을 포함하는 백그라운드용 초경량 Python 사이드카 Spec 파일 작성 (`sermonscript-sidecar.spec`).
+  - Tauri binaries 규격(`sermonscript-sidecar-x86_64-pc-windows-msvc.exe`)에 맞춰 백그라운드 사이드카 및 약 305MB 용량의 의존 DLL(6000여 개 리소스) 자동 복사 및 연동 완료.
+- **Tauri 보안 및 파이프라인 연동**:
+  - `tauri.conf.json` 내 `externalBin` 사이드카 맵핑 및 빌드 포트(1420), 리액트 웹서버 상대 경로 연계 완료.
+  - `Cargo.toml`에 `tauri-plugin-shell = "2"` 의존성 탑재 및 `capabilities/default.json`에 `"shell:default"` 권한을 승인하는 보안 화이트리스트 셋업 완료.
+  - `src/lib.rs` 내에서 백그라운드 사이드카를 비동기적으로 스폰하여 STDOUT/STDERR의 실시간 스트림 출력을 React UI 단방향 이벤트(`sidecar-stdout` / `sidecar-stderr`)로 방출하는 비동기 Rust 커맨드 `run_sermonscript_sidecar` 완성.
+- **버전 관리 및 트래킹 제외 정책**:
+  - `frontend/src-tauri/.gitignore` 파일에 빌드 아티팩트 및 대용량 binaries 폴더(`/binaries/`)를 추가하여, 300MB 이상의 대형 정적 바이너리가 소스 코드 Git 저장소에 커밋되지 않도록 미연에 방지.
+
+### Tests
+- `npm run tauri dev` 최초 실행 시 Rust 컴파일 371개 크레이트 링킹 및 Vite 로컬 서버 기동 100% 성공 확인.
+- Tauri 데스크톱 애플리케이션 프레임 윈도우가 Windows 환경에서 무사히 로딩되는지 수동 기동 수치 검증.
+
 ## Unreleased - 2026-05-20 (Feature: Korean Jamo-based Fuzzy Matching)
 
 ### Added

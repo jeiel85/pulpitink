@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (구현 #13 — Tauri + React 하이브리드 아키텍처 대전환 1차 기동 성공)
+- 작업: PySide6의 시각적 한계 및 미디어 인터랙션의 어려움을 해소하고 프리미엄급 UX를 확보하기 위해, 기존의 견고한 Python Core(CLI/Services) 엔진을 PyInstaller 기반의 백그라운드 사이드카(`sermonscript-sidecar`)로 패키징하고, UI는 Tauri 2.0 (Rust) + React (TypeScript + Vite) 하이브리드 아키텍처로 대전환 및 1차 로컬 컴파일/기동 성공.
+- 변경 파일:
+  - docs/design/tauri-hybrid-architecture.md (신규: 아키텍처 설계서)
+  - sermonscript-sidecar.spec (신규: PySide6 모듈 제외 및 Jamo 모듈 최적화된 사이드카 PyInstaller Spec)
+  - frontend/ (신규: React + TypeScript + Vite + Tauri 2.0 프론트엔드 환경)
+  - frontend/src-tauri/tauri.conf.json (Tauri 설정, externalBin 사이드카 연동 및 capabilities 화이트리스트 셋업)
+  - frontend/src-tauri/Cargo.toml (Tauri Shell 플러그인 의존성 연동)
+  - frontend/src-tauri/capabilities/default.json (Shell 권한 부여)
+  - frontend/src-tauri/src/lib.rs (Rust 측 비동기 run_sermonscript_sidecar 커맨드 및 실시간 스트림 파이프 구현)
+  - frontend/src-tauri/.gitignore (사이드카 대용량 바이너리 폴더 `/binaries/` 트래킹 제외 처리)
+- 검증:
+  - `pyinstaller --clean -y sermonscript-sidecar.spec` 성공 및 `dist/sermonscript-sidecar/` 생성 확인.
+  - 사이드카를 Tauri 규격(`sermonscript-sidecar-x86_64-pc-windows-msvc.exe`) 및 의존 DLL과 함께 `frontend/src-tauri/binaries/`로 전송 완료.
+  - `npm run tauri dev` 로컬 구동 시 Rust 및 Vite 컴파일 100% 성공 및 GUI 프레임 기동 수동 검증 성공.
+- 결과: 하이브리드 대전환을 위한 뼈대 셋업 및 링킹, 1차 기동 완료.
+- 후속 작업:
+  - React + Tailwind CSS UI 다크모드 및 프리미엄 에디션 레이아웃 컴포넌트 탑재.
+  - UI단에서 사이드카 IPC를 호출하여 전처리, STT, 원문 대조 로직 연동 및 E2E 통신 유효성 최종 입증.
+
 ## 2026-05-20 (구현 #12 — jamo fuzzy matching 통합 및 검증)
 - 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의 설계 및 구현 완료. 한글 NFD 자모 분해 및 초성 가중 평균 기반의 Hybrid Scorer를 탑재한 Fuzzy 매칭 알고리즘을 `CorrectionEngine`에 연동. CLI 옵션(`--fuzzy/--no-fuzzy`, `--fuzzy-threshold`) 및 PySide6 GUI(체크박스, 더블 스핀박스)로 완전 노출 및 영속화 파이프라인 통합.
 - 변경 파일:
