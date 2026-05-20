@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-20 (핸드오프 정리 — 다음 작업 후보)
+- 작업: 최신 CI/릴리즈 검증 상태와 이전 세션의 남은 기능 후보를 확인하고, 다음 세션에서 이어받기 쉬운 우선순위 목록을 `docs/roadmap-tasks.md` 상단에 정리.
+- 변경 파일:
+  - docs/roadmap-tasks.md
+  - HISTORY.md
+- 검증:
+  - `gh run list --limit 12`: 최신 `Test` 성공, 최신 `Build Windows Portable` 수동 실행 성공 확인
+  - `gh run view 26146847983`: `SermonScript-Portable` artifact 업로드 확인
+  - 코드 변경 없음 — 테스트/린트는 실행하지 않음
+- 결과: 다음 세션 후보를 CSV Export, 캐시 삭제/작업 삭제 UX, 최근 작업 기록 비활성화, Jamo fuzzy 문서 정리, 오디오 싱크 플레이어, 다중 작업 큐, `frontend/` 산출물 정책 순으로 정리.
+- 후속 작업:
+  - 다음 세션에서 1순위 후보인 CSV Export부터 구현 검토
+  - `frontend/` untracked 산출물의 보존/분리/정리 정책 결정
+
 ## 2026-05-20 (CI Hotfix #14 — Windows 빌드 workflow spec 누락)
 - 작업: 핸드오프 후속 항목 중 GitHub Actions `build-windows.yml` 검증을 진행하고, 수동 실행 실패 원인을 수정.
 - 변경 파일:

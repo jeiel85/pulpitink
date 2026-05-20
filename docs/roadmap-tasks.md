@@ -1,5 +1,52 @@
 # Roadmap Tasks
 
+## Next Session Candidates (2026-05-20)
+
+현재 `main` 기준 릴리즈 검증은 대부분 완료된 상태입니다. 최신 확인 결과:
+
+- GitHub Actions `Test`: 성공 (`fix: Windows 빌드 spec 파일 추적`)
+- GitHub Actions `Build Windows Portable`: 수동 실행 성공, artifact `SermonScript-Portable` 업로드 확인
+- 로컬 기록: `ruff check .`, `pytest 91/91`, `sermonscript doctor`, `scripts/build_windows.ps1 -SkipChecks` 통과
+- 주의: `Build Windows Portable`의 태그 푸시 트리거는 아직 별도 검증 흔적이 없습니다.
+- 주의: 작업트리에 untracked `frontend/` 산출물이 남아 있습니다. 다음 작업자가 보존/분리/정리 정책을 먼저 확인해야 합니다.
+
+다음 세션에서 바로 잡기 좋은 기능 후보:
+
+1. [ ] CSV Export 추가
+   - 근거: `docs/product-spec.md`는 TXT, Markdown, SRT, VTT, JSON, CSV 출력을 목표로 적고 있으나 현재 구현은 TXT/JSON/MD/SRT/VTT 5종입니다.
+   - 범위: `core.export`에 CSV exporter 추가, CLI/GUI 기본 포맷 반영 여부 결정, 단위 테스트 추가, README/사용자 가이드 갱신.
+   - 추천도: 높음. 작고 명확하며 제품 명세와 실제 구현의 차이를 줄입니다.
+
+2. [ ] 캐시 삭제 / 작업 삭제 UX 보강
+   - 근거: 릴리즈 체크리스트의 `캐시 삭제 동작 확인`이 남아 있고, 현재 DB cascade 삭제 테스트는 있으나 사용자 관점의 캐시 정리 흐름이 약합니다.
+   - 범위: CLI `jobs delete` 또는 `cache clean` 후보 검토, 작업별 `cache/jobs/<job_id>` 삭제, 안전 확인 메시지, 테스트 추가.
+   - 주의: 사용자 데이터 삭제 가능성이 있으므로 삭제 범위와 확인 절차를 보수적으로 설계해야 합니다.
+
+3. [ ] 최근 작업 기록 비활성화 옵션
+   - 근거: `docs/known-limitations.md`에 v1.x 후속 작업으로 명시되어 있고 개인정보/프라이버시 성격이 있습니다.
+   - 범위: settings 스키마에 최근 작업 표시/저장 옵션 추가, GUI 최근 작업 패널 동작 조정, 문서 갱신.
+   - 추천도: 중간 이상. 릴리즈 후 사용자 신뢰에 도움이 됩니다.
+
+4. [ ] Jamo fuzzy 문서 상태 정리
+   - 근거: `docs/design/jamo-fuzzy-matching.md`는 아직 "구현 미착수 / v1.x 후속"으로 적혀 있지만 실제 구현은 완료되어 있습니다.
+   - 범위: 설계 노트를 구현 완료 상태로 갱신하고, 남은 한계(짧은 2글자 단어 false positive/미검출)를 후속 항목으로 분리합니다.
+   - 추천도: 중간. 기능 추가는 아니지만 다음 작업자의 혼선을 줄입니다.
+
+5. [ ] 오디오 싱크 플레이어
+   - 근거: `docs/known-limitations.md`에 편집기 후속 작업으로 명시되어 있습니다.
+   - 범위: 세그먼트 선택 시 해당 구간 재생, 재생/정지, 위치 이동, GUI 검증.
+   - 추천도: 중간. 사용자 가치는 크지만 작업량이 큽니다.
+
+6. [ ] 다중 작업 큐 개선
+   - 근거: GUI는 여러 파일 추가가 가능하지만 변환은 한 번에 한 작업입니다.
+   - 범위: 순차 큐 처리, 완료/실패 상태 표시, 중단/재시도 UX.
+   - 추천도: 중간. 긴 파일 배치 처리 니즈가 커질 때 우선순위가 올라갑니다.
+
+7. [ ] `frontend/` untracked 산출물 정책 결정
+   - 근거: 현재 작업트리에 `frontend/`가 추적되지 않은 상태로 남아 있습니다 (`.vscode`, `dist`, `node_modules`, `src-tauri` 포함).
+   - 범위: 실험 산출물 보존 여부, 별도 브랜치/저장소 분리 여부, `.gitignore` 정책 결정.
+   - 주의: 사용자/이전 세션 산출물일 수 있으므로 임의 삭제하지 않습니다.
+
 ## Phase 0: 저장소 초기화
 
 - [ ] pyproject.toml 작성
