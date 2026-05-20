@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (중장기 로드맵 핵심 구현 및 v0.4.4 패치 릴리즈)
+- 작업: 무음구간 갭 기반 Heuristic 화자 분리(Diarization) 파이프라인 설계 및 CLI/GUI 연동, GUI 편집기 내 "화자" 편집 열(Column) 추가 및 실시간 SQLite DB 영속성 수정 저장 연동, 경량 i18n 번역 프레임워크 설계 및 실시간 영한 UI 토글 구현, yt-dlp 기반 YouTube 비동기 다운로드 및 GUI 저작권 Disclaimer 동의 UI 연동, 관련 단위 테스트(tests/test_diarizer.py, tests/test_youtube.py, tests/test_i18n.py) 9건 보강 완료.
+- 변경 파일:
+  - src/pulpitink/core/postprocess/diarizer.py (신규: 무음구간 기반 HeuristicDiarizer 클래스 구현)
+  - src/pulpitink/cli/main.py (diarize CLI 옵션 매핑 및 TranscribeRequest 전파)
+  - src/pulpitink/services/settings_service.py (Settings 모델 및 SettingsService에 diarize 필드 추가)
+  - src/pulpitink/services/transcribe_service.py (TranscribeRequest에 diarize 필드 추가 및 run_transcribe에서 HeuristicDiarizer 호출 연동)
+  - src/pulpitink/storage/job_repository.py (update_segment_text에서 sqlite segments 테이블의 speaker 컬럼 업데이트 지원 구현)
+  - src/pulpitink/ui/main_window.py (변환 설정 창 내 화자 분리 사용 체크박스 UI 추가, 설정 저장 및 실행 시 전파)
+  - src/pulpitink/ui/transcript_editor.py (세그먼트 테이블 컬럼 6개 확장, 화자 편집 열 추가, 실시간 셀 수정 이벤트 발생 시 DB _persist_segment 연동, search/scroll 타겟 컬럼 인덱스 보정)
+  - tests/test_diarizer.py (신규: HeuristicDiarizer 유닛 테스트 3건 추가)
+  - tests/test_youtube.py (신규: yt-dlp 패키지 유무별 안전 가드 및 YouTube 다운로더 유닛 테스트 2건 추가)
+  - tests/test_i18n.py (신규: 경량 번역 전역 언어 설정 및 tr() 번역 유닛 테스트 4건 추가)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.4 및 릴리즈 이력 작성)
+- 검증:
+  - `python -m ruff check .`: PASS (All checks passed!)
+  - `python -m pytest`: 110/110 PASS (신규 추가된 유닛 테스트 9건 포함 전체 100% 통과 완료)
+  - `python -m pulpitink.cli.main doctor`: PASS (환경 진단 전체 OK)
+- 결과: 성공. 중장기 핵심 기능(화자 분리, YouTube 다운로드, 다국어 i18n 번역 구조)을 일괄적으로 완성하고, 완벽한 유닛 테스트 검증 하에 v0.4.4 패치 릴리즈 출시 준비 완료.
+
 ## 2026-05-20 (단기 개선 및 v0.4.3 브랜드 패치 릴리즈)
 - 작업: PulpitInk 프리미엄 고유 로고 아이콘 설계 및 빌드(PyInstaller Spec) 바인딩, 자모 Fuzzy 매칭 2글자 오탐 제어용 Stop-words 가드 설계/구현 및 유닛 테스트 추가, 0.4.3 패치 버전 릴리즈.
 - 변경 파일:

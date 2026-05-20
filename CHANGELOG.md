@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## [0.4.4] - 2026-05-20
+
+### Added
+- **Heuristic 화자 분리(Diarization) 파이프라인 구현**: 무음구간 갭(gap > 1.5s) 기반 `HeuristicDiarizer`를 구현하고, CLI `--diarize` 옵션 및 GUI 변환 설정 체크박스를 연동하여 STT 변환 시 자동으로 화자 태그("화자 1", "화자 2")가 분리되어 할당되도록 구축하였습니다.
+- **GUI 편집기 화자 열 연동 및 영속성 저장**: `TranscriptEditorWidget`에 "화자" 편집 열(Column)을 추가하여 사용자가 테이블에서 직접 화자를 수정할 수 있게 하고, 수정 시 즉시 SQLite DB의 `segments` 테이블 내 `speaker` 컬럼에 실시간으로 영속화되도록 연동하였습니다.
+- **경량 i18n 번역 프레임워크 구축**: `src/pulpitink/core/utils/i18n.py`에 경량 영한 번역 Dictionary 및 실시간 UI retranslate 기능을 구현하여, GUI "인터페이스 언어" 변경 시 실시간으로 영한 UI 언어가 매끄럽게 토글되도록 구축하였습니다.
+- **YouTube URL 비동기 다운로드 및 저작권 Disclaimer UI**: `yt-dlp` 기반의 비동기 오디오 다운로드 파이프라인을 구축하고, GUI 메인 화면에 "YouTube 주소 추가" 버튼 및 저작권 Disclaimer 동의 팝업 창을 추가하여, 동의 후 URL 입력 시 백그라운드 워커 스레드에서 무정지 비동기 다운로드 및 STT 변환이 순차 진행되도록 연동하였습니다.
+
+### Tests
+- `tests/test_diarizer.py`를 신규 추가하여 무음구간 기반 화자 전환 및 예외/빈 입력 처리를 검증하는 단위 테스트 3건 작성 완료.
+- `tests/test_youtube.py`를 신규 추가하여 `yt-dlp` 라이브러리 존재 여부별 안전 폴백 및 Mock 기반 비동기 오디오 다운로드 정확도를 검증하는 단위 테스트 2건 작성 완료.
+- `tests/test_i18n.py`를 신규 추가하여 전역 언어 설정 전환 및 번역/폴백 매핑 정확도를 검증하는 단위 테스트 4건 작성 완료.
+- `python -m pytest`: 110/110 PASS (총 110개 테스트 완료)
+- `python -m ruff check .`: PASS
+
 ## [0.4.3] - 2026-05-20
 
 ### Added
