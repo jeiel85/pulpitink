@@ -1,5 +1,23 @@
 # Decision Log
 
+## 2026-05-20: 앱 정식 명칭 확정 — 설교필기 (PulpitInk)
+
+결정:
+- 한글 정식 명칭: **설교필기**
+- 영문 정식 명칭: **PulpitInk**
+- 브랜드 컨셉: "설교단(Pulpit)의 잉크(Ink)" — 설교 특화 데스크톱 STT 앱
+
+근거:
+- 5개 후보(말씀필사/VoiceQuill, 소리글/SoriScript, 음성기록관/ScribeFlow, 설교필기/PulpitInk, 하늘소리/CelestialVox)에 대해 브랜드 충돌 조사를 실시했습니다.
+- VoiceQuill(iOS STT 앱), 소리글AI(회의 녹음 앱), ScribeFlow(5개 이상 서비스), CelestialVox(Google Play 기도문 앱)는 동일/유사 도메인에서 활성 브랜드가 존재하여 탈락.
+- PulpitInk는 팟캐스트 에피소드 제목 구문 일부로만 등장하며, 소프트웨어 제품으로는 미사용 확인.
+- "설교필기"를 앱 이름으로 사용하는 제품 없음.
+- 개발자 관점에서 실용적이고 앱 목적을 명확히 전달하는 이름으로 선택.
+
+구현 계획:
+- 상세 변경 대상 및 절차는 `docs/branding-rename-plan.md` 참조.
+- 후속 세션에서 일괄 반영 예정.
+
 ## 2026-05-20: 태그 기반 GitHub Release 자동화
 
 결정:
