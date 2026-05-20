@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Documentation: GitHub landing page)
+
+### Changed
+- `README.md`를 GitHub 랜딩 페이지 역할에 맞게 갱신했습니다.
+  사용자가 제공한 랜딩 이미지를 상단에 배치하고, 현재 구현된 GUI/CLI/STT/편집/Export/배포 상태를 기준으로 빠른 시작과 기능표를 정리했습니다.
+- 프로젝트 메타데이터의 GitHub URL을 실제 저장소인 `https://github.com/jeiel85/sermon-script`로 정정했습니다.
+
+### Added
+- `docs/assets/sermonscript-landing.png` 랜딩 이미지를 추가했습니다.
+
 ## [0.3.0] - 2026-05-20
 
 ### Added

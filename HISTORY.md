@@ -1,5 +1,22 @@
 # HISTORY.md
 
+## 2026-05-20 (문서 — GitHub 랜딩/README 최신화)
+- 작업: 현재 `main` 기준 기능 범위와 사용자가 제공한 랜딩 이미지를 반영해 GitHub README 첫 화면을 최신화하고, 저장소 메타데이터와 맞도록 프로젝트 URL을 정정.
+- 변경 파일:
+  - README.md (랜딩 이미지, 배지, 핵심 기능표, GUI/CLI 빠른 시작, 프라이버시/배포 안내 갱신)
+  - docs/assets/sermonscript-landing.png (사용자 제공 랜딩 이미지 추가)
+  - pyproject.toml (GitHub URL을 `jeiel85/sermon-script`로 정정)
+  - CHANGELOG.md
+  - HISTORY.md
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 95/95 PASS
+  - `python -m sermonscript.cli.main doctor`: PASS
+  - `gh repo view jeiel85/sermon-script --json description,homepageUrl,repositoryTopics,url`: description/homepage/topics 반영 확인
+- 결과: 성공
+- 후속 작업:
+  - GitHub 저장소 social preview 이미지는 웹 UI/추가 API 권한이 필요하면 별도 확인
+
 ## 2026-05-20 (배포 규칙 정비 — GitHub Release 자동화)
 - 작업: 참고 프로젝트 `D:\Project\claude-usage-tray-windows`의 태그 기반 릴리즈 흐름을 참고해 SermonScript Windows 배포 규칙을 정비.
 - 변경 파일:
@@ -13,10 +30,13 @@
   - `python -m pytest`: 95/95 PASS
   - `python -m sermonscript.cli.main doctor`: PASS
   - PyYAML 기반 workflow 파일 파싱: PASS (`build-windows.yml`, `test.yml`)
-  - 태그 push 후 GitHub Actions 릴리즈 생성 확인 예정
-- 결과: 로컬 검증 통과. 실제 태그 배포 검증 대기.
+  - GitHub Actions `Test` (`main`): PASS (`26149646461`)
+  - GitHub Actions `Test` (`v0.3.0`): PASS (`26149651698`)
+  - GitHub Actions `Build Windows Portable` (`v0.3.0`): PASS (`26149651701`)
+- 결과: `v0.3.0` GitHub Release 생성 완료. 첨부 파일 `SermonScript_Portable_0.3.0.zip`, `SHA256SUMS.txt` 업로드 확인.
 - 후속 작업:
-  - `v0.3.0` 태그 push로 실제 배포 검증
+  - GitHub Actions Node.js 20 deprecation 경고 대응
+  - `windows-latest`가 `windows-2025-vs2026`으로 전환되는 공지 추적
 
 ## 2026-05-20 (기능 추가 — CSV Export 지원)
 - 작업: `docs/product-spec.md`에 명시된 CSV 출력을 실제로 지원. core.export에 CSV exporter 추가하고 CLI/GUI/서비스 기본 포맷에 포함.
