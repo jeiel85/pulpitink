@@ -53,3 +53,14 @@ def test_resolved_paths_default_to_app_paths() -> None:
     cache = settings.resolved_model_cache_dir()
     assert out.name == "exports"
     assert cache.name == "models"
+
+
+def test_update_coerces_keep_history(tmp_path: Path) -> None:
+    svc = SettingsService(tmp_path / "settings.json")
+    assert svc.load().keep_history is True
+    svc.update(keep_history="false")
+    assert svc.load().keep_history is False
+    svc.update(keep_history="1")
+    assert svc.load().keep_history is True
+    svc.update(keep_history=False)
+    assert svc.load().keep_history is False

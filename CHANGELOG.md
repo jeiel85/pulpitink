@@ -1,5 +1,27 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Feature: Delete UX & Privacy Control & Doc Alignment)
+
+### Added
+- **작업/캐시 삭제 기능 보강 (Delete UX)**:
+  - CLI `jobs delete <job_id>` 명령어 추가: 지정된 작업 ID의 DB 데이터와 캐시 오디오 디렉터리(`cache/jobs/<job_id>`)를 재확인 절차를 거쳐 영구 연쇄 삭제합니다.
+  - CLI `jobs clean-cache` 명령어 추가: DB 내 활성 작업 목록과 대조하여 등록되지 않은 방치 캐시 디렉터리(고스트 캐시)만 안전하게 일괄 정리합니다.
+  - GUI 최근 작업 목록(`recent_list`)에 우클릭 컨텍스트 메뉴 및 "작업 및 캐시 삭제" 액션 추가: `QMessageBox` 대화상자로 안전하게 재확인 후 DB 레코드와 물리 캐시를 연쇄 삭제 처리하고 목록을 자동 갱신합니다.
+- **최근 작업 기록 저장 비활성화 옵션 (Privacy Control)**:
+  - `Settings` 데이터클래스에 `keep_history` (기본값: True) 필드를 탑재하고 JSON 설정 파일 연동 및 형변환 가드 처리를 추가했습니다.
+  - STT 변환 시(`run_transcribe`), `keep_history`가 False이면 `persist` 매개변수를 강제 비활성화하여 DB 영속화 저장을 전면 우회하도록 처리했습니다.
+  - GUI 설정 그룹에 "최근 작업 기록 저장 및 표시" 체크박스 위젯을 추가하여 즉시 저장 및 리프레시되도록 했습니다. 기능 비활성화 시 목록에 고지 문구 노출 및 컨텍스트 메뉴 진입을 차단합니다.
+
+### Changed
+- **Jamo Fuzzy 매칭 문서 상태 갱신 (Doc Alignment)**:
+  - `docs/design/jamo-fuzzy-matching.md` 설계 노트의 상태를 `구현 완료 (v1.0 완비)`로 변경하고 6절에 2글자 단어 한계와 임계값 0.75~0.80 상향 조정 가이드를 보완했습니다.
+
+### Tests
+- `tests/test_settings_service.py`에 `keep_history` 형변환 및 역직렬화 단위 테스트 추가.
+- `tests/test_transcribe_persistence.py`에 `keep_history`가 False일 때 DB 트랜잭션 및 영속화를 생략하는지에 대한 Mocking 기반 통합 테스트 추가.
+- `python -m pytest`: 97/97 PASS
+- `python -m ruff check .`: PASS
+
 ## Unreleased - 2026-05-20 (Branding: 설교필기 PulpitInk 전체 리네이밍)
 
 ### Changed

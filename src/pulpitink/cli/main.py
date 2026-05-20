@@ -376,6 +376,100 @@ def jobs_export(
         console.print(f"  • {path}")
 
 
+@jobs_app.command("delete")
+def jobs_delete(
+    job_id: str = typer.Argument(..., help="삭제할 작업 ID"),
+    yes: bool = typer.Option(
+        False, "--yes", "-y", help="확인 메세지를 생략하고 즉시 삭제합니다."
+    ),
+    cache_root: Path = typer.Option(
+        Path("cache") / "jobs",
+        "--cache-root",
+        help="전처리 결과(processed.wav)가 저장되어 있는 cache/jobs 경로",
+    ),
+) -> None:
+    """특정 작업 데이터와 해당 캐시 파일을 완전히 삭제합니다."""
+    conn, repo = _open_repo()
+    try:
+        job = repo.get_job(job_id)
+        if job is None:
+            console.print(f"[red]오류: ID가 '{job_id}'인 작업을 찾을 수 없습니다.[/red]")
+            raise typer.Exit(code=1)
+
+        if not yes:
+            confirm = typer.confirm(
+                f"정말로 작업 '{job.title}' ({job_id})의 모든 데이터와 캐시 오디오를 삭제하시겠습니까?"
+            )
+            if not confirm:
+                console.print("삭제 작업을 취소했습니다.")
+                return
+
+        # 1. DB에서 작업 삭제 (cascade 제약에 의해 segments, exports 등도 삭제됨)
+        repo.delete_job(job_id)
+        console.print(f"[green]작업 '{job_id}'의 DB 레코드가 성공적으로 삭제되었습니다.[/green]")
+
+        # 2. 캐시 디렉터리 삭제
+        import shutil
+        job_cache_dir = (cache_root / job_id).resolve()
+        if job_cache_dir.exists() and job_cache_dir.is_dir():
+            shutil.rmtree(job_cache_dir)
+            console.print(f"[green]캐시 디렉터리 '{job_cache_dir}'가 성공적으로 삭제되었습니다.[/green]")
+        else:
+            console.print(f"[yellow]알림: 캐시 디렉터리 '{job_cache_dir}'가 존재하지 않아 삭제를 생략합니다.[/yellow]")
+
+    finally:
+        conn.close()  # type: ignore
+
+
+@jobs_app.command("clean-cache")
+def jobs_clean_cache(
+    yes: bool = typer.Option(
+        False, "--yes", "-y", help="확인 메세지를 생략하고 즉시 삭제합니다."
+    ),
+    cache_root: Path = typer.Option(
+        Path("cache") / "jobs",
+        "--cache-root",
+        help="전처리 결과(processed.wav)가 저장되어 있는 cache/jobs 경로",
+    ),
+) -> None:
+    """DB에 등록되어 있지 않은 작업 캐시 디렉터리를 포함해 모든 캐시 디렉터리를 일괄 정리합니다."""
+    # DB에 등록되어 있는 모든 job_id 목록 구하기
+    conn, repo = _open_repo()
+    try:
+        jobs = repo.list_jobs(limit=10000)
+        active_job_ids = {j.id for j in jobs}
+    finally:
+        conn.close()  # type: ignore
+
+    if not cache_root.exists() or not cache_root.is_dir():
+        console.print(f"[yellow]알림: 캐시 디렉터리 '{cache_root}'가 존재하지 않습니다.[/yellow]")
+        return
+
+    import shutil
+    # cache_root의 자식 폴더들 중 DB에 없는 것만 탐색
+    subdirs = [p for p in cache_root.iterdir() if p.is_dir() and p.name not in active_job_ids]
+    if not subdirs:
+        console.print("[green]정리할 미등록(고스트) 캐시 디렉터리가 없습니다.[/green]")
+        return
+
+    console.print(f"발견된 미등록 캐시 폴더 개수: {len(subdirs)}개")
+    if not yes:
+        confirm = typer.confirm("DB에 등록되지 않은 모든 작업 캐시 폴더를 정말로 삭제하시겠습니까?")
+        if not confirm:
+            console.print("캐시 정리를 취소했습니다.")
+            return
+
+    deleted_count = 0
+    for subdir in subdirs:
+        try:
+            shutil.rmtree(subdir)
+            deleted_count += 1
+        except Exception as e:
+            console.print(f"[red]오류: '{subdir.name}' 폴더 삭제 실패: {e}[/red]")
+
+    console.print(f"[green]총 {deleted_count}개의 캐시 디렉터리를 성공적으로 정리했습니다.[/green]")
+
+
 @settings_app.command("show")
 def settings_show() -> None:
     """현재 저장된 사용자 설정을 표시합니다."""

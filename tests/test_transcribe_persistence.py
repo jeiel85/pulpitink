@@ -184,3 +184,26 @@ def test_run_transcribe_persists_validation_failure(tmp_path: Path) -> None:
         jobs = JobRepository(conn).list_jobs(limit=5)
         assert len(jobs) == 1
         assert jobs[0].status == "failed"
+
+
+def test_run_transcribe_skips_persistence_when_keep_history_is_false(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    request, db = _build_request(tmp_path)
+    fake_settings_path = tmp_path / "settings.json"
+    fake_settings_path.write_text('{"keep_history": false}', encoding="utf-8")
+
+    import pulpitink.services.settings_service
+    monkeypatch.setattr(pulpitink.services.settings_service, "settings_path", lambda: fake_settings_path)
+
+    result = run_transcribe(
+        request,
+        engine=_StubEngine(),
+        ffmpeg=_StubFFmpeg(),
+        persist=True,
+        db_path=db,
+    )
+
+    if db.exists():
+        with connect(db) as conn:
+            repo = JobRepository(conn)
+            job = repo.get_job(result.job_id)
+            assert job is None

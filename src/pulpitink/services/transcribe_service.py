@@ -314,6 +314,14 @@ def run_transcribe(
 
     started = time.monotonic()
 
+    from pulpitink.services.settings_service import SettingsService
+    try:
+        settings = SettingsService().load()
+        if not settings.keep_history:
+            persist = False
+    except Exception:  # noqa: BLE001
+        pass
+
     def emit(msg: str) -> None:
         logger.info(msg)
         if progress is not None:

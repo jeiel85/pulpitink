@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPlainTextEdit,
     QProgressBar,
@@ -103,6 +104,8 @@ class MainWindow(QMainWindow):
         left.addWidget(QLabel("최근 작업 (DB)"))
         self.recent_list = QListWidget()
         self.recent_list.itemSelectionChanged.connect(self._on_recent_selected)
+        self.recent_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.recent_list.customContextMenuRequested.connect(self._show_recent_context_menu)
         left.addWidget(self.recent_list, 1)
 
         # Right column: options + run + tabs
@@ -193,6 +196,11 @@ class MainWindow(QMainWindow):
         self.fuzzy_spin.setEnabled(self._settings.fuzzy_matching_enabled)
         self.fuzzy_checkbox.toggled.connect(self.fuzzy_spin.setEnabled)
         form.addRow("Fuzzy 임계값", self.fuzzy_spin)
+
+        self.history_checkbox = QCheckBox("최근 작업 기록 저장 및 표시")
+        self.history_checkbox.setChecked(self._settings.keep_history)
+        self.history_checkbox.toggled.connect(self._on_history_toggled)
+        form.addRow("작업 기록", self.history_checkbox)
 
         group.setLayout(form)
         return group
@@ -378,6 +386,12 @@ class MainWindow(QMainWindow):
 
     def _refresh_recent_jobs(self) -> None:
         self.recent_list.clear()
+        if not self._settings.keep_history:
+            item = QListWidgetItem("(최근 작업 기록 기능이 비활성화되었습니다)")
+            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEnabled)
+            self.recent_list.addItem(item)
+            return
+
         try:
             initialise_database()
             with connect() as conn:
@@ -418,3 +432,51 @@ class MainWindow(QMainWindow):
             self.editor.load_job(job_id)
         except Exception as exc:  # noqa: BLE001
             self._append_log(f"편집기 로드 실패: {exc}")
+
+    def _on_history_toggled(self, checked: bool) -> None:
+        try:
+            self._settings = self._settings_service.update(keep_history=checked)
+            self._refresh_recent_jobs()
+            self._append_log(f"설정 변경: keep_history={checked}")
+        except Exception as exc:  # noqa: BLE001
+            self._append_log(f"설정 저장 실패: {exc}")
+
+    def _show_recent_context_menu(self, pos: QPoint) -> None:
+        if not self._settings.keep_history:
+            return
+
+        item = self.recent_list.itemAt(pos)
+        if item is None:
+            return
+
+        job_id = item.data(Qt.ItemDataRole.UserRole)
+        if not job_id:
+            return
+
+        menu = QMenu(self)
+        delete_action = menu.addAction("작업 및 캐시 삭제")
+        action = menu.exec(self.recent_list.mapToGlobal(pos))
+        if action == delete_action:
+            confirm = QMessageBox.question(
+                self,
+                "작업 삭제",
+                f"정말로 이 작업({job_id})의 모든 DB 레코드와 전처리된 캐시 오디오 파일을 완전히 삭제하시겠습니까?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if confirm == QMessageBox.StandardButton.Yes:
+                try:
+                    initialise_database()
+                    with connect() as conn:
+                        repo = JobRepository(conn)
+                        repo.delete_job(job_id)
+
+                    import shutil
+                    job_cache_dir = (Path("cache") / "jobs" / job_id).resolve()
+                    if job_cache_dir.exists() and job_cache_dir.is_dir():
+                        shutil.rmtree(job_cache_dir)
+
+                    self._append_log(f"작업 및 캐시 삭제 완료: {job_id}")
+                    self._refresh_recent_jobs()
+                except Exception as exc:  # noqa: BLE001
+                    QMessageBox.warning(self, "오류", f"작업 삭제 중 오류가 발생했습니다:\n{exc}")

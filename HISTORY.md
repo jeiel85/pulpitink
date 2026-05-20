@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (기능 추가 — 캐시/작업 삭제 및 프라이버시 보강)
+- 작업: 캐시 및 작업 삭제 UX 보강 (Delete UX), 최근 작업 기록 비활성화 옵션 (Privacy Control), Jamo Fuzzy 문서 최신화 (Doc Alignment).
+- 변경 파일:
+  - src/pulpitink/cli/main.py (CLI `jobs delete <job_id>` 및 `jobs clean-cache` 명령어 구현)
+  - src/pulpitink/ui/main_window.py (GUI 최근 작업 목록 우클릭 컨텍스트 메뉴로 "작업 및 캐시 삭제" 연계, `keep_history` 연계 체크박스 추가 및 비활성화 문구 리프레시 구현)
+  - src/pulpitink/services/settings_service.py (`Settings` 데이터클래스에 `keep_history: bool` 추가 및 형변환 가드 구현)
+  - src/pulpitink/services/transcribe_service.py (`settings.keep_history`가 False이면 `persist` 생략 처리)
+  - docs/design/jamo-fuzzy-matching.md (구현 완료로 상태 갱신, 2글자 한글 노이즈 한계 및 임계값 상향 우회 가이드 보강)
+  - docs/roadmap-tasks.md (작업 완료 상태 체크리스트 업데이트)
+  - docs/decision-log.md (프라이버시 강화 및 캐시 연쇄 삭제 UX 도입 결정 사안 추가)
+  - tests/test_settings_service.py (keep_history 데이터 타입 형변환 단위 테스트 추가)
+  - tests/test_transcribe_persistence.py (keep_history 비활성화 시 DB 미저장 여부 Mocking 단위 테스트 추가)
+- 검증:
+  - `python -m ruff check .`: All checks passed! (린트 성공)
+  - `python -m pytest`: 97/97 PASS (추가된 신규 테스트 2건 포함 전체 유닛 테스트 100% 통과 완료)
+  - `python -m pulpitink.cli.main doctor`: 환경 진단 도구 전체 항목 OK 확인
+- 결과: 성공. v1.0 릴리즈 완성도를 극대화하는 개인정보 보호 기능과 캐시 찌꺼기 완벽 제거 UX를 CLI와 GUI 모두에 완비함.
+- 후속 작업:
+  - 오디오 싱크 플레이어 및 다중 작업 큐 개선 검토.
+
 ## 2026-05-20 (브랜딩 — 전체 리네이밍 실행)
 - 작업: SermonScript → 설교필기 (PulpitInk) 전체 브랜딩 일괄 반영.
 - 변경 범위: 109개 파일 (774 insertions, 652 deletions)

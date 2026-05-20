@@ -17,20 +17,18 @@
    - 결과: `pytest 95/95`, `ruff check .` 통과
    - 후속(낮은 우선): 짧은 2글자 한글 false positive와 별개로 발견되는 한계 있으면 별도 정리
 
-2. [ ] 캐시 삭제 / 작업 삭제 UX 보강
-   - 근거: 릴리즈 체크리스트의 `캐시 삭제 동작 확인`이 남아 있고, 현재 DB cascade 삭제 테스트는 있으나 사용자 관점의 캐시 정리 흐름이 약합니다.
-   - 범위: CLI `jobs delete` 또는 `cache clean` 후보 검토, 작업별 `cache/jobs/<job_id>` 삭제, 안전 확인 메시지, 테스트 추가.
-   - 주의: 사용자 데이터 삭제 가능성이 있으므로 삭제 범위와 확인 절차를 보수적으로 설계해야 합니다.
+2. [x] 캐시 삭제 / 작업 삭제 UX 보강 (2026-05-20 완료)
+   - 구현: CLI `jobs delete <job_id>` 및 `jobs clean-cache` 명령어 구현.
+   - GUI: 최근 작업 목록 마우스 우클릭 시 컨텍스트 메뉴로 "작업 및 캐시 삭제" 메뉴 추가, `QMessageBox` 최종 확인 후 DB 레코드와 물리 캐시(`cache/jobs/<job_id>`) 연쇄 삭제 처리.
+   - 결과: `pytest` 통과 및 `ruff` 린트 완료.
 
-3. [ ] 최근 작업 기록 비활성화 옵션
-   - 근거: `docs/known-limitations.md`에 v1.x 후속 작업으로 명시되어 있고 개인정보/프라이버시 성격이 있습니다.
-   - 범위: settings 스키마에 최근 작업 표시/저장 옵션 추가, GUI 최근 작업 패널 동작 조정, 문서 갱신.
-   - 추천도: 중간 이상. 릴리즈 후 사용자 신뢰에 도움이 됩니다.
+3. [x] 최근 작업 기록 비활성화 옵션 (2026-05-20 완료)
+   - 구현: settings 스키마에 `keep_history: bool` 추가. 토글 시 즉시 설정 저장 및 최근 작업 목록을 `"(최근 작업 기록 기능이 비활성화되었습니다)"` 고지 처리.
+   - STT: `settings.keep_history`가 False이면 `persist` 매개변수를 오버라이드하여 DB 영속화 과정을 완벽히 생략하도록 우회 처리.
+   - 결과: `test_settings_service.py`, `test_transcribe_persistence.py` 테스트 케이스 추가 및 통과.
 
-4. [ ] Jamo fuzzy 문서 상태 정리
-   - 근거: `docs/design/jamo-fuzzy-matching.md`는 아직 "구현 미착수 / v1.x 후속"으로 적혀 있지만 실제 구현은 완료되어 있습니다.
-   - 범위: 설계 노트를 구현 완료 상태로 갱신하고, 남은 한계(짧은 2글자 단어 false positive/미검출)를 후속 항목으로 분리합니다.
-   - 추천도: 중간. 기능 추가는 아니지만 다음 작업자의 혼선을 줄입니다.
+4. [x] Jamo fuzzy 문서 상태 정리 (2026-05-20 완료)
+   - 작업: `docs/design/jamo-fuzzy-matching.md` 상단 상태를 "구현 완료 (v1.0 완비)"로 최신화하고, 2글자 한글 단어 노이즈 한계 및 임계값 상향 우회 가이드를 6절에 명문화하여 다음 작업자의 혼선 최소화.
 
 5. [ ] 오디오 싱크 플레이어
    - 근거: `docs/known-limitations.md`에 편집기 후속 작업으로 명시되어 있습니다.
