@@ -36,8 +36,13 @@ SUPPORTED_REFERENCE_EXTENSIONS: frozenset[str] = frozenset({".txt", ".md", ".mar
 _BOOK_PATTERN = "(?:" + "|".join(
     re.escape(name) for name in sorted(DEFAULT_BIBLE_BOOKS.keys(), key=len, reverse=True)
 ) + ")"
+# Korean ``장 / 절`` notation: 로마서 1장, 로마서 1장 1절, 로마서 1장 1-15절.
 _BIBLE_REF_RE = re.compile(
     rf"{_BOOK_PATTERN}\s*(\d+)\s*장(?:\s*(\d+)\s*(?:절(?:\s*[-~]\s*(\d+)\s*절)?)?)?"
+)
+# Colon notation common in printed sermon notes: 로마서 3:21, 로마서 3: 21~22.
+_BIBLE_REF_COLON_RE = re.compile(
+    rf"{_BOOK_PATTERN}\s*(\d+)\s*:\s*(\d+)(?:\s*[-~]\s*(\d+))?"
 )
 
 _HANGUL_WORD_RE = re.compile(r"[가-힣]{2,}")
@@ -138,24 +143,45 @@ def _extract_title(text: str, fallback: str) -> str | None:
     return fallback or None
 
 
+def _format_ref(book: str, chapter: str, verse_start: str | None, verse_end: str | None) -> str:
+    if verse_start and verse_end:
+        return f"{book} {chapter}장 {verse_start}-{verse_end}절"
+    if verse_start:
+        return f"{book} {chapter}장 {verse_start}절"
+    return f"{book} {chapter}장"
+
+
 def _extract_bible_refs(text: str) -> list[str]:
+    """Return canonical bible references found in ``text``.
+
+    Accepts both Korean ``장 / 절`` notation and printed colon notation:
+
+    * ``로마서 1장`` / ``로마서 1장 1절`` / ``로마서 1장 1-15절``
+    * ``로마서 3:21`` / ``로마서 3: 21~22`` (sermon notes use either dash)
+
+    All hits are normalised to the ``BOOK C장 S(-E)절`` form so downstream
+    code (corrections, prompt builder) can rely on a single shape.
+    """
+
     found: list[str] = []
+
+    def _push(book: str, chapter: str, vs: str | None, ve: str | None) -> None:
+        ref = _format_ref(book, chapter, vs, ve)
+        if ref not in found:
+            found.append(ref)
+
     for m in _BIBLE_REF_RE.finditer(text):
         book_match = re.match(_BOOK_PATTERN, m.group(0))
         if book_match is None:
             continue
-        book = book_match.group(0)
-        chapter = m.group(1)
-        verse_start = m.group(2)
-        verse_end = m.group(3)
-        if verse_start and verse_end:
-            ref = f"{book} {chapter}장 {verse_start}-{verse_end}절"
-        elif verse_start:
-            ref = f"{book} {chapter}장 {verse_start}절"
-        else:
-            ref = f"{book} {chapter}장"
-        if ref not in found:
-            found.append(ref)
+        _push(book_match.group(0), m.group(1), m.group(2), m.group(3))
+
+    for m in _BIBLE_REF_COLON_RE.finditer(text):
+        book_match = re.match(_BOOK_PATTERN, m.group(0))
+        if book_match is None:
+            continue
+        _push(book_match.group(0), m.group(1), m.group(2), m.group(3))
+
     return found
 
 

@@ -39,6 +39,37 @@ def test_parse_extracts_bible_refs(tmp_path: Path) -> None:
     assert any(ref.startswith("로마서 1장") for ref in parsed.bible_refs)
 
 
+def test_parse_extracts_bible_refs_colon_notation(tmp_path: Path) -> None:
+    """Printed sermon notes frequently write '로마서 3: 21~22' instead of
+    '로마서 3장 21-22절'. Both forms must be normalised to the canonical
+    `BOOK C장 S-E절` shape."""
+
+    text = (
+        "# 로마서 3장 강해\n"
+        "\n"
+        "로마서 3: 21~22 이제는 율법 외에...\n"
+        "또한 창세기 1:1 도 함께 살펴봅니다.\n"
+        "끝으로 요한복음 3:16-17 을 묵상합시다.\n"
+    )
+    p = tmp_path / "sermon.md"
+    p.write_text(text, encoding="utf-8")
+    parsed = parse_reference(p)
+    refs = set(parsed.bible_refs)
+    assert "로마서 3장 21-22절" in refs
+    assert "창세기 1장 1절" in refs
+    assert "요한복음 3장 16-17절" in refs
+
+
+def test_parse_deduplicates_jang_and_colon_overlap(tmp_path: Path) -> None:
+    """When both styles refer to the same passage we keep one canonical entry."""
+
+    text = "로마서 1장 1-15절\n로마서 1:1-15\n"
+    p = tmp_path / "sermon.md"
+    p.write_text(text, encoding="utf-8")
+    parsed = parse_reference(p)
+    assert parsed.bible_refs.count("로마서 1장 1-15절") == 1
+
+
 def test_parse_extracts_proper_nouns(tmp_path: Path) -> None:
     p = tmp_path / "sermon.md"
     p.write_text(SAMPLE_MD, encoding="utf-8")
