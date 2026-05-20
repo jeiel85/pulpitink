@@ -4,6 +4,15 @@
 ``scripts/build_windows.ps1`` (PyInstaller + ZIP), GitHub Actions workflow
 ``build-windows.yml``.
 
+## Release Rule
+
+- 릴리즈 트리거는 `v*` 태그 push 입니다.
+- 태그 버전(`v0.3.0` → `0.3.0`)과 `pyproject.toml` 버전이 다르면 빌드를 중단합니다.
+- GitHub Actions는 Windows Portable ZIP을 빌드하고 `SHA256SUMS.txt`를 생성합니다.
+- 태그 push 빌드가 성공하면 GitHub Release를 자동 생성하고 ZIP + checksum 파일을 첨부합니다.
+- 릴리즈 본문은 `CHANGELOG.md`의 `## [버전] - 날짜` 섹션에서 추출합니다. 섹션이 없으면 기본 문구로 생성됩니다.
+- 수동 실행(`workflow_dispatch`)은 빌드 artifact 검증용이며 GitHub Release를 만들지 않습니다.
+
 ## Code
 
 - [x] `python -m pytest` 통과 (2026-05-20, 91/91)
@@ -38,6 +47,8 @@
 - [x] 산출물 파일명이 `SermonScript_Portable_{version}.zip` 패턴 (2026-05-20, `SermonScript_Portable_0.3.0.zip`)
 - [x] FFmpeg, 모델 파일이 번들에 포함되지 않았는지 확인 (2026-05-20, ZIP 내 `ffmpeg.exe`/`ffprobe.exe` 없음, STT 모델 파일 미발견)
 - [ ] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작
+- [x] GitHub Release 자동 생성 규칙 정의 (2026-05-20, `build-windows.yml`)
+- [x] SHA256 checksum artifact 생성 규칙 정의 (2026-05-20, `SHA256SUMS.txt`)
 - [ ] 앱 아이콘 포함 (선택)
 - [ ] pyproject.toml 버전 업데이트
 - [x] CHANGELOG.md / HISTORY.md 업데이트 (2026-05-20)

@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## [0.3.0] - 2026-05-20
+
+### Added
+- GitHub 태그(`v*`) push 시 Windows Portable ZIP을 빌드한 뒤 GitHub Release를 자동 생성하도록
+  `build-windows.yml`을 정비했습니다.
+- 릴리즈 산출물과 함께 `SHA256SUMS.txt`를 생성해 GitHub Release에 첨부합니다.
+
+### Changed
+- 참고 프로젝트(`claude-usage-tray-windows`)와 동일하게 태그를 릴리즈 트리거로 삼고,
+  릴리즈 본문은 `CHANGELOG.md`의 해당 버전 섹션에서 추출합니다.
+- 태그 버전과 `pyproject.toml` 버전이 다르면 릴리즈 빌드를 중단하도록 검증 단계를 추가했습니다.
+
+### Tests
+- 워크플로우 변경은 GitHub Actions 태그 push에서 검증됩니다.
+
 ## Unreleased - 2026-05-20 (Release validation)
 
 ### Fixed

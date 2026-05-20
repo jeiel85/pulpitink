@@ -12,7 +12,7 @@ on:
         default: ""
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -27,6 +27,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Validate tag version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $tagVersion = "${{ github.ref_name }}".TrimStart("v")
+          $pyproject = Get-Content "pyproject.toml" -Raw
+          $match = [regex]::Match($pyproject, '(?m)^\s*version\s*=\s*"([^"]+)"')
+          if (-not $match.Success) {
+            throw "Could not detect version from pyproject.toml."
+          }
+          $projectVersion = $match.Groups[1].Value
+          if ($tagVersion -ne $projectVersion) {
+            throw "Tag version $tagVersion does not match pyproject.toml version $projectVersion."
+          }
+
       - name: Install FFmpeg (build-time only — not bundled)
         shell: pwsh
         run: choco install -y ffmpeg --no-progress
@@ -40,10 +55,69 @@ jobs:
           }
           ./scripts/build_windows.ps1 @extra
 
+      - name: Generate SHA256 checksums
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem "dist" -Filter "SermonScript_Portable_*.zip" -File
+          if ($files.Count -eq 0) {
+            throw "No portable ZIP found under dist/."
+          }
+          $lines = foreach ($file in $files) {
+            $hash = (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($file.Name)"
+          }
+          $lines | Set-Content -Path "dist/SHA256SUMS.txt" -Encoding ASCII
+          Get-Content "dist/SHA256SUMS.txt"
+
       - name: Upload portable ZIP
         uses: actions/upload-artifact@v4
         with:
           name: SermonScript-Portable
-          path: dist/SermonScript_Portable_*.zip
+          path: |
+            dist/SermonScript_Portable_*.zip
+            dist/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download portable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SermonScript-Portable
+          path: artifacts/
+
+      - name: Extract changelog for this version
+        id: changelog
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES="$(awk -v version="$VERSION" '
+            $0 ~ "^## \\[" version "\\]" { capture=1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' CHANGELOG.md)"
+          if [ -z "$NOTES" ]; then
+            NOTES="Release ${GITHUB_REF_NAME}"
+          fi
+          {
+            echo "NOTES<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.NOTES }}
+          files: |
+            artifacts/SermonScript_Portable_*.zip
+            artifacts/SHA256SUMS.txt

@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-05-20: 태그 기반 GitHub Release 자동화
+
+결정:
+- Windows 배포는 `v*` 태그 push를 단일 릴리즈 트리거로 사용합니다.
+- GitHub Actions가 Portable ZIP을 빌드하고 `SHA256SUMS.txt`를 생성한 뒤 GitHub Release에 첨부합니다.
+- 태그 버전과 `pyproject.toml` 버전이 다르면 릴리즈를 중단합니다.
+
+근거:
+- 참고 프로젝트 `claude-usage-tray-windows`처럼 태그가 배포 의도를 명확히 표현합니다.
+- GitHub Release 산출물과 checksum을 같은 자동화 경로에서 만들면 수동 업로드 누락을 줄일 수 있습니다.
+- 버전 불일치 검증으로 앱 내부 버전, ZIP 파일명, 릴리즈 태그의 혼선을 방지합니다.
+
 ## 2026-05-20: PC 데스크톱 우선
 
 결정:

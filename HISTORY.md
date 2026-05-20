@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-20 (배포 규칙 정비 — GitHub Release 자동화)
+- 작업: 참고 프로젝트 `D:\Project\claude-usage-tray-windows`의 태그 기반 릴리즈 흐름을 참고해 SermonScript Windows 배포 규칙을 정비.
+- 변경 파일:
+  - .github/workflows/build-windows.yml (태그 버전 검증, SHA256SUMS 생성, GitHub Release 자동 생성)
+  - docs/release/release-checklist.md (릴리즈 규칙 명문화)
+  - docs/decision-log.md (태그 기반 릴리즈 자동화 결정 기록)
+  - CHANGELOG.md (`0.3.0` 릴리즈 섹션 추가)
+  - HISTORY.md
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 95/95 PASS
+  - `python -m sermonscript.cli.main doctor`: PASS
+  - PyYAML 기반 workflow 파일 파싱: PASS (`build-windows.yml`, `test.yml`)
+  - 태그 push 후 GitHub Actions 릴리즈 생성 확인 예정
+- 결과: 로컬 검증 통과. 실제 태그 배포 검증 대기.
+- 후속 작업:
+  - `v0.3.0` 태그 push로 실제 배포 검증
+
 ## 2026-05-20 (기능 추가 — CSV Export 지원)
 - 작업: `docs/product-spec.md`에 명시된 CSV 출력을 실제로 지원. core.export에 CSV exporter 추가하고 CLI/GUI/서비스 기본 포맷에 포함.
 - 변경 파일:
