@@ -8,13 +8,23 @@ from __future__ import annotations
 
 import unicodedata
 from collections.abc import Iterable
+from difflib import SequenceMatcher
 
-from rapidfuzz import fuzz
+try:
+    from rapidfuzz import fuzz
+except ImportError:  # pragma: no cover - exercised in CI without [reference]
+    fuzz = None
 
 CHO_TABLE: tuple[str, ...] = (
     "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ",
     "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"
 )
+
+
+def _ratio(a: str, b: str) -> float:
+    if fuzz is not None:
+        return fuzz.ratio(a, b) / 100.0
+    return SequenceMatcher(None, a, b).ratio()
 
 
 def jamo_seq(text: str) -> str:
@@ -54,8 +64,8 @@ def hybrid_similarity(a: str, b: str, weights: tuple[float, float] = (0.6, 0.4))
     if not jamo_a and not jamo_b:
         return 0.0
 
-    ratio_score = fuzz.ratio(jamo_a, jamo_b) / 100.0
-    cho_score = fuzz.ratio(cho_a, cho_b) / 100.0
+    ratio_score = _ratio(jamo_a, jamo_b)
+    cho_score = _ratio(cho_a, cho_b)
 
     return weights[0] * ratio_score + weights[1] * cho_score
 
@@ -99,7 +109,7 @@ def find_fuzzy_matches(
                 score = hybrid_similarity(sub, candidate)
                 if score > best_score:
                     # Double-pass gate: raw jamo ratio must be >= 50%
-                    j_ratio = fuzz.ratio(jamo_seq(sub), jamo_seq(candidate)) / 100.0
+                    j_ratio = _ratio(jamo_seq(sub), jamo_seq(candidate))
                     if j_ratio >= 0.50:
                         best_score = score
                         best_snippet = sub

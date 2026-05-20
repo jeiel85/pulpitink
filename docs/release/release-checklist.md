@@ -6,7 +6,7 @@
 
 ## Code
 
-- [x] `python -m pytest` 통과 (2026-05-20, 90/90)
+- [x] `python -m pytest` 통과 (2026-05-20, 91/91)
 - [x] `python -m ruff check .` 통과 (2026-05-20)
 - [x] CLI `sermonscript doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행

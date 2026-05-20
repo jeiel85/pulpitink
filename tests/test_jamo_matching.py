@@ -6,6 +6,7 @@ import unicodedata
 
 import pytest
 
+from sermonscript.core.postprocess import jamo
 from sermonscript.core.postprocess.jamo import (
     choseong,
     find_fuzzy_matches,
@@ -46,6 +47,13 @@ def test_hybrid_similarity() -> None:
     assert hybrid_similarity("예수", "여러분") < 0.50
     assert hybrid_similarity("그리스도", "기독교") < 0.60
     assert hybrid_similarity("", "") == 0.0
+
+
+def test_hybrid_similarity_falls_back_without_rapidfuzz(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(jamo, "fuzz", None)
+
+    assert hybrid_similarity("예수", "예수") == pytest.approx(1.0)
+    assert hybrid_similarity("그리스도", "그리시도") > 0.80
 
 
 def test_find_fuzzy_matches_length_gate() -> None:

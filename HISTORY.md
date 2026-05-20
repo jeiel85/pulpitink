@@ -4,17 +4,18 @@
 - 작업: 핸드오프 후보 문서와 릴리즈 체크리스트를 확인하고, 현재 `main` 기준 로컬 품질 검사와 Windows Portable ZIP 생성을 재검증.
 - 변경 파일:
   - pyproject.toml (`frontend/` untracked Tauri/번들 산출물이 `ruff check .` 대상에 섞이지 않도록 제외)
+  - src/sermonscript/core/postprocess/jamo.py (`rapidfuzz` 미설치 기본 CI 환경에서 `difflib` fallback 사용)
   - tests/integration/verify_fuzzy.py (Ruff import 정렬/공백 정리)
   - docs/release/release-checklist.md (검증 완료 항목 갱신)
   - HISTORY.md
   - CHANGELOG.md
 - 검증:
   - `python -m ruff check .`: PASS
-  - `python -m pytest`: 90/90 PASS
+  - `python -m pytest`: 91/91 PASS
   - `python -m sermonscript.cli.main doctor`: PASS
   - `./scripts/build_windows.ps1 -SkipChecks`: PASS
-  - 산출물: `dist/SermonScript_Portable_0.3.0.zip` (172,799,783 bytes)
-- 결과: 로컬 품질 검사와 PyInstaller/Portable ZIP 생성 검증 완료.
+  - 산출물: `dist/SermonScript_Portable_0.3.0.zip` (172,800,567 bytes)
+- 결과: 로컬 품질 검사와 PyInstaller/Portable ZIP 생성 검증 완료. 기본 설치 CI에서 `rapidfuzz`가 없어도 Jamo fuzzy 유틸이 import 가능하도록 보완.
 - 후속 작업:
   - 깨끗한 Windows VM에서 GUI 실행 수동 검증
   - GitHub Actions `build-windows.yml` 태그/수동 실행 검증

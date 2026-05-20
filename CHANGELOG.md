@@ -4,12 +4,13 @@
 
 ### Changed
 - `ruff check .`가 로컬 실험/번들 산출물인 untracked `frontend/` 디렉터리를 스캔하지 않도록 Ruff 제외 목록에 `frontend`를 추가했습니다.
+- 한국어 Jamo fuzzy 유틸이 `rapidfuzz` 미설치 환경에서도 표준 라이브러리 `difflib` fallback으로 동작하도록 보완했습니다.
 - `tests/integration/verify_fuzzy.py`의 import 정렬과 공백을 Ruff 기준에 맞게 정리했습니다.
 - `docs/release/release-checklist.md`에 2026-05-20 로컬 품질 검사 및 Windows Portable ZIP 생성 결과를 반영했습니다.
 
 ### Tests
 - `python -m ruff check .`: PASS
-- `python -m pytest`: 90/90 PASS
+- `python -m pytest`: 91/91 PASS
 - `python -m sermonscript.cli.main doctor`: PASS
 - `./scripts/build_windows.ps1 -SkipChecks`: PASS, `dist/SermonScript_Portable_0.3.0.zip` 생성 확인.
 
