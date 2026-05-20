@@ -2,6 +2,11 @@
 
 ## Unreleased - 2026-05-20 (Release validation)
 
+### Fixed
+- GitHub Actions `build-windows.yml` 수동 실행에서 `sermonscript.spec`가 저장소에 포함되지 않아
+  PyInstaller 단계가 `Spec file "sermonscript.spec" not found!`로 실패하던 문제를 수정했습니다.
+  `.gitignore`의 일반 `*.spec` 제외는 유지하되 루트 `sermonscript.spec`만 추적 대상으로 허용했습니다.
+
 ### Changed
 - `ruff check .`가 로컬 실험/번들 산출물인 untracked `frontend/` 디렉터리를 스캔하지 않도록 Ruff 제외 목록에 `frontend`를 추가했습니다.
 - 한국어 Jamo fuzzy 유틸이 `rapidfuzz` 미설치 환경에서도 표준 라이브러리 `difflib` fallback으로 동작하도록 보완했습니다.

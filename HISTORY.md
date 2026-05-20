@@ -1,5 +1,23 @@
 # HISTORY.md
 
+## 2026-05-20 (CI Hotfix #14 — Windows 빌드 workflow spec 누락)
+- 작업: 핸드오프 후속 항목 중 GitHub Actions `build-windows.yml` 검증을 진행하고, 수동 실행 실패 원인을 수정.
+- 변경 파일:
+  - .gitignore (`sermonscript.spec`만 추적 가능하도록 예외 추가)
+  - sermonscript.spec (Windows PyInstaller GUI 번들 spec을 저장소에 포함)
+  - HISTORY.md
+  - CHANGELOG.md
+- 검증:
+  - `gh workflow run build-windows.yml --ref main`: 실패 재현 (`Spec file "sermonscript.spec" not found!`)
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 91/91 PASS
+  - `python -m sermonscript.cli.main doctor`: PASS
+- 결과: CI 실패 원인은 PyInstaller spec 파일이 `.gitignore`의 `*.spec`에 의해 미추적 상태였기 때문으로 확인. 루트 `sermonscript.spec`를 추적 대상에 포함하도록 수정.
+- 후속 작업:
+  - 수정 커밋 푸시 후 GitHub Actions `build-windows.yml` 재실행 결과 확인
+  - 깨끗한 Windows VM에서 GUI 실행 수동 검증
+  - `frontend/` untracked 산출물의 보존/정리 정책 결정
+
 ## 2026-05-20 (릴리즈 검증 #13 — 로컬 품질/패키징 체크)
 - 작업: 핸드오프 후보 문서와 릴리즈 체크리스트를 확인하고, 현재 `main` 기준 로컬 품질 검사와 Windows Portable ZIP 생성을 재검증.
 - 변경 파일:

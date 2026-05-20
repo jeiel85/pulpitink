@@ -19,6 +19,7 @@ dist/
 wheels/
 *.manifest
 *.spec
+!sermonscript.spec
 
 # ----- Test/Lint caches -----
 .pytest_cache/
