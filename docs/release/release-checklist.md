@@ -46,7 +46,7 @@
 - [x] Portable ZIP 생성: `scripts/make_portable_zip.ps1` (2026-05-20)
 - [x] 산출물 파일명이 `SermonScript_Portable_{version}.zip` 패턴 (2026-05-20, `SermonScript_Portable_0.3.0.zip`)
 - [x] FFmpeg, 모델 파일이 번들에 포함되지 않았는지 확인 (2026-05-20, ZIP 내 `ffmpeg.exe`/`ffprobe.exe` 없음, STT 모델 파일 미발견)
-- [ ] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작
+- [x] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작 (2026-05-20, `v0.3.0`)
 - [x] GitHub Release 자동 생성 규칙 정의 (2026-05-20, `build-windows.yml`)
 - [x] SHA256 checksum artifact 생성 규칙 정의 (2026-05-20, `SHA256SUMS.txt`)
 - [ ] 앱 아이콘 포함 (선택)
