@@ -184,6 +184,19 @@ def transcribe(
     formats = _parse_formats(fmt)
     settings = SettingsService().load()
 
+    input_str = str(input_path)
+    if input_str.startswith(("http://", "https://")):
+        console.print(f"[bold blue]YouTube URL 감지:[/bold blue] {input_str}")
+        console.print("오디오 다운로드를 진행합니다. (yt-dlp 구동)")
+        from pulpitink.core.audio.youtube_downloader import download_youtube_audio
+        try:
+            downloaded_path = download_youtube_audio(input_str, output)
+            console.print(f"[bold green]다운로드 완료:[/bold green] {downloaded_path.name}")
+            input_path = downloaded_path
+        except Exception as exc:
+            console.print(f"[red]YouTube 다운로드 실패:[/red] {exc}")
+            raise typer.Exit(code=1) from exc
+
     actual_fuzzy = fuzzy if fuzzy is not None else settings.fuzzy_matching_enabled
     actual_threshold = fuzzy_threshold if fuzzy_threshold is not None else settings.fuzzy_threshold
 

@@ -13,11 +13,14 @@ from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
+    QDialog,
+    QDialogButtonBox,
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QListWidget,
     QListWidgetItem,
@@ -30,6 +33,7 @@ from PySide6.QtWidgets import (
     QSplitter,
     QStatusBar,
     QTabWidget,
+    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -56,6 +60,41 @@ _LANGUAGES = (
     ("zh", "中文"),
     ("auto", "자동 감지"),
 )
+
+
+class DisclaimerDialog(QDialog):
+    """YouTube copyright and usage disclaimer dialog."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(tr("YouTube 저작권 동의"))
+        self.resize(450, 300)
+
+        layout = QVBoxLayout(self)
+
+        title = QLabel(f"<b>{tr('YouTube 저작권 및 이용 고지')}</b>")
+        layout.addWidget(title)
+
+        doc = QTextBrowser()
+        doc.setHtml(
+            f"<p>{tr('YouTube 다운로드 기능은 개인 소장 및 설교/강의 분석 목적의 비상업적 이용만 허용합니다.')}</p>"
+            f"<p>{tr('저작권자가 허가하지 않은 배포나 상업적 목적의 활용으로 발생하는 모든 법적 책임은 전적으로 사용자 본인에게 있습니다.')}</p>"
+            f"<p>{tr('다운로드 시 저작권법을 준수하고 타인의 권리를 침해하지 않음에 동의하는 것으로 간주합니다.')}</p>"
+            f"<hr/>"
+            f"<p><i>{tr('본 프로그램은 다운로드 도구인 yt-dlp의 래퍼(wrapper) 역할만 수행하며, 어떠한 콘텐츠도 대리 저장하지 않습니다.')}</i></p>"
+        )
+        layout.addWidget(doc)
+
+        self.buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+            self,
+        )
+        self.buttons.button(QDialogButtonBox.StandardButton.Ok).setText(tr("동의 및 계속"))
+        self.buttons.button(QDialogButtonBox.StandardButton.Cancel).setText(tr("취소"))
+
+        self.buttons.accepted.connect(self.accept)
+        self.buttons.rejected.connect(self.reject)
+        layout.addWidget(self.buttons)
 
 
 class MainWindow(QMainWindow):
@@ -96,11 +135,14 @@ class MainWindow(QMainWindow):
         file_buttons = QHBoxLayout()
         self.add_btn = QPushButton("")
         self.add_btn.clicked.connect(self._on_add_files)
+        self.add_youtube_btn = QPushButton("")
+        self.add_youtube_btn.clicked.connect(self._on_add_youtube_url)
         self.remove_btn = QPushButton("")
         self.remove_btn.clicked.connect(self._on_remove_selected)
         self.clear_btn = QPushButton("")
         self.clear_btn.clicked.connect(self._on_clear_files)
         file_buttons.addWidget(self.add_btn)
+        file_buttons.addWidget(self.add_youtube_btn)
         file_buttons.addWidget(self.remove_btn)
         file_buttons.addWidget(self.clear_btn)
         left.addLayout(file_buttons)
@@ -228,6 +270,7 @@ class MainWindow(QMainWindow):
 
         self.file_title_label.setText(tr("변환 대기 파일"))
         self.add_btn.setText(tr("파일 추가…"))
+        self.add_youtube_btn.setText(tr("YouTube 주소 추가"))
         self.remove_btn.setText(tr("선택 제거"))
         self.clear_btn.setText(tr("모두 비우기"))
         self.recent_db_label.setText(tr("최근 작업"))
@@ -324,8 +367,43 @@ class MainWindow(QMainWindow):
         if 0 <= index < self.file_list.count():
             item = self.file_list.item(index)
             path_str = item.data(Qt.ItemDataRole.UserRole)
-            path = Path(path_str)
-            item.setText(f"[{status}] {path.name}  —  {path}")
+            if path_str.startswith(("http://", "https://")):
+                item.setText(f"[{tr(status)}] YouTube  —  {path_str}")
+            else:
+                path = Path(path_str)
+                item.setText(f"[{tr(status)}] {path.name}  —  {path}")
+
+    def _on_add_youtube_url(self) -> None:
+        if self._thread is not None:
+            QMessageBox.information(self, tr("설교필기"), tr("변환 진행 중에는 새 파일을 추가할 수 없습니다."))
+            return
+
+        url, ok = QInputDialog.getText(
+            self, tr("YouTube 주소 추가"), tr("다운로드할 YouTube URL을 입력해 주세요:")
+        )
+        if not ok or not url.strip():
+            return
+
+        url = url.strip()
+        if not url.startswith(("http://", "https://")):
+            QMessageBox.warning(self, tr("경고"), tr("유효하지 않은 URL 형식입니다."))
+            return
+
+        # 저작권 Disclaimer 표시
+        dialog = DisclaimerDialog(self)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        # URL을 대기열에 Path 객체 형태로 추가
+        path = Path(url)
+        if path in self._files:
+            return
+
+        self._files.append(path)
+        item = QListWidgetItem(f"[{tr('대기')}] YouTube  —  {url}")
+        item.setData(Qt.ItemDataRole.UserRole, url)
+        self.file_list.addItem(item)
+        self.statusBar().showMessage(tr("YouTube 작업 추가됨"))
 
     # ---------- drag-and-drop ----------
 

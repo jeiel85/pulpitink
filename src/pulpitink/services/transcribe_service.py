@@ -330,6 +330,20 @@ def run_transcribe(
     job_id = request.job_id or new_job_id()
     engine_label = _engine_name(engine)
 
+    # Handle YouTube URL download seamlessly in worker thread
+    input_str = str(request.input_path)
+    if input_str.startswith(("http://", "https://")):
+        emit(f"YouTube URL 감지: {input_str}")
+        emit("오디오 다운로드를 진행합니다. (yt-dlp 구동)")
+        from pulpitink.core.audio.youtube_downloader import download_youtube_audio
+        try:
+            downloaded_path = download_youtube_audio(input_str, request.output_dir)
+            emit(f"YouTube 다운로드 완료: {downloaded_path.name}")
+            from dataclasses import replace
+            request = replace(request, input_path=downloaded_path)
+        except Exception as exc:
+            raise PulpitInkError(f"YouTube 다운로드 실패: {exc}") from exc
+
     try:
         source = validate_input_path(request.input_path)
     except PulpitInkError as exc:
