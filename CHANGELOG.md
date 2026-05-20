@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Documentation: GitHub Pages landing)
+
+### Added
+- GitHub Pages용 정적 랜딩 페이지 `docs/index.html`을 추가했습니다.
+- GitHub Pages에서 정적 파일을 그대로 제공하도록 `docs/.nojekyll`을 추가했습니다.
+
+### Changed
+- README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/sermon-script/` 기준으로 갱신했습니다.
+
 ## Unreleased - 2026-05-20 (Documentation: GitHub landing page)
 
 ### Changed

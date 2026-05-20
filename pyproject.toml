@@ -41,7 +41,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jeiel85/sermon-script"
+Homepage = "https://jeiel85.github.io/sermon-script/"
 Issues = "https://github.com/jeiel85/sermon-script/issues"
 
 [project.scripts]

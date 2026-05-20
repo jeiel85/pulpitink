@@ -9,6 +9,8 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
 
+[공식 랜딩 페이지](https://jeiel85.github.io/sermon-script/) · [GitHub Releases](https://github.com/jeiel85/sermon-script/releases) · [사용자 가이드](docs/user-guide.md)
+
 SermonScript는 목회자, 교회 미디어팀, 강사, 연구자가 긴 녹음 파일을 안전하게 텍스트화하도록 만든 오픈소스 앱입니다. 오디오와 변환 텍스트는 기본적으로 외부 서버로 전송되지 않으며, STT 원본(`raw_text`)은 보존하고 사용자의 수정은 `edited_text`로 분리해 저장합니다.
 
 ## 지금 가능한 일
