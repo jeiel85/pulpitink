@@ -51,6 +51,12 @@ exports/
 cache/
 logs/
 models/
+
+# ----- Integration test outputs (user content; never commit) -----
+tests/integration/out/
+tests/integration/fixtures/*
+!tests/integration/fixtures/.gitkeep
+!tests/integration/fixtures/README.md
 *.ckpt
 *.bin
 *.pt
