@@ -312,6 +312,7 @@ class JobRepository:
         clean_text: str | None = None,
         edited_text: str | None = None,
         needs_review: bool | None = None,
+        speaker: str | None = None,
     ) -> None:
         """Patch the editable fields of a segment.
 
@@ -331,6 +332,9 @@ class JobRepository:
         if needs_review is not None:
             sets.append("needs_review = ?")
             values.append(1 if needs_review else 0)
+        if speaker is not None:
+            sets.append("speaker = ?")
+            values.append(speaker)
         if not sets:
             return
         values.append(segment_id)

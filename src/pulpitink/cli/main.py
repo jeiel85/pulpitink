@@ -178,6 +178,11 @@ def transcribe(
         "--fuzzy-threshold",
         help="자모 Fuzzy 매칭 임계값 (0.6 ~ 0.9) (지정하지 않으면 사용자 설정 사용)",
     ),
+    diarize: bool = typer.Option(
+        False,
+        "--diarize",
+        help="Heuristic 화자 분리(Diarization) 활성화 여부",
+    ),
 ) -> None:
     """로컬 오디오 파일을 전처리 → STT → Export 파이프라인으로 변환합니다."""
 
@@ -217,6 +222,7 @@ def transcribe(
         user_dict_path=user_dict,
         fuzzy_matching_enabled=actual_fuzzy,
         fuzzy_threshold=actual_threshold,
+        diarize=diarize,
     )
 
     def progress(msg: str) -> None:

@@ -101,6 +101,7 @@ class TranscribeRequest:
     user_dict_path: Path | None = None
     fuzzy_matching_enabled: bool = True
     fuzzy_threshold: float = 0.70
+    diarize: bool = False
 
 
 @dataclass
@@ -416,6 +417,12 @@ def run_transcribe(
                 )
 
         _enrich_segments(segments, lexicon)
+
+        if request.diarize:
+            emit("      [Heuristic 화자 분리] 화자 태그 할당 중...")
+            from pulpitink.core.postprocess.diarizer import HeuristicDiarizer
+            diarizer = HeuristicDiarizer()
+            diarizer.assign_speakers_to_segments(segments)
 
         duration = segments[-1].end if segments else None
         transcription = TranscriptionResult(

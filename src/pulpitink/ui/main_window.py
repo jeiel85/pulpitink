@@ -261,6 +261,11 @@ class MainWindow(QMainWindow):
         self.history_label_title = QLabel("")
         form.addRow(self.history_label_title, self.history_checkbox)
 
+        self.diarize_checkbox = QCheckBox("")
+        self.diarize_checkbox.setChecked(self._settings.diarize)
+        self.diarize_label_title = QLabel("")
+        form.addRow(self.diarize_label_title, self.diarize_checkbox)
+
         self.options_group.setLayout(form)
         return self.options_group
 
@@ -275,6 +280,9 @@ class MainWindow(QMainWindow):
         self.clear_btn.setText(tr("모두 비우기"))
         self.recent_db_label.setText(tr("최근 작업"))
         self.run_btn.setText(tr("변환 시작"))
+
+        self.diarize_label_title.setText(tr("화자"))
+        self.diarize_checkbox.setText(tr("화자 분리 사용 (--diarize)"))
 
         self.options_group.setTitle(tr("변환 설정"))
         self.app_lang_label.setText(tr("인터페이스 언어"))
@@ -299,7 +307,7 @@ class MainWindow(QMainWindow):
         try:
             self._settings = self._settings_service.update(app_language=lang)
             self._retranslate_ui()
-        except Exception as e:
+        except Exception:
             pass
 
     @staticmethod
@@ -487,6 +495,7 @@ class MainWindow(QMainWindow):
         output_dir = Path(self.output_label.text())
         fuzzy_enabled = self.fuzzy_checkbox.isChecked()
         fuzzy_threshold = self.fuzzy_spin.value()
+        diarize_enabled = self.diarize_checkbox.isChecked()
 
         try:
             self._settings_service.update(
@@ -496,6 +505,7 @@ class MainWindow(QMainWindow):
                 output_dir=str(output_dir),
                 fuzzy_matching_enabled=fuzzy_enabled,
                 fuzzy_threshold=fuzzy_threshold,
+                diarize=diarize_enabled,
             )
         except KeyError:
             pass
@@ -516,6 +526,7 @@ class MainWindow(QMainWindow):
             ),
             fuzzy_matching_enabled=fuzzy_enabled,
             fuzzy_threshold=fuzzy_threshold,
+            diarize=diarize_enabled,
         )
 
         thread, worker = start_worker(request)

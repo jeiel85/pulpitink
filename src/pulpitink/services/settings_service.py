@@ -34,6 +34,7 @@ class Settings:
     fuzzy_matching_enabled: bool = True
     fuzzy_threshold: float = 0.70
     keep_history: bool = True
+    diarize: bool = False
 
     def resolved_output_dir(self) -> Path:
         if self.output_dir:
@@ -97,7 +98,7 @@ class SettingsService:
         # Enforce proper types for values that may come in as strings from CLI
         converted: dict[str, object] = {}
         for k, v in kwargs.items():
-            if k in ("fuzzy_matching_enabled", "keep_history"):
+            if k in ("fuzzy_matching_enabled", "keep_history", "diarize"):
                 if isinstance(v, str):
                     converted[k] = v.lower() in ("true", "1", "yes", "on")
                 else:

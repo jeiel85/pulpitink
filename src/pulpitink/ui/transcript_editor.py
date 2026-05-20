@@ -129,15 +129,15 @@ class TranscriptEditorWidget(QWidget):
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
         layout.addWidget(splitter, 1)
 
-        self.segment_table = QTableWidget(0, 5)
+        self.segment_table = QTableWidget(0, 6)
         self.segment_table.setHorizontalHeaderLabels(
-            ["시작", "종료", "확인", "텍스트", "원문(raw)"]
-        )
-        self.segment_table.horizontalHeader().setSectionResizeMode(
-            3, QHeaderView.ResizeMode.Stretch
+            ["시작", "종료", "확인", "화자", "텍스트", "원문(raw)"]
         )
         self.segment_table.horizontalHeader().setSectionResizeMode(
             4, QHeaderView.ResizeMode.Stretch
+        )
+        self.segment_table.horizontalHeader().setSectionResizeMode(
+            5, QHeaderView.ResizeMode.Stretch
         )
         self.segment_table.verticalHeader().setVisible(False)
         self.segment_table.setEditTriggers(
@@ -321,7 +321,7 @@ class TranscriptEditorWidget(QWidget):
             try:
                 self.segment_table.selectRow(target_row)
                 if self.sync_scroll_check.isChecked():
-                    item = self.segment_table.item(target_row, 3)
+                    item = self.segment_table.item(target_row, 4)
                     if item:
                         self.segment_table.scrollToItem(item, QAbstractItemView.ScrollHint.PositionAtCenter)
             finally:
@@ -391,6 +391,10 @@ class TranscriptEditorWidget(QWidget):
                     | Qt.ItemFlag.ItemIsSelectable
                 )
                 review_item.setData(Qt.ItemDataRole.UserRole, seg.id)
+
+                speaker_item = QTableWidgetItem(seg.speaker or "")
+                speaker_item.setData(Qt.ItemDataRole.UserRole, seg.id)
+
                 display = seg.edited_text or seg.clean_text or seg.raw_text
                 text_item = QTableWidgetItem(display)
                 text_item.setData(Qt.ItemDataRole.UserRole, seg.id)
@@ -398,21 +402,22 @@ class TranscriptEditorWidget(QWidget):
                 raw_item.setFlags(raw_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 if seg.needs_review:
                     bg = QBrush(REVIEW_HIGHLIGHT)
-                    for it in (start_item, end_item, review_item, text_item, raw_item):
+                    for it in (start_item, end_item, review_item, speaker_item, text_item, raw_item):
                         it.setBackground(bg)
                 if seg.edited_text:
                     text_item.setBackground(QBrush(EDITED_HIGHLIGHT))
                 self.segment_table.setItem(row, 0, start_item)
                 self.segment_table.setItem(row, 1, end_item)
                 self.segment_table.setItem(row, 2, review_item)
-                self.segment_table.setItem(row, 3, text_item)
-                self.segment_table.setItem(row, 4, raw_item)
+                self.segment_table.setItem(row, 3, speaker_item)
+                self.segment_table.setItem(row, 4, text_item)
+                self.segment_table.setItem(row, 5, raw_item)
             self.segment_table.resizeColumnsToContents()
             self.segment_table.horizontalHeader().setSectionResizeMode(
-                3, QHeaderView.ResizeMode.Stretch
+                4, QHeaderView.ResizeMode.Stretch
             )
             self.segment_table.horizontalHeader().setSectionResizeMode(
-                4, QHeaderView.ResizeMode.Stretch
+                5, QHeaderView.ResizeMode.Stretch
             )
         finally:
             self._suppress_table_change = False
@@ -433,6 +438,13 @@ class TranscriptEditorWidget(QWidget):
             seg.needs_review = checked
             self._refresh_segment_view()
         elif column == 3:
+            new_speaker = item.text()
+            if new_speaker == seg.speaker:
+                return
+            self._persist_segment(seg.id, speaker=new_speaker)
+            seg.speaker = new_speaker
+            self.segment_updated.emit(seg.id or 0)
+        elif column == 4:
             new_text = item.text()
             if new_text == seg.edited_text:
                 return
@@ -452,6 +464,7 @@ class TranscriptEditorWidget(QWidget):
         *,
         edited_text: str | None = None,
         needs_review: bool | None = None,
+        speaker: str | None = None,
     ) -> None:
         if segment_id is None:
             return
@@ -461,6 +474,7 @@ class TranscriptEditorWidget(QWidget):
                 segment_id,
                 edited_text=edited_text,
                 needs_review=needs_review,
+                speaker=speaker,
             )
         finally:
             conn.close()
@@ -480,13 +494,13 @@ class TranscriptEditorWidget(QWidget):
 
         current_row = self.segment_table.currentRow()
         for row in range(current_row + 1, self.segment_table.rowCount()):
-            item = self.segment_table.item(row, 3)
+            item = self.segment_table.item(row, 4)
             if item and contains(item.text()):
                 self.segment_table.setCurrentItem(item)
                 return
         # wrap around
         for row in range(0, current_row + 1):
-            item = self.segment_table.item(row, 3)
+            item = self.segment_table.item(row, 4)
             if item and contains(item.text()):
                 self.segment_table.setCurrentItem(item)
                 return
@@ -546,7 +560,7 @@ class TranscriptEditorWidget(QWidget):
         if sug is None:
             return
         for row in range(self.segment_table.rowCount()):
-            item = self.segment_table.item(row, 3)
+            item = self.segment_table.item(row, 4)
             if item and item.data(Qt.ItemDataRole.UserRole) == sug.segment_id:
                 self.segment_table.setCurrentItem(item)
                 break
