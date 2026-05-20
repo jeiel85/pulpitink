@@ -8,11 +8,11 @@
 
 - [ ] `python -m pytest` 통과
 - [ ] `python -m ruff check .` 통과
-- [ ] CLI `sermonscript doctor` 통과
+- [x] CLI `sermonscript doctor` 통과 (2026-05-20)
 - [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
-- [ ] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt) 검증
-- [ ] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인
-- [ ] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능
+- [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
+- [x] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인 (회귀 테스트로 보장: `tests/test_transcript_editor_repo.py`)
+- [ ] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능 — **회차 #1에서 0건 발견, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10) 참고**
 
 ## Security and Privacy
 
@@ -44,8 +44,8 @@
 
 ## Documentation
 
-- [ ] README 업데이트
-- [ ] 사용자 가이드 업데이트
-- [ ] 스크린샷 갱신
-- [ ] 알려진 제한 사항 문서화
-- [ ] `docs/deferred-youtube-import.md` 로 YouTube 비포함 정책 명시
+- [x] README 업데이트 (`README.md` 본 프로젝트 진입점으로 재작성, 2026-05-20)
+- [x] 사용자 가이드 업데이트 (`docs/user-guide.md` 신규 작성, 2026-05-20)
+- [ ] 스크린샷 갱신 (GUI 변환/편집기 캡처 추가 예정)
+- [x] 알려진 제한 사항 문서화 (`docs/known-limitations.md` 신규 작성, 2026-05-20)
+- [x] `docs/deferred-youtube-import.md` 로 YouTube 비포함 정책 명시

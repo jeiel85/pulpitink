@@ -1,5 +1,68 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Design note: jamo fuzzy matching)
+
+### Documentation
+- `docs/design/jamo-fuzzy-matching.md` 신규: 자모(jamo) 기반 fuzzy 매칭의 문제 정의,
+  PoC 실측 (24 쌍, Hybrid scorer @ threshold 0.70 → recall 0.76, precision 1.0),
+  알고리즘 결정, `CorrectionEngine` 통합 지점, 거짓 양성 통제, 작업 단위 분해.
+- `docs/known-limitations.md` §10 — fuzzy matching 후속 작업이 v1.1 대상이며
+  설계 노트로 링크되도록 갱신.
+
+### Decisions
+- 구현은 v1.0 출시 후 v1.1 마일스톤으로 권장 (총 ~3.5 일 추정).
+- 추가 외부 의존성 없음 (`rapidfuzz` 는 이미 `[reference]` extra, `unicodedata`
+  는 표준 라이브러리).
+
+## Unreleased - 2026-05-20 (Hotfix: bible_refs colon notation)
+
+### Fixed
+- `core.reference.parser._BIBLE_REF_RE` 는 `장` 키워드를 강제해서 인쇄된
+  설교 원문에 흔한 콜론 표기(`로마서 3: 21~22`, `요한복음 3:16-17`)를 인식하지
+  못했습니다. 신규 `_BIBLE_REF_COLON_RE` 와 통합된 `_extract_bible_refs` 가
+  두 표기를 모두 `BOOK C장 S(-E)절` 캐노니컬 형태로 정규화합니다.
+- 통합 회귀 회차 #1 에서 bible_refs=0 로 관찰된 회귀가 해소됩니다. 같은
+  fixture (`로마서 1장 1-15절` 설교 원문) 재파싱 결과: `['로마서 3장 21-22절']`.
+
+### Tests
+- `tests/test_reference_parser.py` 에 콜론 표기 추출/중복 제거 테스트 2건 추가.
+  전체 스위트 85/85 PASS, `ruff check` 그린.
+
+## Unreleased - 2026-05-20 (Integration regression #1)
+
+### Added
+- `tests/integration/` 디렉터리: 수동 회귀 시나리오 정의(README), docx → md
+  추출 유틸(extract_docx.py), 결과 검증 스크립트(verify_run.py),
+  회차 누적 로그(results.md). 사용자 콘텐츠는 gitignore 로 분리.
+- `docs/known-limitations.md` §10 — 35분 실설교 회귀에서 관찰된 원문 대조 /
+  자동 교정 적중률 한계와 우회 안내.
+
+### Findings
+- 회차 #1: 35분 45초 한국어 설교 + Markdown 원문으로 end-to-end 변환 성공.
+  파이프라인(전처리 → STT → 후처리 → Export → DB) 자체는 정상.
+- 자동 교정 후보가 0건으로 발견됨. 원인 2가지: (1) bible_refs 정규식이 콜론
+  표기를 못 잡음(`로마서 3: 21~22`), (2) lexicon wrong_forms 가 사전등록형이라
+  실제 STT 자모 변형(이에수/그리시도/보궁 등)에 무력. v1.x 후속 작업 후보.
+
+### Notes
+- 코드 변경 없음. 통합 시나리오/문서/검증 도구만 추가. 기존 `pytest`/`ruff` 결과 유지.
+
+## Unreleased - 2026-05-20 (Documentation)
+
+### Added
+- `docs/user-guide.md` — 일반 사용자용 한국어 가이드 신규 작성 (설치, `doctor`,
+  CLI/GUI 변환, 편집기, 원문 대조, 사용자 사전, 문제 해결, 데이터 저장 위치).
+- `docs/known-limitations.md` — v1.0 범위 제외/플랫폼/데이터 정책 SSOT.
+
+### Changed
+- `README.md` 를 번들 안내 문서에서 SermonScript 본 프로젝트의 진입점으로 재작성
+  (빠른 시작, 주요 기능, 데이터 저장 위치, v1.0 제외 항목, 라이선스/문서 링크).
+- `docs/release/release-checklist.md` — Documentation 섹션의 README/사용자 가이드/
+  알려진 제한사항 항목을 완료로 표시. 스크린샷 갱신만 남김.
+
+### Notes
+- 코드 변경은 없습니다. 기존 `pytest` / `ruff` 결과는 유지됩니다.
+
 ## Unreleased - 2026-05-20 (Goal 3)
 
 ### Added

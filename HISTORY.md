@@ -1,5 +1,85 @@
 # HISTORY.md
 
+## 2026-05-20 (설계 #12 — jamo fuzzy matching)
+- 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의
+  설계 노트 작성. PoC 실측으로 알고리즘 결정 + 통합 지점/거짓 양성 통제/작업
+  단위까지 정리. **구현은 v1.1 대상으로 권장**.
+- 변경 파일:
+  - docs/design/jamo-fuzzy-matching.md (신규)
+  - docs/known-limitations.md (설계 노트로 링크 갱신)
+  - CHANGELOG.md
+- 검증:
+  - PoC 24 쌍 (POS 17 / NEG 7) 실측: Hybrid 0.6×jamo.ratio + 0.4×choseong.ratio
+    @ threshold 0.70 → recall 0.76, precision 1.0
+  - 추가 의존성 없음 (rapidfuzz 는 이미 `[reference]` extra)
+- 결과: 설계 픽스. 구현은 v1.1 마일스톤에서 진행 (3.5 일 추정).
+- 후속 작업 후보:
+  - A 단계: `core.postprocess.jamo` 모듈 + 단위 테스트
+  - B 단계: `CorrectionEngine` fuzzy 통합
+  - 통합 회차 #2 실행하여 적중률 회복 측정
+
+## 2026-05-20 (Hotfix #11 — bible_refs 콜론 표기)
+- 작업: 통합 회귀 #1 에서 발견한 `parser._BIBLE_REF_RE` 한계 수정. 원문의
+  `로마서 3: 21~22` 콜론 표기를 잡지 못해 reference_documents.bible_refs 가
+  0건이 되던 문제.
+- 변경 파일:
+  - src/sermonscript/core/reference/parser.py (`_BIBLE_REF_COLON_RE` 추가,
+    `_extract_bible_refs` 가 두 정규식을 통합·중복 제거)
+  - tests/test_reference_parser.py (test_parse_extracts_bible_refs_colon_notation,
+    test_parse_deduplicates_jang_and_colon_overlap)
+  - docs/known-limitations.md (§10 해당 항목 수정 표시)
+  - tests/integration/results.md (Hotfix 노트)
+  - CHANGELOG.md
+- 검증:
+  - `python -m pytest`: 85/85 PASS (신규 2건 포함)
+  - `python -m ruff check .`: PASS
+  - 실제 fixture (`tests/integration/fixtures/sermon.md`) 직접 파싱:
+    `bible_refs = ['로마서 3장 21-22절']` (이전 0건 → 1건)
+- 결과: 성공
+- 후속 작업:
+  - 같은 입력으로 통합 회귀 회차 #2 실행해 DB 영속화 단계까지 회복 재확인 (선택)
+  - #12 (자모 변형 매칭) 여부 결정
+
+## 2026-05-20 (통합 회귀 #1)
+- 작업: 35분 분량 실설교 MP3 + Markdown 원문으로 end-to-end 통합 회귀 1회 실행.
+- 입력:
+  - 오디오: `D:\Media\2026-05-13 수요밤설교 _ 로마서 1장 1-15절 _ 로마서의 서론.mp3` (35분 45초)
+  - 원문(docx → md): `tests/integration/fixtures/sermon.md` (236문단, ~9.7KB)
+  - 모델/프리셋: `small` / CPU `int8` / `--preset sermon`
+- 변경 파일:
+  - tests/integration/README.md (검증 항목 실제 결과 반영)
+  - tests/integration/extract_docx.py (의존성 없는 docx → md 추출 유틸)
+  - tests/integration/verify_run.py (실제 reference_documents 스키마에 맞춰 컬럼 수정)
+  - tests/integration/results.md (회차 #1 결과/원인 분석)
+  - tests/integration/fixtures/README.md, .gitkeep (사용자 콘텐츠 gitignore 정책)
+  - docs/known-limitations.md (§10 원문 대조/자동 교정 적중률 보강)
+  - .gitignore (tests/integration/out, fixtures/* 제외)
+  - CHANGELOG.md
+- 검증:
+  - 변환 소요 1560.55초 (~26분), 641 세그먼트, Export 5종 모두 생성
+  - DB 영속화 정상 (jobs/segments/exports/reference_documents/alignment_pairs)
+  - `verify_run.py` 모든 PASS 항목 통과; INFO 로 0건 항목 2개 노출
+- 결과: 파이프라인 자체 성공 / 자동 교정 후보 적중률 이슈 2건 발견
+- 후속 작업:
+  - 버그(#11): `parser._BIBLE_REF_RE` 가 콜론 표기(`로마서 3: 21~22`) 미인식 — 정규식 확장
+  - 한계(#12): STT 자모 변형 (이에수/그리시도/보궁 등) 에 대한 lexicon/proper_noun 매칭 무력 — 자모 유사도 매칭 또는 lexicon 자동 확장 검토 (v1.x)
+  - GUI 편집기에서 needs_review 10건 직접 검토하며 스크린샷 캡처 (release-checklist Documentation §스크린샷)
+
+## 2026-05-20 (문서)
+- 작업: v1.0 릴리즈 준비용 사용자 문서 정비 (README/사용자 가이드/알려진 제한사항).
+- 변경 파일:
+  - README.md (Goal 1~3 결과 반영한 본 프로젝트 진입점으로 재작성)
+  - docs/user-guide.md (신규: 설치/doctor/CLI/GUI/편집기/원문 대조/사용자 사전/문제 해결)
+  - docs/known-limitations.md (신규: v1.0 범위 제외/플랫폼/데이터 정책 SSOT)
+  - docs/release/release-checklist.md (Documentation 섹션 갱신)
+  - CHANGELOG.md
+- 검증: 코드 변경 없음 — 문서만 추가/수정. 기존 `python -m pytest` / `ruff check` 결과 유지.
+- 결과: 성공
+- 후속 작업:
+  - GUI 변환/편집기 스크린샷 캡처 후 docs/user-guide.md 와 release-checklist 에 반영
+  - 실제 Windows VM 에서 PyInstaller 산출물 수동 검증 (이전 Goal 3 후속 항목 그대로)
+  - 30분 분량 MP3 + 원문 대조 시나리오 통합 회귀
+
 ## 2026-05-20 (Goal 3)
 - 작업: Goal 3 — 편집기/후처리/사용자 사전 + 원문 대조 + Windows 릴리즈 패키징.
 - 변경 파일:
