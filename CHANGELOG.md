@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## [0.4.2] - 2026-05-20
+
+### Added
+- **CI 빌드 및 테스트 자동화 고도화**: GitHub Actions `Test` 워크플로우 실행 시 GUI 테스트에 필수적인 `PySide6` 및 `rapidfuzz`를 포함한 옵셔널 의존성을 일괄 설치하도록 구성 (`test.yml` 수정).
+
+### Fixed
+- **PySide6 환경 가드 설계**: 로컬 및 CLI 가상환경 중 PySide6가 누락된 환경에서도 배치 큐 관련 유닛 테스트 수집(collection) 시 크래시가 발생하지 않고, 정상적으로 스킵 처리되도록 임포트 안전장치 탑재 (`tests/test_batch_queue.py` 수정).
+
 ## [0.4.1] - 2026-05-20
 
 ### Added

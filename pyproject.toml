@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pulpitink"
-version = "0.4.1"
+version = "0.4.2"
 description = "설교필기 — 로컬 우선 설교/강의/회의 녹음 STT 데스크톱 앱"
 readme = "README.md"
 requires-python = ">=3.11"

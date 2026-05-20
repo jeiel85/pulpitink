@@ -1,16 +1,27 @@
 # HISTORY.md
 
-## 2026-05-20 (단기 저장소 정비 및 v0.4.1 패치 릴리즈)
-- 작업: 단기 저장소 정비(untracked 파일 차단), 알려진 제한사항 문서 최신화, 릴리즈 체크리스트 갱신, 패치 버전 릴리즈.
+## 2026-05-20 (CI 수정 및 v0.4.2 패치 릴리즈)
+- 작업: CI 빌드 시 PySide6 등 GUI 관련 의존성 누락 문제 해결 및 PySide6 미설치 CLI 환경에서의 유닛 테스트 가드(Skip) 고도화, 0.4.2 패치 버전 릴리즈.
+- 변경 파일:
+  - .github/workflows/test.yml (pip install에 `[dev,gui,reference]` 반영하여 CI 내 의존성 결함 해소)
+  - tests/test_batch_queue.py (PySide6 ImportError 발생 시 안전하게 테스트 수집 스킵하도록 pytestmark 구성)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md (버전 범프 v0.4.2)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 100/100 PASS (로컬 검증 및 CI 대응 완료)
+- 결과: 성공. v0.4.1 배포 파이프라인에서 탐지된 의존성 미비 오류를 완벽하게 수정한 v0.4.2 패치 릴리즈 준비 완료.
+
+## 2026-05-20 (단기 저장소 정비 및 v0.4.1 배포 시도)
+- 작업: 단기 저장소 정비(untracked 파일 차단), 알려진 제한사항 문서 최신화, 릴리즈 체크리스트 갱신, 패치 버전 배포 시도. (CI 검증 단계에서 GUI 의존성 부재로 빌드 대기 상태 전환됨)
 - 변경 파일:
   - .gitignore (임시 `.antigravitycli/` 및 실험용 `frontend/` 무시 설정 반영)
   - docs/known-limitations.md (싱크 플레이어, 배치 큐, 기록 비활성화 옵션을 "구현 완료" 상태로 최신화)
   - docs/release/release-checklist.md (0.4.0 및 0.4.1 대응 체크리스트 갱신 완료)
-  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.1 및 이력 갱신)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.1 및 이력 작성)
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 100/100 PASS
-- 결과: 성공. 임시 산출물 격리 및 알려진 문서들의 최신성(v0.4.0 기준 완비)을 보장하는 정밀 0.4.1 패치 배포 완료.
+- 결과: CI 서버 환경의 PySide6 패키지 누락으로 빌드 재조정 필요 판단, 이에 따라 v0.4.2를 긴급 출시하기로 전환함.
 
 ## 2026-05-20 (기능 추가 — 오디오 싱크 플레이어 및 다중 배치 큐)
 - 작업: 편집기 내 오디오 싱크 플레이어 연동 개발 (Audio Sync Player), 메인 화면 다중 작업 배치 큐 UX 개선 (Batch Queue UX).

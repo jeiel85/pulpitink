@@ -3,10 +3,17 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from PySide6.QtWidgets import QApplication, QMessageBox
 
-from pulpitink.services.transcribe_service import TranscribeResult
-from pulpitink.ui.main_window import MainWindow
+try:
+    from PySide6.QtWidgets import QApplication, QMessageBox
+    PYSIDE6_AVAILABLE = True
+except ImportError:
+    PYSIDE6_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(not PYSIDE6_AVAILABLE, reason="PySide6 is not installed")
+
+from pulpitink.services.transcribe_service import TranscribeResult  # noqa: E402
+from pulpitink.ui.main_window import MainWindow  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
