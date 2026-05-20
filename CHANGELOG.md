@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-## Unreleased - 2026-05-20 (Feature: Audio Sync Player & Batch Queue UX)
+## [0.4.0] - 2026-05-20
 
 ### Added
 - **편집기 탭 내 오디오 싱크 플레이어 연동 (Audio Sync Player)**:
@@ -21,7 +21,7 @@
 - `python -m pytest`: 100/100 PASS (총 100개 테스트)
 - `python -m ruff check .`: PASS
 
-## Unreleased - 2026-05-20 (Feature: Delete UX & Privacy Control & Doc Alignment)
+### Feature: Delete UX & Privacy Control & Doc Alignment
 
 ### Added
 - **작업/캐시 삭제 기능 보강 (Delete UX)**:
@@ -43,7 +43,7 @@
 - `python -m pytest`: 97/97 PASS
 - `python -m ruff check .`: PASS
 
-## Unreleased - 2026-05-20 (Branding: 설교필기 PulpitInk 전체 리네이밍)
+### Branding: 설교필기 PulpitInk 전체 리네이밍
 
 ### Changed
 - 프로젝트 전체 브랜딩을 **SermonScript**에서 **설교필기 (PulpitInk)** 로 변경했습니다.
@@ -61,13 +61,13 @@
 - `ruff check .`: All checks passed
 - `pytest`: 95/95 passed
 
-## Unreleased - 2026-05-20 (Documentation: README repository guide)
+### Documentation: README repository guide
 
 ### Changed
 - GitHub Pages 랜딩 페이지가 별도로 생긴 뒤 README를 저장소 안내 문서 역할에 맞게 재정비했습니다.
 - 상단 대형 랜딩 이미지를 제거하고 설치, 사용, 데이터 저장 위치, 개발 검증, 프로젝트 구조 중심으로 구성했습니다.
 
-## Unreleased - 2026-05-20 (Documentation: GitHub Pages landing)
+### Documentation: GitHub Pages landing
 
 ### Added
 - GitHub Pages용 정적 랜딩 페이지 `docs/index.html`을 추가했습니다.
@@ -76,7 +76,7 @@
 ### Changed
 - README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/pulpitink/` 기준으로 갱신했습니다.
 
-## Unreleased - 2026-05-20 (Documentation: GitHub landing page)
+### Documentation: GitHub landing page
 
 ### Changed
 - `README.md`를 GitHub 랜딩 페이지 역할에 맞게 갱신했습니다.
@@ -101,7 +101,7 @@
 ### Tests
 - 워크플로우 변경은 GitHub Actions 태그 push에서 검증됩니다.
 
-## Unreleased - 2026-05-20 (Release validation)
+### Release validation
 
 ### Fixed
 - GitHub Actions `build-windows.yml` 수동 실행에서 `pulpitink.spec`가 저장소에 포함되지 않아
@@ -120,7 +120,7 @@
 - `python -m pulpitink.cli.main doctor`: PASS
 - `./scripts/build_windows.ps1 -SkipChecks`: PASS, `dist/PulpitInk_Portable_0.3.0.zip` 생성 확인.
 
-## Unreleased - 2026-05-20 (Feature: Korean Jamo-based Fuzzy Matching)
+### Feature: Korean Jamo-based Fuzzy Matching
 
 ### Added
 - **한국어 자모(Jamo) Fuzzy 매칭 구현** (`src/pulpitink/core/postprocess/jamo.py`):
@@ -148,7 +148,7 @@
 - `tests/integration/verify_fuzzy.py` 신규 작성 (실제 DB 세그먼트 데이터 641개에 대한 Fuzzy 효과 측정 검증 스크립트).
 - `python -m pytest`: 90/90 테스트 통과 완료.
 
-## Unreleased - 2026-05-20 (Hotfix: bible_refs colon notation)
+### Hotfix: bible_refs colon notation
 
 ### Fixed
 - `core.reference.parser._BIBLE_REF_RE` 는 `장` 키워드를 강제해서 인쇄된
@@ -162,7 +162,7 @@
 - `tests/test_reference_parser.py` 에 콜론 표기 추출/중복 제거 테스트 2건 추가.
   전체 스위트 85/85 PASS, `ruff check` 그린.
 
-## Unreleased - 2026-05-20 (Integration regression #1)
+### Integration regression #1
 
 ### Added
 - `tests/integration/` 디렉터리: 수동 회귀 시나리오 정의(README), docx → md
@@ -181,7 +181,7 @@
 ### Notes
 - 코드 변경 없음. 통합 시나리오/문서/검증 도구만 추가. 기존 `pytest`/`ruff` 결과 유지.
 
-## Unreleased - 2026-05-20 (Documentation)
+### Documentation
 
 ### Added
 - `docs/user-guide.md` — 일반 사용자용 한국어 가이드 신규 작성 (설치, `doctor`,
