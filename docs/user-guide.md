@@ -191,6 +191,18 @@ sermonscript transcribe sermon.mp3 --reference sermon.md --language ko
 
 원문이 실제 발화와 다른 경우 raw_text(실제 발화) 가 우선이며, 사용자가 편집기에서 직접 교정 후보를 검토합니다.
 
+### 6.1 한국어 자모(Jamo) Fuzzy 매칭
+
+Whisper 모델이 한국어 고유 성경 용어나 고유명사를 오인식(예: `예수 그리스도` -> `이에수 크리스토리`, `사도로 부르심을 받아` -> `사도로 부르신을 받아`)하는 경우를 대비해, **한글 자모 분해 및 초성(Choseong) 기반 Hybrid 유사도 측정 알고리즘**이 탑재되어 있습니다.
+
+* **작동 원리**: 원문의 고유명사 및 사전에 등록된 단어들과 STT 결과 간의 자모 유사도가 설정된 임계값 이상이면 자동으로 `pending` 교정 제안을 생성합니다. (단, 음절 길이 3 미만의 아주 짧은 단어는 무분별한 매칭 노이즈 방지를 위해 스캔 대상에서 엄격히 제외됩니다.)
+* **제어 및 옵션**:
+  - **CLI 변환**: `--fuzzy` (기본값) 또는 `--no-fuzzy`로 활성화 여부를 제어하고, `--fuzzy-threshold`로 매칭 감도를 설정합니다.
+  - **GUI 변환**: 설정 영역의 **Fuzzy 매칭 사용 체크박스**와 **임계값 스핀박스**를 통해 간편하게 제어할 수 있습니다.
+  - **임계값(`fuzzy_threshold`) 권장 가이드**:
+    * `0.70` (기본값): 일반적인 한국어 성경/설교 오타를 가장 폭넓게 잡아냅니다.
+    * `0.75` ~ `0.80` (타이트): `에스라`, `에스더`, `에스겔` 등 자모 구조가 단순한 3글자 성경 책 이름이 본문의 짧은 발화(`이시라`, `에서`, `에게`)와 오인식되어 발생하는 노이즈성(False Positive) 제안을 최소화하고 싶을 때 권장합니다.
+
 CLI 로 교정 후보를 확인 / 적용 / 무시:
 
 ```powershell
@@ -249,6 +261,8 @@ sermonscript settings set model small
 sermonscript settings set preset sermon
 sermonscript settings set output_dir D:\sermons\exports
 sermonscript settings set model_cache_dir D:\sermons\models
+sermonscript settings set fuzzy_matching_enabled true
+sermonscript settings set fuzzy_threshold 0.75
 ```
 
 설정은 JSON 으로 저장되며 경로는 `settings show` 가 알려줍니다.

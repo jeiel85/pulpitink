@@ -98,6 +98,8 @@ class TranscribeRequest:
     job_id: str | None = None
     reference_path: Path | None = None
     user_dict_path: Path | None = None
+    fuzzy_matching_enabled: bool = True
+    fuzzy_threshold: float = 0.70
 
 
 @dataclass
@@ -227,6 +229,8 @@ def _persist_reference_artifacts(
     parsed: ParsedReference,
     segments: list[TranscriptSegment],
     lexicon: Lexicon,
+    fuzzy_matching_enabled: bool = True,
+    fuzzy_threshold: float = 0.70,
 ) -> int:
     """Save reference doc + alignment pairs + correction suggestions.
 
@@ -265,7 +269,12 @@ def _persist_reference_artifacts(
             if p.segment_index in seg_id_by_index
         )
 
-    engine = CorrectionEngine.from_reference(parsed, lexicon=lexicon)
+    engine = CorrectionEngine.from_reference(
+        parsed,
+        lexicon=lexicon,
+        fuzzy_matching_enabled=fuzzy_matching_enabled,
+        fuzzy_threshold=fuzzy_threshold,
+    )
     suggestions: list[CorrectionSuggestionRecord] = []
     for idx, seg in enumerate(segments):
         seg_id = seg_id_by_index.get(idx)
@@ -441,7 +450,13 @@ def run_transcribe(
                 )
                 if parsed_reference is not None:
                     correction_count = _persist_reference_artifacts(
-                        repo, job_id, parsed_reference, segments, lexicon
+                        repo,
+                        job_id,
+                        parsed_reference,
+                        segments,
+                        lexicon,
+                        fuzzy_matching_enabled=request.fuzzy_matching_enabled,
+                        fuzzy_threshold=request.fuzzy_threshold,
                     )
                     emit(
                         f"      원문 대조: 교정 후보 {correction_count}개 "

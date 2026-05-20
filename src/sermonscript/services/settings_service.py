@@ -29,6 +29,8 @@ class Settings:
     preset: str = DEFAULT_PRESET
     output_dir: str = ""  # empty -> resolved to <data_dir>/exports
     model_cache_dir: str = ""  # empty -> resolved to <data_dir>/models
+    fuzzy_matching_enabled: bool = True
+    fuzzy_threshold: float = 0.70
 
     def resolved_output_dir(self) -> Path:
         if self.output_dir:
@@ -84,7 +86,24 @@ class SettingsService:
                 f"알 수 없는 설정 키: {', '.join(unknown)}. "
                 f"사용 가능: {', '.join(sorted(_KNOWN_FIELDS))}"
             )
-        merged = replace(self.load(), **kwargs)  # type: ignore[arg-type]
+
+        # Enforce proper types for values that may come in as strings from CLI
+        converted: dict[str, object] = {}
+        for k, v in kwargs.items():
+            if k == "fuzzy_matching_enabled":
+                if isinstance(v, str):
+                    converted[k] = v.lower() in ("true", "1", "yes", "on")
+                else:
+                    converted[k] = bool(v)
+            elif k == "fuzzy_threshold":
+                try:
+                    converted[k] = float(v)  # type: ignore
+                except (ValueError, TypeError):
+                    raise ValueError(f"'{v}'는 유효한 float 임계값이 아닙니다.") from None
+            else:
+                converted[k] = v
+
+        merged = replace(self.load(), **converted)  # type: ignore[arg-type]
         self.save(merged)
         return merged
 

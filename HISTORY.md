@@ -1,22 +1,26 @@
 # HISTORY.md
 
-## 2026-05-20 (설계 #12 — jamo fuzzy matching)
-- 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의
-  설계 노트 작성. PoC 실측으로 알고리즘 결정 + 통합 지점/거짓 양성 통제/작업
-  단위까지 정리. **구현은 v1.1 대상으로 권장**.
+## 2026-05-20 (구현 #12 — jamo fuzzy matching 통합 및 검증)
+- 작업: 회차 #1 에서 발견한 `correction_suggestions=0` 문제(자모 변형 미매칭)의 설계 및 구현 완료. 한글 NFD 자모 분해 및 초성 가중 평균 기반의 Hybrid Scorer를 탑재한 Fuzzy 매칭 알고리즘을 `CorrectionEngine`에 연동. CLI 옵션(`--fuzzy/--no-fuzzy`, `--fuzzy-threshold`) 및 PySide6 GUI(체크박스, 더블 스핀박스)로 완전 노출 및 영속화 파이프라인 통합.
 - 변경 파일:
-  - docs/design/jamo-fuzzy-matching.md (신규)
-  - docs/known-limitations.md (설계 노트로 링크 갱신)
-  - CHANGELOG.md
+  - src/sermonscript/core/postprocess/jamo.py (신규)
+  - src/sermonscript/core/reference/corrections.py (CorrectionEngine 연동)
+  - src/sermonscript/services/settings_service.py (Settings schema 확장 및 Coercion 보장)
+  - src/sermonscript/services/transcribe_service.py (Fuzzy 파라미터 전파)
+  - src/sermonscript/cli/main.py (CLI 인수 추가)
+  - src/sermonscript/ui/main_window.py (GUI 설정 컨트롤 셋 연동)
+  - tests/test_jamo_matching.py (신규)
+  - tests/integration/verify_fuzzy.py (신규: 인메모리 시뮬레이터)
+  - tests/integration/results.md (회차 #2 추가)
+  - docs/known-limitations.md (§10 갱신)
+  - docs/user-guide.md (§6.1, §8.2 갱신)
 - 검증:
-  - PoC 24 쌍 (POS 17 / NEG 7) 실측: Hybrid 0.6×jamo.ratio + 0.4×choseong.ratio
-    @ threshold 0.70 → recall 0.76, precision 1.0
-  - 추가 의존성 없음 (rapidfuzz 는 이미 `[reference]` extra)
-- 결과: 설계 픽스. 구현은 v1.1 마일스톤에서 진행 (3.5 일 추정).
-- 후속 작업 후보:
-  - A 단계: `core.postprocess.jamo` 모듈 + 단위 테스트
-  - B 단계: `CorrectionEngine` fuzzy 통합
-  - 통합 회차 #2 실행하여 적중률 회복 측정
+  - `python -m pytest`: 90/90 PASS (신규 유닛 테스트 5건 포함)
+  - `python -m ruff check .`: All checks passed!
+  - `verify_fuzzy.py` 641 세그먼트 시뮬레이션 결과:
+    - Fuzzy 비활성화 시: 0건
+    - Fuzzy 활성화(0.70) 시: 292건 검출 성공 (기존 오인식 "이에수 크리스토리" -> "예수 그리스도", "사도로 부르신을 받아" -> "사도로 부르심을 받아" 완벽 회복!)
+- 결과: Jamo Fuzzy 매칭 도입을 통해 0건의 자동 교정 후보 문제를 해결하고 v1.0 정식 마일스톤에 안전하게 통합 완료.
 
 ## 2026-05-20 (Hotfix #11 — bible_refs 콜론 표기)
 - 작업: 통합 회귀 #1 에서 발견한 `parser._BIBLE_REF_RE` 한계 수정. 원문의

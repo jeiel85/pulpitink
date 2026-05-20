@@ -1,18 +1,32 @@
 # CHANGELOG.md
 
-## Unreleased - 2026-05-20 (Design note: jamo fuzzy matching)
+## Unreleased - 2026-05-20 (Feature: Korean Jamo-based Fuzzy Matching)
 
-### Documentation
-- `docs/design/jamo-fuzzy-matching.md` 신규: 자모(jamo) 기반 fuzzy 매칭의 문제 정의,
-  PoC 실측 (24 쌍, Hybrid scorer @ threshold 0.70 → recall 0.76, precision 1.0),
-  알고리즘 결정, `CorrectionEngine` 통합 지점, 거짓 양성 통제, 작업 단위 분해.
-- `docs/known-limitations.md` §10 — fuzzy matching 후속 작업이 v1.1 대상이며
-  설계 노트로 링크되도록 갱신.
+### Added
+- **한국어 자모(Jamo) Fuzzy 매칭 구현** (`src/sermonscript/core/postprocess/jamo.py`):
+  - 한글 유니코드 NFD 자모 분해(`jamo_seq`) 및 초성 추출(`choseong`) 헬퍼 구현.
+  - 자모 매칭 비율(60%) 및 초성 매칭 비율(40%)을 결합한 **Hybrid 유사도 Scorer** 탑재.
+  - 슬라이딩 윈도우 스캔 및 Double-pass Jamo ratio 검사(>= 50%)를 통한 거짓 양성(False Positive) 방지 및 최소 음절 길이 3 미만 게이트 적용.
+- **CorrectionEngine 연동** (`src/sermonscript/core/reference/corrections.py`):
+  - `CorrectionEngine` 파라미터로 `fuzzy_matching_enabled`와 `fuzzy_threshold` 추가.
+  - `suggestions_for`에서 고유명사 및 lexicon 단어들을 대상으로 Fuzzy 매치 수행 후 `reference+fuzzy:<score>` 소스의 `proper_noun` 제안 생성.
+- **설정 및 영속화 확장**:
+  - `Settings` 데이터클래스에 `fuzzy_matching_enabled`와 `fuzzy_threshold` 기본값(True, 0.70) 적용.
+  - `SettingsService` 및 `TranscribeRequest` 필드 연동 완료.
+- **CLI/GUI 제어 패널**:
+  - `sermonscript transcribe` CLI 인자 `--fuzzy/--no-fuzzy` 및 `--fuzzy-threshold` 추가.
+  - PySide6 GUI 설정 영역에 체크박스 및 더블 스핀박스(0.60~0.90) 위젯 연동 완료.
 
-### Decisions
-- 구현은 v1.0 출시 후 v1.1 마일스톤으로 권장 (총 ~3.5 일 추정).
-- 추가 외부 의존성 없음 (`rapidfuzz` 는 이미 `[reference]` extra, `unicodedata`
-  는 표준 라이브러리).
+### Improved
+- **문서화 갱신**:
+  - `docs/known-limitations.md`에 v1.0 릴리즈 패치 포함 및 작동 한계/우회방법 명시.
+  - `docs/user-guide.md`에 Fuzzy 매칭 원리, CLI/GUI 제어, 권장 임계값 가이드 추가.
+  - `tests/integration/results.md`에 통합 회차 #2 결과 기록 추가.
+
+### Tests
+- `tests/test_jamo_matching.py` 신규 작성 (자모 분해, 초성 추출, hybrid 유사도, 슬라이딩 윈도우 스캔 단위 테스트 5건).
+- `tests/integration/verify_fuzzy.py` 신규 작성 (실제 DB 세그먼트 데이터 641개에 대한 Fuzzy 효과 측정 검증 스크립트).
+- `python -m pytest`: 90/90 테스트 통과 완료.
 
 ## Unreleased - 2026-05-20 (Hotfix: bible_refs colon notation)
 

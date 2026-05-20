@@ -70,11 +70,15 @@ class CorrectionEngine:
         *,
         lexicon: Lexicon | None = None,
         proper_nouns: Iterable[str] = (),
+        fuzzy_matching_enabled: bool = True,
+        fuzzy_threshold: float = 0.70,
     ) -> None:
         self._lexicon = lexicon if lexicon is not None else default_lexicon()
         self._proper_nouns: tuple[str, ...] = tuple(
             sorted({n.strip() for n in proper_nouns if n and n.strip()}, key=len, reverse=True)
         )
+        self.fuzzy_matching_enabled = fuzzy_matching_enabled
+        self.fuzzy_threshold = fuzzy_threshold
 
     @classmethod
     def from_reference(
@@ -82,12 +86,23 @@ class CorrectionEngine:
         parsed: ParsedReference | None,
         *,
         lexicon: Lexicon | None = None,
+        fuzzy_matching_enabled: bool = True,
+        fuzzy_threshold: float = 0.70,
     ) -> CorrectionEngine:
         """Build an engine seeded with the reference's proper nouns."""
 
         if parsed is None:
-            return cls(lexicon=lexicon)
-        return cls(lexicon=lexicon, proper_nouns=parsed.proper_nouns)
+            return cls(
+                lexicon=lexicon,
+                fuzzy_matching_enabled=fuzzy_matching_enabled,
+                fuzzy_threshold=fuzzy_threshold,
+            )
+        return cls(
+            lexicon=lexicon,
+            proper_nouns=parsed.proper_nouns,
+            fuzzy_matching_enabled=fuzzy_matching_enabled,
+            fuzzy_threshold=fuzzy_threshold,
+        )
 
     def suggestions_for(self, segment_index: int, text: str) -> list[CorrectionCandidate]:
         """Return correction candidates for a single segment's raw text.
@@ -155,6 +170,20 @@ class CorrectionEngine:
                 snippet = _locate_proper_noun_snippet(text, name)
                 if snippet:
                     add("proper_noun", snippet, name, "reference")
+
+        # 4) Korean Jamo-based Fuzzy match (Proper Nouns and Lexicon Canonical terms)
+        if self.fuzzy_matching_enabled:
+            from sermonscript.core.postprocess.jamo import find_fuzzy_matches
+            candidates = list(self._proper_nouns) + list(self._lexicon.entries.keys())
+            matches = find_fuzzy_matches(
+                text=text,
+                candidates=candidates,
+                threshold=self.fuzzy_threshold,
+            )
+            for snippet, candidate, score in matches:
+                if candidate in text:
+                    continue
+                add("proper_noun", snippet, candidate, f"reference+fuzzy:{score:.2f}")
 
         return out
 

@@ -11,7 +11,9 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
+    QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
     QGroupBox,
@@ -180,6 +182,18 @@ class MainWindow(QMainWindow):
         wrapper.setLayout(output_row)
         form.addRow("출력 폴더", wrapper)
 
+        self.fuzzy_checkbox = QCheckBox("자모 Fuzzy 매칭 활성화")
+        self.fuzzy_checkbox.setChecked(self._settings.fuzzy_matching_enabled)
+        form.addRow("Fuzzy 매칭", self.fuzzy_checkbox)
+
+        self.fuzzy_spin = QDoubleSpinBox()
+        self.fuzzy_spin.setRange(0.60, 0.90)
+        self.fuzzy_spin.setSingleStep(0.05)
+        self.fuzzy_spin.setValue(self._settings.fuzzy_threshold)
+        self.fuzzy_spin.setEnabled(self._settings.fuzzy_matching_enabled)
+        self.fuzzy_checkbox.toggled.connect(self.fuzzy_spin.setEnabled)
+        form.addRow("Fuzzy 임계값", self.fuzzy_spin)
+
         group.setLayout(form)
         return group
 
@@ -270,6 +284,8 @@ class MainWindow(QMainWindow):
         model = self.model_combo.currentData()
         preset = self.preset_combo.currentData()
         output_dir = Path(self.output_label.text())
+        fuzzy_enabled = self.fuzzy_checkbox.isChecked()
+        fuzzy_threshold = self.fuzzy_spin.value()
 
         # Persist the latest choices so the next launch starts from where the user left off.
         try:
@@ -278,6 +294,8 @@ class MainWindow(QMainWindow):
                 model=model,
                 preset=preset,
                 output_dir=str(output_dir),
+                fuzzy_matching_enabled=fuzzy_enabled,
+                fuzzy_threshold=fuzzy_threshold,
             )
         except KeyError:
             pass
@@ -295,6 +313,8 @@ class MainWindow(QMainWindow):
                 ExportFormat.SRT,
                 ExportFormat.VTT,
             ),
+            fuzzy_matching_enabled=fuzzy_enabled,
+            fuzzy_threshold=fuzzy_threshold,
         )
 
         self.log_view.clear()

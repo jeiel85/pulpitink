@@ -168,10 +168,24 @@ def transcribe(
         "--cache-root",
         help="전처리 결과(processed.wav)를 저장할 cache/jobs 경로",
     ),
+    fuzzy: bool = typer.Option(
+        None,
+        "--fuzzy/--no-fuzzy",
+        help="자모 Fuzzy 매칭 활성화 여부 (지정하지 않으면 사용자 설정 사용)",
+    ),
+    fuzzy_threshold: float = typer.Option(
+        None,
+        "--fuzzy-threshold",
+        help="자모 Fuzzy 매칭 임계값 (0.6 ~ 0.9) (지정하지 않으면 사용자 설정 사용)",
+    ),
 ) -> None:
     """로컬 오디오 파일을 전처리 → STT → Export 파이프라인으로 변환합니다."""
 
     formats = _parse_formats(fmt)
+    settings = SettingsService().load()
+
+    actual_fuzzy = fuzzy if fuzzy is not None else settings.fuzzy_matching_enabled
+    actual_threshold = fuzzy_threshold if fuzzy_threshold is not None else settings.fuzzy_threshold
 
     request = TranscribeRequest(
         input_path=input_path,
@@ -188,6 +202,8 @@ def transcribe(
         cache_root=cache_root,
         reference_path=reference,
         user_dict_path=user_dict,
+        fuzzy_matching_enabled=actual_fuzzy,
+        fuzzy_threshold=actual_threshold,
     )
 
     def progress(msg: str) -> None:
