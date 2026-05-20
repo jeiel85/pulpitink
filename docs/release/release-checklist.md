@@ -49,8 +49,10 @@
 - [x] GitHub Actions `build-windows.yml` 가 태그 푸시에서 정상 동작 (2026-05-20, `v0.3.0`)
 - [x] GitHub Release 자동 생성 규칙 정의 (2026-05-20, `build-windows.yml`)
 - [x] SHA256 checksum artifact 생성 규칙 정의 (2026-05-20, `SHA256SUMS.txt`)
-- [ ] 앱 아이콘 포함 (선택)
-- [x] pyproject.toml 버전 업데이트 (2026-05-20, v0.4.0 및 v0.4.1)
+- [x] 앱 아이콘 포함 (2026-05-20, v0.4.3에서 `src/pulpitink/resources/pulpitink.ico` 탑재 및 PyInstaller spec 바인딩 완료)
+- [x] Inno Setup 기반 Windows 설치 관리자 빌드 스크립트 (2026-05-20, v0.4.5, `scripts/create_installer.ps1` + `scripts/pulpitink.iss`. 코드 서명은 미적용)
+- [x] 1시간 오디오 스트레스 테스트 / 성능 프로파일 보고서 (2026-05-20, v0.4.5, `docs/performance-profile.md`)
+- [x] pyproject.toml 버전 업데이트 (2026-05-20, v0.4.0 ~ v0.4.5)
 - [x] CHANGELOG.md / HISTORY.md 업데이트 (2026-05-20)
 
 ## Documentation

@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (yt-dlp 자동설치 UI · 성능 프로파일 · Inno Setup 인스톨러 도입 및 v0.4.5 패치 릴리즈)
+- 작업: GUI 저작권 Disclaimer 다이얼로그에 yt-dlp 자동 진단/원클릭 설치 UI를 통합하고 백그라운드 워커 스레드로 UI 프리즈를 해소, 1시간 오디오 스트레스 테스트 스크립트 및 실측 성능 프로파일 보고서 추가, Windows 정식 설치 관리자(Inno Setup .exe) 빌드 스크립트 도입, 관련 단위 테스트 5건 보강 및 v0.4.5 패치 릴리즈.
+- 변경 파일:
+  - src/pulpitink/core/audio/youtube_downloader.py (is_yt_dlp_available / install_yt_dlp 헬퍼 추가, pip 서브프로세스 호출 구현)
+  - src/pulpitink/ui/main_window.py (YtdlpInstallWorker QThread 및 DisclaimerDialog 상태 라벨/원클릭 설치 버튼/완료 콜백 통합)
+  - src/pulpitink/core/utils/i18n.py (yt-dlp 자동 설치 흐름용 ko↔en 번역 키 8종 추가)
+  - tests/test_youtube.py (install_yt_dlp 성공/실패 + is_yt_dlp_available 진단 단위 테스트 4건 추가)
+  - tests/test_i18n.py (신규 yt-dlp 번역 키 회귀 테스트 1건 추가)
+  - scripts/stress_test.py (신규: 3600초 무음 WAV 합성 후 transcribe 파이프라인 실행 및 psutil 기반 CPU/RSS 샘플러)
+  - docs/performance-profile.md (신규: tiny 모델 기준 1시간 처리 실측 보고서 — 14.07x 실시간, RSS 1014MB)
+  - scripts/pulpitink.iss (신규: PulpitInk Inno Setup 설치 본체 스크립트 — 다국어 한국어/영어, 데스크탑 아이콘 옵션, 64bit Program Files 설치 대상)
+  - scripts/create_installer.ps1 (신규: pyproject.toml 버전 자동 감지 후 ISCC.exe 호출, 미설치 시 사용자에게 다운로드 링크 안내)
+  - pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md, HISTORY.md (버전 범프 v0.4.5 및 릴리즈 이력 작성)
+  - docs/known-limitations.md (§4 패키징: Inno Setup 인스톨러 제공 명시, 코드 서명 미적용은 한계로 별도 명시)
+  - docs/release/release-checklist.md (앱 아이콘 체크 + Inno Setup 인스톨러 항목 반영)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `python -m pytest`: 115/115 PASS (신규 5건 포함 전체 100% 통과)
+- 결과: 성공. YouTube 다운로드 진입 장벽을 GUI 자동 설치로 제거하고 1시간 오디오 실측 자료를 공식 문서로 남겨 사용자 환경 추천을 객관화했으며, Portable ZIP 외에 정식 설치 관리자 산출물을 추가로 제공할 수 있는 빌드 인프라를 v0.4.5 패치로 출시 준비 완료.
+
 ## 2026-05-20 (중장기 로드맵 핵심 구현 및 v0.4.4 패치 릴리즈)
 - 작업: 무음구간 갭 기반 Heuristic 화자 분리(Diarization) 파이프라인 설계 및 CLI/GUI 연동, GUI 편집기 내 "화자" 편집 열(Column) 추가 및 실시간 SQLite DB 영속성 수정 저장 연동, 경량 i18n 번역 프레임워크 설계 및 실시간 영한 UI 토글 구현, yt-dlp 기반 YouTube 비동기 다운로드 및 GUI 저작권 Disclaimer 동의 UI 연동, 관련 단위 테스트(tests/test_diarizer.py, tests/test_youtube.py, tests/test_i18n.py) 9건 보강 완료.
 - 변경 파일:

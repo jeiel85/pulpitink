@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## [0.4.5] - 2026-05-20
+
+### Added
+- **yt-dlp 자동 진단/원클릭 설치 UI**: YouTube 저작권 Disclaimer 다이얼로그에 `yt-dlp` 라이브러리 설치 상태를 자동 진단하는 상태 라벨과 백그라운드 워커 스레드(`YtdlpInstallWorker`) 기반의 원클릭 자동 설치 버튼을 추가하여, 사용자가 터미널 명령 없이 GUI에서 직접 `pip install yt-dlp`를 안전하게 실행할 수 있도록 통합하였습니다. 설치 진행 중에도 UI가 프리즈되지 않습니다.
+- **1시간 오디오 스트레스 테스트 및 실측 성능 프로파일 보고서**: `scripts/stress_test.py`로 3600초 무음 WAV를 합성하여 전체 STT 파이프라인을 구동하고 `psutil`로 CPU/RSS를 샘플링한 뒤 `docs/performance-profile.md`로 결과를 자동 출력합니다. tiny 모델 기준 실측 결과는 14.07x 실시간, 평균 CPU 11.84%, 피크 RSS 1014.32 MB입니다.
+- **Inno Setup 기반 Windows 인스톨러 빌드 스크립트**: `scripts/pulpitink.iss`(다국어 한국어/영어, 데스크탑 아이콘 옵션, 64bit Program Files 설치)와 `scripts/create_installer.ps1`(pyproject.toml 버전 자동 감지 후 ISCC.exe 호출, 미설치 시 다운로드 안내)을 추가하여 Portable ZIP 외에 정식 설치 관리자(.exe) 산출물을 생성할 수 있게 되었습니다. 단, 코드 서명은 미적용입니다.
+
+### Tests
+- `tests/test_youtube.py`에 `install_yt_dlp` 성공/실패 및 `is_yt_dlp_available` 진단 경로 단위 테스트 4건 추가.
+- `tests/test_i18n.py`에 yt-dlp 자동 설치 흐름용 신규 ko↔en 번역 키 회귀 테스트 1건 추가.
+- `python -m pytest`: 115/115 PASS
+- `python -m ruff check .`: PASS
+
 ## [0.4.4] - 2026-05-20
 
 ### Added
