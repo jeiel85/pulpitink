@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-20 (브랜딩 — 전체 리네이밍 실행)
+- 작업: SermonScript → 설교필기 (PulpitInk) 전체 브랜딩 일괄 반영.
+- 변경 범위: 109개 파일 (774 insertions, 652 deletions)
+  - Python 패키지: `src/sermonscript/` → `src/pulpitink/`, 모든 import/클래스명/상수 변경
+  - PyInstaller: `sermonscript.spec` → `pulpitink.spec`, `sermonscript-sidecar.spec` → `pulpitink-sidecar.spec`
+  - CLI: `sermonscript` → `pulpitink` 명령
+  - GUI: 타이틀바 `설교필기 (PulpitInk)`, 다이얼로그 제목 `설교필기`
+  - 빌드/CI: 환경변수 `PULPITINK_ROOT`, 산출물 `PulpitInk_Portable_*.zip`
+  - GitHub: 저장소 `jeiel85/sermon-script` → `jeiel85/pulpitink` 리네이밍 완료
+  - 문서: README, AGENTS, CHANGELOG, HISTORY, user-guide 등 30+ 문서 갱신
+  - 테스트: 모든 import/참조 갱신
+- 검증:
+  - `ruff check .`: All checks passed
+  - `pytest`: 95/95 passed (2.69s)
+  - `pip install -e ".[dev]"`: pulpitink-0.3.0 설치 성공
+- 결과: 성공. GitHub 저장소 리네이밍 및 원격 URL 변경 완료.
+- 후속 작업:
+  - 로컬 폴더명 변경 (`sermon-script` → `pulpitink`) — IDE/프로세스 잠금 해제 후 수동 진행 필요
+  - GitHub Pages 설정 확인 (새 URL: `jeiel85.github.io/pulpitink`)
+
 ## 2026-05-20 (브랜딩 — 앱 정식 명칭 확정)
 - 작업: 이전 세션(993b96d1)에서 논의된 앱 이름 한글화 후보 5개에 대해 브랜드 충돌 조사를 실시하고, 최종 이름을 확정.
 - 조사 결과:

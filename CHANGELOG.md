@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-20 (Branding: 설교필기 PulpitInk 전체 리네이밍)
+
+### Changed
+- 프로젝트 전체 브랜딩을 **SermonScript**에서 **설교필기 (PulpitInk)** 로 변경했습니다.
+- Python 패키지명: `sermonscript` → `pulpitink`, CLI 명령: `pulpitink`
+- GUI 타이틀바: `설교필기 (PulpitInk)`, QMessageBox 다이얼로그: `설교필기`
+- 클래스: `SermonScriptError` → `PulpitInkError`
+- PyInstaller spec: `pulpitink.spec`, `pulpitink-sidecar.spec`
+- 빌드 산출물: `PulpitInk_Portable_*.zip`, EXE: `PulpitInk.exe`
+- GitHub 저장소: `jeiel85/sermon-script` → `jeiel85/pulpitink`
+- 데이터 경로: `%LOCALAPPDATA%\PulpitInk\PulpitInk\`
+- DB/로그: `pulpitink.db`, `pulpitink.log`
+- 환경변수: `PULPITINK_ROOT`
+
+### Tests
+- `ruff check .`: All checks passed
+- `pytest`: 95/95 passed
+
 ## Unreleased - 2026-05-20 (Documentation: README repository guide)
 
 ### Changed
