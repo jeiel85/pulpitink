@@ -48,7 +48,7 @@
 ## Phase 0: 저장소 초기화
 
 - [ ] pyproject.toml 작성
-- [ ] src/pulpitink 패키지 생성
+- [ ] src/pulpit_ink 패키지 생성
 - [ ] Typer CLI 생성
 - [ ] PulpitInk doctor 구현
 - [ ] pytest/ruff 설정

@@ -6,13 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from pulpitink.storage.database import (
+from pulpit_ink.storage.database import (
     SCHEMA_VERSION,
     connect,
     get_schema_version,
     initialise_database,
 )
-from pulpitink.storage.job_repository import (
+from pulpit_ink.storage.job_repository import (
     AlignmentPairRecord,
     CorrectionSuggestionRecord,
     ExportRecord,

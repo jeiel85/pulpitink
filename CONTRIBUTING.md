@@ -3,12 +3,12 @@
 ## Development Setup
 
 ```bash
-git clone https://github.com/yourname/pulpitink.git
-cd pulpitink
+git clone https://github.com/yourname/pulpit_ink.git
+cd pulpit-ink
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
-pulpitink doctor
+pulpit-ink doctor
 ```
 
 ## Commit Style

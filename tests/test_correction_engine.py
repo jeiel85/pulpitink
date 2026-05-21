@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pulpitink.core.postprocess import Lexicon
-from pulpitink.core.reference.corrections import (
+from pulpit_ink.core.postprocess import Lexicon
+from pulpit_ink.core.reference.corrections import (
     CorrectionEngine,
     apply_correction_to_segment,
 )
-from pulpitink.core.reference.parser import ParsedReference
+from pulpit_ink.core.reference.parser import ParsedReference
 
 
 def test_engine_suggests_bible_reference_normalisation() -> None:

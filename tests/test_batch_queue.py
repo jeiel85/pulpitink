@@ -12,8 +12,8 @@ except ImportError:
 
 pytestmark = pytest.mark.skipif(not PYSIDE6_AVAILABLE, reason="PySide6 is not installed")
 
-from pulpitink.services.transcribe_service import TranscribeResult  # noqa: E402
-from pulpitink.ui.main_window import MainWindow  # noqa: E402
+from pulpit_ink.services.transcribe_service import TranscribeResult  # noqa: E402
+from pulpit_ink.ui.main_window import MainWindow  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -25,9 +25,9 @@ def q_app():
 
 
 def test_batch_queue_sequential_flow(q_app):
-    with patch("pulpitink.ui.main_window.start_worker") as mock_start_worker, \
-         patch("pulpitink.ui.main_window.connect"), \
-         patch("pulpitink.ui.main_window.initialise_database"):
+    with patch("pulpit_ink.ui.main_window.start_worker") as mock_start_worker, \
+         patch("pulpit_ink.ui.main_window.connect"), \
+         patch("pulpit_ink.ui.main_window.initialise_database"):
 
         mock_thread = MagicMock()
         mock_worker = MagicMock()
@@ -87,9 +87,9 @@ def test_batch_queue_sequential_flow(q_app):
 
 
 def test_batch_queue_continuous_on_failure(q_app):
-    with patch("pulpitink.ui.main_window.start_worker") as mock_start_worker, \
-         patch("pulpitink.ui.main_window.connect"), \
-         patch("pulpitink.ui.main_window.initialise_database"), \
+    with patch("pulpit_ink.ui.main_window.start_worker") as mock_start_worker, \
+         patch("pulpit_ink.ui.main_window.connect"), \
+         patch("pulpit_ink.ui.main_window.initialise_database"), \
          patch("PySide6.QtWidgets.QMessageBox.warning"):
 
         mock_thread = MagicMock()
@@ -116,9 +116,9 @@ def test_batch_queue_continuous_on_failure(q_app):
 
 
 def test_batch_queue_cancellation(q_app):
-    with patch("pulpitink.ui.main_window.start_worker") as mock_start_worker, \
-         patch("pulpitink.ui.main_window.connect"), \
-         patch("pulpitink.ui.main_window.initialise_database"), \
+    with patch("pulpit_ink.ui.main_window.start_worker") as mock_start_worker, \
+         patch("pulpit_ink.ui.main_window.connect"), \
+         patch("pulpit_ink.ui.main_window.initialise_database"), \
          patch("PySide6.QtWidgets.QMessageBox.question") as mock_question:
 
         mock_question.return_value = QMessageBox.StandardButton.Yes

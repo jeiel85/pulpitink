@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pulpitink.core.utils.i18n import get_language, set_language, tr
+from pulpit_ink.core.utils.i18n import get_language, set_language, tr
 
 
 def test_i18n_default_language() -> None:

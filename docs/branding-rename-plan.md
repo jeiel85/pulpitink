@@ -31,21 +31,21 @@
 **PulpitInk 상세**:
 - "PulpitInk"은 팟캐스트 에피소드 제목 구문의 일부로만 등장 (소프트웨어 브랜드 아님)
 - "설교필기"를 앱 이름으로 사용하는 제품 없음
-- 도메인(`pulpitink.com` 등) 가용성은 추가 확인 필요
+- 도메인(`pulpit_ink.com` 등) 가용성은 추가 확인 필요
 
 ---
 
 ## 3. 미결 사항 (실행 전 확인 필요)
 
 ### Q1. GitHub 저장소 이름 변경 여부
-- 현재: `jeiel85/pulpitink`
-- 옵션 A: `jeiel85/pulpitink`로 변경 (기존 URL은 GitHub이 리다이렉트)
+- 현재: `jeiel85/pulpit-ink`
+- 옵션 A: `jeiel85/pulpit-ink`로 변경 (기존 URL은 GitHub이 리다이렉트)
 - 옵션 B: 유지 (내부 이름만 변경)
 - **영향**: CI 설정, 외부 링크, README 배지 등
 
 ### Q2. Python 패키지명 변경 여부
-- 현재: `pip install pulpitink`, CLI 명령 `PulpitInk`
-- 옵션 A: `pip install pulpitink`, CLI 명령 `pulpitink`
+- 현재: `pip install pulpit-ink`, CLI 명령 `PulpitInk`
+- 옵션 A: `pip install pulpit-ink`, CLI 명령 `pulpit-ink`
 - 옵션 B: 패키지명/CLI 유지, 표시 이름만 변경
 - **참고**: PyPI에 아직 미배포 상태라면 자유롭게 변경 가능
 
@@ -79,15 +79,15 @@
 | 파일 | 변경 내용 |
 |------|-----------|
 | `pyproject.toml` | `project.description`, `project.urls` (name은 Q2 답변에 따라) |
-| `src/pulpitink/__init__.py` | `APP_NAME` 상수 |
-| `src/pulpitink/cli/main.py` | CLI 헤더/배너 |
-| `src/pulpitink/app/main.py` | 윈도우 타이틀 |
+| `src/pulpit_ink/__init__.py` | `APP_NAME` 상수 |
+| `src/pulpit_ink/cli/main.py` | CLI 헤더/배너 |
+| `src/pulpit_ink/app/main.py` | 윈도우 타이틀 |
 
 ### 4.4 Windows 빌드 / 패키징
 
 | 파일 | 변경 내용 |
 |------|-----------|
-| `pulpitink.spec` | EXE 이름 |
+| `pulpit-ink.spec` | EXE 이름 |
 | `scripts/build_windows.ps1` | 출력 파일명 |
 | `scripts/make_portable_zip.ps1` | ZIP 파일명 |
 | `.github/workflows/build-windows.yml` | artifact 이름, Release 산출물 |

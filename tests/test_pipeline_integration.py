@@ -12,13 +12,13 @@ from pathlib import Path
 
 import pytest
 
-from pulpitink.core.export.base import ExportFormat
-from pulpitink.core.transcription.base import (
+from pulpit_ink.core.export.base import ExportFormat
+from pulpit_ink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from pulpitink.services.transcribe_service import (
+from pulpit_ink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )

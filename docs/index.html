@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="pulpitink는 설교, 강의, 회의 녹음을 로컬 PC에서 텍스트로 변환하고 검수, 편집, 출력까지 지원하는 Windows 데스크톱 STT 앱입니다."
+      content="pulpit-ink는 설교, 강의, 회의 녹음을 로컬 PC에서 텍스트로 변환하고 검수, 편집, 출력까지 지원하는 Windows 데스크톱 STT 앱입니다."
     />
-    <meta property="og:title" content="pulpitink" />
+    <meta property="og:title" content="pulpit-ink" />
     <meta
       property="og:description"
       content="설교, 강의, 회의 녹음을 당신의 PC 안에서 안전하게 텍스트로 변환하세요."
@@ -15,9 +15,9 @@
     <meta property="og:type" content="website" />
     <meta
       property="og:image"
-      content="https://jeiel85.github.io/pulpitink/assets/pulpitink-landing.png"
+      content="https://jeiel85.github.io/pulpit-ink/assets/pulpit-ink-landing.png"
     />
-    <title>pulpitink | 로컬 우선 설교 STT 데스크톱 앱</title>
+    <title>pulpit-ink | 로컬 우선 설교 STT 데스크톱 앱</title>
     <style>
       :root {
         color-scheme: dark;
@@ -68,7 +68,7 @@
         inset: 0;
         background:
           linear-gradient(90deg, rgba(4, 13, 29, 0.92) 0%, rgba(4, 13, 29, 0.62) 42%, rgba(4, 13, 29, 0.15) 100%),
-          url("assets/pulpitink-landing.png") center / cover no-repeat;
+          url("assets/pulpit-ink-landing.png") center / cover no-repeat;
         z-index: -2;
       }
 
@@ -357,28 +357,28 @@
   <body>
     <header class="hero">
       <nav class="nav" aria-label="주요 링크">
-        <a class="brand" href="https://github.com/jeiel85/pulpitink">
+        <a class="brand" href="https://github.com/jeiel85/pulpit-ink">
           <span class="brand-mark">S</span>
-          <span>pulpitink</span>
+          <span>pulpit-ink</span>
         </a>
         <div class="nav-links">
           <a href="#features">기능</a>
           <a href="#start">시작하기</a>
-          <a href="https://github.com/jeiel85/pulpitink/releases">다운로드</a>
-          <a href="https://github.com/jeiel85/pulpitink">GitHub</a>
+          <a href="https://github.com/jeiel85/pulpit-ink/releases">다운로드</a>
+          <a href="https://github.com/jeiel85/pulpit-ink">GitHub</a>
         </div>
       </nav>
       <div class="hero-copy">
-        <h1>pulpitink</h1>
+        <h1>pulpit-ink</h1>
         <p class="headline">설교·강의·회의 녹음을 <strong>로컬에서 텍스트로</strong></p>
         <p class="subcopy">
           faster-whisper와 FFmpeg 기반의 Windows 데스크톱 STT 앱입니다. 긴 녹음을 전처리하고,
           세그먼트별로 검수한 뒤 TXT, JSON, Markdown, SRT, VTT, CSV로 내보냅니다.
         </p>
         <div class="actions">
-          <a class="button primary" href="https://github.com/jeiel85/pulpitink/releases">Portable ZIP 받기</a>
-          <a class="button" href="https://github.com/jeiel85/pulpitink#readme">README 보기</a>
-          <a class="button" href="https://github.com/jeiel85/pulpitink/blob/main/docs/user-guide.md">사용자 가이드</a>
+          <a class="button primary" href="https://github.com/jeiel85/pulpit-ink/releases">Portable ZIP 받기</a>
+          <a class="button" href="https://github.com/jeiel85/pulpit-ink#readme">README 보기</a>
+          <a class="button" href="https://github.com/jeiel85/pulpit-ink/blob/main/docs/user-guide.md">사용자 가이드</a>
         </div>
       </div>
     </header>
@@ -406,7 +406,7 @@
       <section class="section" id="features">
         <h2>검수까지 생각한 로컬 STT 워크플로우</h2>
         <p class="section-lead">
-          pulpitink는 단순히 음성을 텍스트로 바꾸는 데서 멈추지 않습니다. 원본을 보존하고,
+          pulpit-ink는 단순히 음성을 텍스트로 바꾸는 데서 멈추지 않습니다. 원본을 보존하고,
           사람이 확인해야 하는 부분을 남기며, 편집 결과가 export에 반영되도록 설계했습니다.
         </p>
         <div class="feature-grid">
@@ -445,14 +445,14 @@
         </p>
         <div class="workflow">
           <div class="code-panel">
-            <pre>git clone https://github.com/jeiel85/pulpitink.git
-cd pulpitink
+            <pre>git clone https://github.com/jeiel85/pulpit-ink.git
+cd pulpit-ink
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[gui,reference,dev]"
 
-pulpitink doctor
-python -m pulpitink.app.main</pre>
+pulpit-ink doctor
+python -m pulpit_ink.app.main</pre>
           </div>
           <div class="scope-panel">
             <ul class="scope-list">
@@ -467,9 +467,9 @@ python -m pulpitink.app.main</pre>
     </main>
 
     <footer class="footer">
-      <strong>pulpitink</strong><br />
+      <strong>pulpit-ink</strong><br />
       Apache-2.0 오픈소스 프로젝트 ·
-      <a href="https://github.com/jeiel85/pulpitink">GitHub 저장소</a>
+      <a href="https://github.com/jeiel85/pulpit-ink">GitHub 저장소</a>
     </footer>
   </body>
 </html>

@@ -46,7 +46,7 @@ GitHub Public 저장소로 개발 가능한 프로젝트 골격을 만들고, GU
 
 구현 요구사항 A: 프로젝트 구조
 1. pyproject.toml 기반 Python 프로젝트 구조를 만든다.
-2. src/pulpitink 패키지 구조를 만든다.
+2. src/pulpit_ink 패키지 구조를 만든다.
 3. 다음 디렉터리 구조를 준비한다.
    - app/
    - cli/
@@ -278,7 +278,7 @@ Goal 1에서 CLI 기반 오디오 전처리, faster-whisper STT, TXT/JSON/Markdo
 11. 실제 모델 다운로드 구현이 과도하면 지원 모델 목록과 캐시 경로까지만 구현하고 후속 작업으로 기록한다.
 
 구현 요구사항 C: PySide6 GUI 기본
-1. python -m pulpitink.app.main 으로 GUI를 실행할 수 있게 한다.
+1. python -m pulpit_ink.app.main 으로 GUI를 실행할 수 있게 한다.
 2. main_window.py를 구현한다.
 3. 메인 화면 구성:
    - 파일 추가 버튼
@@ -344,7 +344,7 @@ Goal 1에서 CLI 기반 오디오 전처리, faster-whisper STT, TXT/JSON/Markdo
 - PulpitInk jobs show 실행 가능
 - PulpitInk settings show 실행 가능
 - PulpitInk models list 실행 가능
-- python -m pulpitink.app.main 실행 가능
+- python -m pulpit_ink.app.main 실행 가능
 - MP3/M4A/WAV 파일 GUI 추가 가능
 - GUI에서 변환 시작 가능
 - 변환 중 UI가 멈추지 않음

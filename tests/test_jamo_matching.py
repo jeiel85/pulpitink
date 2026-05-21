@@ -6,8 +6,8 @@ import unicodedata
 
 import pytest
 
-from pulpitink.core.postprocess import jamo
-from pulpitink.core.postprocess.jamo import (
+from pulpit_ink.core.postprocess import jamo
+from pulpit_ink.core.postprocess.jamo import (
     choseong,
     find_fuzzy_matches,
     hybrid_similarity,

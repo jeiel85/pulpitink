@@ -17,7 +17,7 @@
 ### 실행 명령
 
 ```powershell
-python -X utf8 -m pulpitink.cli.main transcribe `
+python -X utf8 -m pulpit_ink.cli.main transcribe `
   "D:\Media\2026-05-13 수요밤설교 _ 로마서 1장 1-15절 _ 로마서의 서론.mp3" `
   --reference tests/integration/fixtures/sermon.md `
   --language ko --model small --preset sermon `

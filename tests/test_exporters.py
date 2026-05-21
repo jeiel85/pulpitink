@@ -3,7 +3,7 @@ import io
 import json
 from pathlib import Path
 
-from pulpitink.core.export import (
+from pulpit_ink.core.export import (
     CsvExporter,
     ExportFormat,
     JsonExporter,
@@ -12,10 +12,10 @@ from pulpitink.core.export import (
     TxtExporter,
     VttExporter,
 )
-from pulpitink.core.export.base import ExportRequest
-from pulpitink.core.export.csv_exporter import CSV_COLUMNS
-from pulpitink.core.export.pipeline import ExportPipeline
-from pulpitink.core.transcription.base import (
+from pulpit_ink.core.export.base import ExportRequest
+from pulpit_ink.core.export.csv_exporter import CSV_COLUMNS
+from pulpit_ink.core.export.pipeline import ExportPipeline
+from pulpit_ink.core.transcription.base import (
     TranscriptionResult,
     TranscriptSegment,
     segment_display_text,

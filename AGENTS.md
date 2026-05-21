@@ -8,15 +8,15 @@
 
 ```text
 Project Name: PulpitInk
-Repository: https://github.com/jeiel85/pulpitink.git
+Repository: https://github.com/jeiel85/pulpit-ink.git
 Main Branch: main
 Primary Spec: docs/product-spec.md
 History Document: HISTORY.md
 Changelog: CHANGELOG.md
 Task Document: docs/roadmap-tasks.md
 Decision Log: docs/decision-log.md
-Version Files: pyproject.toml, src/pulpitink/__init__.py, CHANGELOG.md
-Build/Test Commands: pytest, ruff check ., pulpitink doctor
+Version Files: pyproject.toml, src/pulpit_ink/__init__.py, CHANGELOG.md
+Build/Test Commands: pytest, ruff check ., pulpit-ink doctor
 Release Trigger: tag push
 CI System: GitHub Actions
 Expected Assets: EXE, ZIP
@@ -189,7 +189,7 @@ git status
 ```bash
 ruff check .
 pytest
-pulpitink doctor
+pulpit-ink doctor
 ```
 
 실행하지 않은 테스트를 성공한 것처럼 기록하지 않습니다.

@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Expects dist/PulpitInk/ to exist (produced by PyInstaller running
-    pulpitink.spec). Resolves the project version from pyproject.toml
+    pulpit-ink.spec). Resolves the project version from pyproject.toml
     unless overridden via -Version, then writes the ZIP to dist/.
 
     The archive intentionally excludes FFmpeg binaries and STT model
@@ -58,11 +58,11 @@ $readmePath = Join-Path $BuildDir "PORTABLE-README.txt"
 
 2. STT 모델
    - faster-whisper 가 처음 실행 시 huggingface 에서 자동으로 다운로드합니다.
-   - 오프라인 환경에서는 pulpitink settings 명령으로 model_cache_dir 을 지정하세요.
+   - 오프라인 환경에서는 pulpit-ink settings 명령으로 model_cache_dir 을 지정하세요.
 
 3. 실행
    - PulpitInk.exe (GUI)
-   - pulpitink (CLI) — 별도 wheel 설치 또는 ``python -m pulpitink.cli.main`` 사용
+   - pulpit-ink (CLI) — 별도 wheel 설치 또는 ``python -m pulpit_ink.cli.main`` 사용
 
 자세한 내용은 docs/release/release-checklist.md 와 THIRD_PARTY_NOTICES.md 를 참고하세요.
 "@ | Set-Content -Path $readmePath -Encoding UTF8

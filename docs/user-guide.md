@@ -35,8 +35,8 @@ FFmpeg 가 설치되어 있지 않다면 [공식 빌드](https://www.gyan.dev/ff
 ### 1.2 소스로 설치
 
 ```powershell
-git clone https://github.com/jeiel85/pulpitink.git
-cd pulpitink
+git clone https://github.com/jeiel85/pulpit-ink.git
+cd pulpit-ink
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[gui,reference,dev]"
@@ -146,7 +146,7 @@ CSV 는 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM 으로 저장되며
 ## 4. GUI 변환 워크플로우
 
 ```powershell
-python -m pulpitink.app.main
+python -m pulpit_ink.app.main
 ```
 
 1. 좌측 패널에 파일을 드래그 앤 드롭하거나 “파일 추가” 로 선택합니다.
@@ -155,7 +155,7 @@ python -m pulpitink.app.main
 4. 진행률 / 로그 영역에서 단계별 상태를 확인합니다.
 5. 변환이 끝나면 결과 미리보기 패널에 텍스트가 표시되고, 같은 창의 “편집기” 탭에서 세그먼트를 열 수 있습니다.
 
-GUI 가 시작하지 않고 `PySide6가 설치되어 있지 않습니다` 안내가 나오면 `pip install "pulpitink[gui]"` 를 실행하세요.
+GUI 가 시작하지 않고 `PySide6가 설치되어 있지 않습니다` 안내가 나오면 `pip install "pulpit-ink[gui]"` 를 실행하세요.
 
 ---
 
@@ -300,7 +300,7 @@ Windows 기본 경로 (사용자 디렉터리 안):
 
 백업이 필요한 파일:
 
-- `pulpitink.sqlite3` — 모든 작업/세그먼트/교정 기록
+- `pulpit_ink.sqlite3` — 모든 작업/세그먼트/교정 기록
 - `settings.json` — 사용자 설정
 - 필요하다면 모델 캐시(`models/`) — 다시 다운로드받아도 무방하지만 시간이 걸립니다
 
@@ -313,7 +313,7 @@ Windows 기본 경로 (사용자 디렉터리 안):
 | 증상 | 원인 / 해결 |
 | --- | --- |
 | `FFmpeg 가 설치되어 있지 않습니다` | PATH 에 `ffmpeg` 추가 후 새 PowerShell 창을 열고 `ffmpeg -version` 확인 |
-| `PySide6가 설치되어 있지 않습니다` | `pip install "pulpitink[gui]"` |
+| `PySide6가 설치되어 있지 않습니다` | `pip install "pulpit-ink[gui]"` |
 | CUDA 모델이 메모리 부족으로 실패 | `--device cpu --compute-type int8` 로 다운그레이드하거나 모델 크기를 낮춤 |
 | 변환이 매우 느림 | 작은 모델로 시도(`--model small`), VAD 필터 켜기(기본값), `--preset sermon` 사용 |
 | 잘못된 단어가 반복 | 사용자 사전에 등록 후 `corrections apply` 또는 편집기에서 직접 수정 |

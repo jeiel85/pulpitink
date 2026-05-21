@@ -6,7 +6,7 @@
     1. Detects the version from pyproject.toml if not passed via -Version.
     2. Verifies that dist/PulpitInk/ exists (PyInstaller output).
     3. Locates Inno Setup's command line compiler (ISCC.exe) in PATH or standard Program Files locations.
-    4. Compiles scripts/pulpitink.iss into dist/PulpitInk_Setup_{version}.exe.
+    4. Compiles scripts/pulpit-ink.iss into dist/PulpitInk_Setup_{version}.exe.
 #>
 
 [CmdletBinding()]
@@ -19,7 +19,7 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $DistDir = Join-Path $RepoRoot "dist"
 $BuildDir = Join-Path $DistDir "PulpitInk"
-$IssScript = Join-Path $PSScriptRoot "pulpitink.iss"
+$IssScript = Join-Path $PSScriptRoot "pulpit-ink.iss"
 
 # 1. Verify build directory exists
 if (-not (Test-Path $BuildDir)) {

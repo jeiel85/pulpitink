@@ -6,7 +6,7 @@
 
 ## 1. 문제
 
-`CorrectionEngine.suggestions_for` ([src/pulpitink/core/reference/corrections.py:92](../../src/pulpitink/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
+`CorrectionEngine.suggestions_for` ([src/pulpit_ink/core/reference/corrections.py:92](../../src/pulpit_ink/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
 
 | kind | 매칭 방식 | 회차 #1 적중 |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ similarity(a, b) =
 ### 5.1 신규 모듈: `core.postprocess.jamo`
 
 ```text
-src/pulpitink/core/postprocess/
+src/pulpit_ink/core/postprocess/
 └── jamo.py
     - jamo_seq(s)        -> str
     - choseong(s)        -> str
@@ -91,7 +91,7 @@ src/pulpitink/core/postprocess/
 
 ### 5.2 `CorrectionEngine` 통합
 
-기존 `proper_noun` 매칭 ([corrections.py:144](../../src/pulpitink/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
+기존 `proper_noun` 매칭 ([corrections.py:144](../../src/pulpit_ink/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
 
 1. 정확 매칭 (현행) — 가장 신뢰도 높음
 2. squeeze 매칭 (현행) — 공백/대소문자 변형용
@@ -165,6 +165,6 @@ src/pulpitink/core/postprocess/
 ## 10. 참고
 
 - 회차 #1 실측 데이터 추출: [tests/integration/results.md](../../tests/integration/results.md)
-- 현행 매칭 코드: [src/pulpitink/core/reference/corrections.py](../../src/pulpitink/core/reference/corrections.py)
-- 현행 lexicon: [src/pulpitink/core/postprocess/lexicon.py](../../src/pulpitink/core/postprocess/lexicon.py)
+- 현행 매칭 코드: [src/pulpit_ink/core/reference/corrections.py](../../src/pulpit_ink/core/reference/corrections.py)
+- 현행 lexicon: [src/pulpit_ink/core/postprocess/lexicon.py](../../src/pulpit_ink/core/postprocess/lexicon.py)
 - PoC 스크립트 (커밋 안 함, 본 노트의 §3 표 산출): 작업 디렉터리에서 인라인 실행. 재현 필요 시 본 노트 §4 알고리즘으로 1시간 내 재구성 가능.

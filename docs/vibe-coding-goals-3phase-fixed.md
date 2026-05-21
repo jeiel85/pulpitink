@@ -33,7 +33,7 @@ Python 3.11+, Typer, faster-whisper, FFmpeg, pytest, ruff, pyproject.toml.
 
 구현:
 1. pyproject.toml 기반 프로젝트 구조를 만든다.
-2. src/pulpitink 아래 app, cli, core/audio, core/transcription, core/export, core/postprocess, core/reference, services, storage, ui 구조를 만든다.
+2. src/pulpit_ink 아래 app, cli, core/audio, core/transcription, core/export, core/postprocess, core/reference, services, storage, ui 구조를 만든다.
 3. Typer CLI와 PulpitInk doctor 명령을 구현한다.
 4. doctor는 Python 버전, OS, FFmpeg 설치 여부, 쓰기 권한, 앱 데이터 경로 생성을 확인한다.
 5. PulpitInk transcribe 명령을 구현한다.
@@ -91,7 +91,7 @@ SQLite, platformdirs, Typer, PySide6, QThread 또는 QThreadPool, pytest, ruff.
 12. model service를 만들고 지원 모델 목록과 캐시 경로를 표시한다.
 13. models list/cache-dir CLI를 추가한다.
 14. 테스트는 임시 DB를 사용하고 실제 사용자 DB를 건드리지 않는다.
-15. python -m pulpitink.app.main으로 PySide6 GUI를 실행한다.
+15. python -m pulpit_ink.app.main으로 PySide6 GUI를 실행한다.
 16. GUI에는 파일 추가, 드래그 앤 드롭, 작업 목록, 언어/모델/프리셋 선택, 출력 폴더, 변환 시작, 진행률, 로그, 결과 미리보기를 둔다.
 17. GUI 변환은 기존 core/service 파이프라인을 재사용한다.
 18. 긴 작업은 worker thread에서 실행해 UI가 멈추지 않게 한다.

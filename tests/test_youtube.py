@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pulpitink.core.audio.youtube_downloader import (
+from pulpit_ink.core.audio.youtube_downloader import (
     download_youtube_audio,
     install_yt_dlp,
     is_yt_dlp_available,
@@ -24,7 +24,7 @@ def test_download_youtube_audio_missing_yt_dlp() -> None:
         assert "yt-dlp" in str(exc_info.value)
 
 
-@patch("pulpitink.core.audio.youtube_downloader.Path.exists")
+@patch("pulpit_ink.core.audio.youtube_downloader.Path.exists")
 def test_download_youtube_audio_success(mock_exists: MagicMock, tmp_path: Path) -> None:
     mock_exists.return_value = True
 
@@ -65,7 +65,7 @@ def test_is_yt_dlp_available_false() -> None:
         assert is_yt_dlp_available() is False
 
 
-@patch("pulpitink.core.audio.youtube_downloader.subprocess.run")
+@patch("pulpit_ink.core.audio.youtube_downloader.subprocess.run")
 def test_install_yt_dlp_success(mock_run: MagicMock) -> None:
     mock_run.return_value = MagicMock(stdout="Successfully installed yt-dlp", returncode=0)
     assert install_yt_dlp() is True
@@ -78,7 +78,7 @@ def test_install_yt_dlp_success(mock_run: MagicMock) -> None:
     assert kwargs.get("check") is True
 
 
-@patch("pulpitink.core.audio.youtube_downloader.subprocess.run")
+@patch("pulpit_ink.core.audio.youtube_downloader.subprocess.run")
 def test_install_yt_dlp_failure(mock_run: MagicMock) -> None:
     mock_run.side_effect = subprocess.CalledProcessError(
         returncode=1, cmd=["pip", "install", "yt-dlp"], stderr="network error"

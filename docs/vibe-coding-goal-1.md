@@ -12,7 +12,7 @@ Python 3.11+, Typer, faster-whisper, FFmpeg, pytest, ruff, pyproject.toml.
 
 구현:
 1. pyproject.toml 기반 프로젝트 구조를 만든다.
-2. src/pulpitink 아래 app, cli, core/audio, core/transcription, core/export, core/postprocess, core/reference, services, storage, ui 구조를 만든다.
+2. src/pulpit_ink 아래 app, cli, core/audio, core/transcription, core/export, core/postprocess, core/reference, services, storage, ui 구조를 만든다.
 3. Typer CLI와 PulpitInk doctor 명령을 구현한다.
 4. doctor는 Python 버전, OS, FFmpeg 설치 여부, 쓰기 권한, 앱 데이터 경로 생성을 확인한다.
 5. PulpitInk transcribe 명령을 구현한다.

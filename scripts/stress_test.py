@@ -19,7 +19,7 @@ from pathlib import Path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("pulpitink.stress_test")
+logger = logging.getLogger("pulpit_ink.stress_test")
 
 
 def ensure_psutil():
@@ -107,12 +107,12 @@ def generate_silent_wav(
 
 
 def run_stress_test():
-    # Make sure we add src/ to sys.path so we can import pulpitink
+    # Make sure we add src/ to sys.path so we can import pulpit_ink
     repo_root = Path(__file__).resolve().parent.parent
     sys.path.insert(0, str(repo_root / "src"))
 
-    from pulpitink.core.export.base import ExportFormat
-    from pulpitink.services.transcribe_service import TranscribeRequest, run_transcribe
+    from pulpit_ink.core.export.base import ExportFormat
+    from pulpit_ink.services.transcribe_service import TranscribeRequest, run_transcribe
 
     test_dir = repo_root / "tests" / "data"
     test_dir.mkdir(parents=True, exist_ok=True)

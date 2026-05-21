@@ -19,8 +19,8 @@ dist/
 wheels/
 *.manifest
 *.spec
-!pulpitink.spec
-!pulpitink-sidecar.spec
+!pulpit-ink.spec
+!pulpit-ink-sidecar.spec
 
 # ----- Test/Lint caches -----
 .pytest_cache/

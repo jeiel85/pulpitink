@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from pulpitink.app.exceptions import PulpitInkError, UnsupportedFormatError
-from pulpitink.services.transcribe_service import (
+from pulpit_ink.app.exceptions import PulpitInkError, UnsupportedFormatError
+from pulpit_ink.services.transcribe_service import (
     SUPPORTED_INPUT_EXTENSIONS,
     validate_input_path,
 )

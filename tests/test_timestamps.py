@@ -1,4 +1,4 @@
-from pulpitink.core.export.timestamps import (
+from pulpit_ink.core.export.timestamps import (
     format_srt_timestamp,
     format_vtt_timestamp,
 )

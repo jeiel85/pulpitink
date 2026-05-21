@@ -6,20 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from pulpitink.app.exceptions import PulpitInkError
-from pulpitink.core.audio.enhancement_presets import AudioEnhancementPreset
-from pulpitink.core.export.base import ExportFormat
-from pulpitink.core.transcription.base import (
+from pulpit_ink.app.exceptions import PulpitInkError
+from pulpit_ink.core.audio.enhancement_presets import AudioEnhancementPreset
+from pulpit_ink.core.export.base import ExportFormat
+from pulpit_ink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from pulpitink.services.transcribe_service import (
+from pulpit_ink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )
-from pulpitink.storage.database import connect
-from pulpitink.storage.job_repository import JobRepository
+from pulpit_ink.storage.database import connect
+from pulpit_ink.storage.job_repository import JobRepository
 
 
 class _StubEngine(TranscriptionEngine):
@@ -191,8 +191,8 @@ def test_run_transcribe_skips_persistence_when_keep_history_is_false(tmp_path: P
     fake_settings_path = tmp_path / "settings.json"
     fake_settings_path.write_text('{"keep_history": false}', encoding="utf-8")
 
-    import pulpitink.services.settings_service
-    monkeypatch.setattr(pulpitink.services.settings_service, "settings_path", lambda: fake_settings_path)
+    import pulpit_ink.services.settings_service
+    monkeypatch.setattr(pulpit_ink.services.settings_service, "settings_path", lambda: fake_settings_path)
 
     result = run_transcribe(
         request,

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-import pulpitink.app.paths as paths_module
+import pulpit_ink.app.paths as paths_module
 
 
 @pytest.fixture(autouse=True)

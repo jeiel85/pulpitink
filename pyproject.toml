@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pulpitink"
+name = "pulpit-ink"
 version = "0.4.5"
 description = "설교필기 — 로컬 우선 설교/강의/회의 녹음 STT 데스크톱 앱"
 readme = "README.md"
@@ -12,7 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [
   { name = "Aiden Park" }
 ]
-keywords = ["stt", "whisper", "sermon", "transcription", "pulpitink"]
+keywords = ["stt", "whisper", "sermon", "transcription", "pulpit-ink"]
 classifiers = [
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: Microsoft :: Windows",
@@ -41,11 +41,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://jeiel85.github.io/pulpitink/"
-Issues = "https://github.com/jeiel85/pulpitink/issues"
+Homepage = "https://jeiel85.github.io/pulpit-ink/"
+Issues = "https://github.com/jeiel85/pulpit-ink/issues"
 
 [project.scripts]
-pulpitink = "pulpitink.cli.main:app"
+pulpit-ink = "pulpit_ink.cli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -69,7 +69,7 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["B018"]
-"src/pulpitink/cli/*.py" = ["B008"]
+"src/pulpit_ink/cli/*.py" = ["B008"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,7 +1,7 @@
 import pytest
 
-from pulpitink.app.exceptions import PulpitInkError
-from pulpitink.core.audio.enhancement_presets import (
+from pulpit_ink.app.exceptions import PulpitInkError
+from pulpit_ink.core.audio.enhancement_presets import (
     PRESETS,
     build_ffmpeg_filter,
     get_preset,

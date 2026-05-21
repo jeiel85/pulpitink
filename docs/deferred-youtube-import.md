@@ -54,7 +54,7 @@ YouTube 기능은 STT core에 절대 들어가면 안 됩니다.
 ```text
 input_sources/youtube_url.py
 → local temp audio file
-→ existing audio pipeline (pulpitink.core.audio)
+→ existing audio pipeline (pulpit_ink.core.audio)
 ```
 
 ## 6. v1.0 공통 규칙

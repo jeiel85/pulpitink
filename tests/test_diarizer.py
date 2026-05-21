@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pulpitink.core.postprocess.diarizer import HeuristicDiarizer
-from pulpitink.core.transcription.base import TranscriptSegment
+from pulpit_ink.core.postprocess.diarizer import HeuristicDiarizer
+from pulpit_ink.core.transcription.base import TranscriptSegment
 
 
 def test_diarizer_assigns_speakers_dicts() -> None:
