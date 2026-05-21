@@ -360,7 +360,7 @@ def jobs_export(
             console.print(f"[red]작업을 찾을 수 없습니다: {job_id}[/red]")
             raise typer.Exit(code=1)
         seg_rows = repo.list_segments(job_id)
-        
+
         # Load bible_refs from database reference documents
         bible_refs = []
         try:

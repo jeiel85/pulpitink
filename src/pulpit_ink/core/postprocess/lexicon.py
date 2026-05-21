@@ -212,6 +212,53 @@ def load_user_lexicon(path: Path | str | None) -> Lexicon:
     return lex
 
 
+def save_user_lexicon(path: Path | str, entries: dict[str, list[str] | tuple[str, ...]]) -> None:
+    """Save user lexicon entries to a JSON file.
+
+    Saves the data securely by writing to a temporary file first,
+    then renaming it to prevent corruption. If the target file exists,
+    creates a backup (.bak) beforehand.
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+
+    bak_path = p.with_suffix(".json.bak")
+    if p.exists():
+        try:
+            if bak_path.exists():
+                bak_path.unlink()
+            p.rename(bak_path)
+        except OSError:
+            pass
+
+    tmp_path = p.with_suffix(".json.tmp")
+    try:
+        data_to_save = {canonical: list(forms) for canonical, forms in entries.items()}
+        tmp_path.write_text(
+            json.dumps(data_to_save, indent=2, ensure_ascii=False),
+            encoding="utf-8"
+        )
+        if tmp_path.exists():
+            if p.exists():
+                p.unlink()
+            tmp_path.rename(p)
+
+        if bak_path.exists():
+            try:
+                bak_path.unlink()
+            except OSError:
+                pass
+    except Exception as exc:
+        if bak_path.exists():
+            try:
+                if p.exists():
+                    p.unlink()
+                bak_path.rename(p)
+            except OSError:
+                pass
+        raise OSError(f"사용자 사전을 저장하는 중 오류가 발생했습니다: {exc}") from exc
+
+
 # A liberal regex that recognises a single bible reference candidate.
 # Examples it matches:
 #   로마서 1장 1절       (already canonical — left unchanged)

@@ -2,6 +2,7 @@
 
 from pulpit_ink.core.export.base import Exporter, ExportFormat, ExportRequest
 from pulpit_ink.core.export.csv_exporter import CsvExporter
+from pulpit_ink.core.export.docx_exporter import DocxExporter
 from pulpit_ink.core.export.json_exporter import JsonExporter
 from pulpit_ink.core.export.markdown_exporter import MarkdownExporter
 from pulpit_ink.core.export.pipeline import (
@@ -13,7 +14,6 @@ from pulpit_ink.core.export.srt_exporter import SrtExporter
 from pulpit_ink.core.export.timestamps import format_srt_timestamp, format_vtt_timestamp
 from pulpit_ink.core.export.txt_exporter import TxtExporter
 from pulpit_ink.core.export.vtt_exporter import VttExporter
-from pulpit_ink.core.export.docx_exporter import DocxExporter
 
 __all__ = [
     "EXPORTERS",

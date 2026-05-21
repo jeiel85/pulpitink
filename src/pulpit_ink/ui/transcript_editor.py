@@ -628,7 +628,7 @@ class TranscriptEditorWidget(QWidget):
         if not target:
             return
         result = _build_transcription_result(self._segments, self._job_id)
-        
+
         # Load bible_refs from database reference documents
         bible_refs = []
         conn, repo = self._open_repo()

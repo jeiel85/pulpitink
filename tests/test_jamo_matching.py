@@ -109,12 +109,12 @@ def test_find_fuzzy_matches_short_snippet_tuning() -> None:
     # 동적 임계값 가드(0.78) 및 Double-pass ratio(0.65)가 안전하게 차단하는지 확인
     text = "오늘 지금 그곳에 갔다"
     candidates = ["오늘날", "지극히"] # 각각 3글자이므로 min_len=3 게이트 통과
-    
+
     # 2글자 조각 "오늘"과 "오늘날"의 hybrid_similarity는 약 0.76 (자모 5/7겹침)
     # 2글자 조각 "지금"과 "지극히"의 hybrid_similarity는 약 0.72
     # threshold가 0.70일 때, 2글자 이하 동적 가드가 없다면 오탐 매칭 발생함
     matches = find_fuzzy_matches(text, candidates, threshold=0.70, min_len=3)
-    
+
     # 동적 임계치(0.78)에 의해 2글자 조각 오탐은 모두 걸러져야 함
     assert len(matches) == 0
 

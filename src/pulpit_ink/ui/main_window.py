@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QThread, Signal, QUrl, QTimer
-from PySide6.QtGui import QDragEnterEvent, QDropEvent, QColor, QDesktopServices
+from PySide6.QtCore import QPoint, Qt, QThread, QTimer, QUrl, Signal
+from PySide6.QtGui import QColor, QDesktopServices, QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -18,6 +18,8 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
+    QFrame,
+    QGraphicsDropShadowEffect,
     QGroupBox,
     QHBoxLayout,
     QInputDialog,
@@ -36,8 +38,6 @@ from PySide6.QtWidgets import (
     QTextBrowser,
     QVBoxLayout,
     QWidget,
-    QFrame,
-    QGraphicsDropShadowEffect,
 )
 
 from pulpit_ink import __version__
@@ -54,6 +54,7 @@ from pulpit_ink.services.transcribe_service import (
 )
 from pulpit_ink.storage.database import connect, initialise_database
 from pulpit_ink.storage.job_repository import JobRepository
+from pulpit_ink.ui.glossary_tab import GlossaryTab
 from pulpit_ink.ui.transcript_editor import TranscriptEditorWidget
 from pulpit_ink.ui.worker import start_worker
 
@@ -192,7 +193,7 @@ class UpdateBannerWidget(QFrame):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.download_url = ""
-        
+
         # Style sheet for premium styling: modern gradient from deep navy to soft blue
         self.setStyleSheet("""
             UpdateBannerWidget {
@@ -361,9 +362,11 @@ class MainWindow(QMainWindow):
         self.preview_view = QPlainTextEdit()
         self.preview_view.setReadOnly(True)
         self.editor = TranscriptEditorWidget()
+        self.glossary = GlossaryTab()
         self.tabs.addTab(self.log_view, "")
         self.tabs.addTab(self.preview_view, "")
         self.tabs.addTab(self.editor, "")
+        self.tabs.addTab(self.glossary, "")
         right.addWidget(self.tabs, 1)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -492,6 +495,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabText(0, tr("로그"))
         self.tabs.setTabText(1, tr("결과 미리보기"))
         self.tabs.setTabText(2, tr("편집기"))
+        self.tabs.setTabText(3, tr("용어 사전"))
 
         self.help_menu.setTitle(tr("도움말"))
         self.check_update_action.setText(tr("업데이트 확인..."))

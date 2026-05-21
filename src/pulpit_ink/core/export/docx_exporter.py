@@ -7,19 +7,17 @@ and a scripture highlight box on top.
 from __future__ import annotations
 
 import logging
-import re
 from pathlib import Path
-from datetime import timedelta
 
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.shared import Inches, Pt, RGBColor
 
 from pulpit_ink.core.export.base import Exporter, ExportFormat, ExportRequest
-from pulpit_ink.core.transcription.base import segment_display_text, TranscriptSegment
+from pulpit_ink.core.transcription.base import segment_display_text
 
 logger = logging.getLogger("pulpit_ink.export.docx")
 
@@ -49,7 +47,6 @@ def set_paragraph_left_border(paragraph, color_hex: str, size_pt: float):
 
 def format_duration(seconds: float) -> str:
     """Format seconds into HH:MM:SS or MM:SS."""
-    td = timedelta(seconds=int(seconds))
     total_sec = int(seconds)
     hours = total_sec // 3600
     minutes = (total_sec % 3600) // 60
@@ -125,11 +122,11 @@ class DocxExporter(Exporter):
             box_p.paragraph_format.right_indent = Inches(0.5)
             box_p.paragraph_format.space_after = Pt(18)
             box_p.paragraph_format.space_before = Pt(12)
-            
+
             # Apply styling (Light Beige background `#F8F6F0`, Navy border `#1E293B`)
             set_paragraph_background(box_p, "F8F6F0")
             set_paragraph_left_border(box_p, "1E293B", size_pt=3.0)
-            
+
             # Write content inside the box
             icon_run = box_p.add_run("📖 [ 성경 본문 ]\n\n")
             icon_run.bold = True
@@ -246,7 +243,7 @@ class DocxExporter(Exporter):
                 p = doc.add_paragraph()
                 p.paragraph_format.line_spacing = 1.8
                 p.paragraph_format.space_after = Pt(14)
-                
+
                 txt_run = p.add_run(text_str)
                 txt_run.font.name = "바탕"
                 txt_run.font.size = Pt(14)  # Large font size

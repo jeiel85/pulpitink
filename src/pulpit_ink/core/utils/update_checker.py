@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import json
 import logging
-import urllib.request
 import urllib.error
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
+import urllib.request
+from datetime import UTC, datetime, timedelta
 
 from pulpit_ink.app.paths import get_app_paths
 
@@ -73,14 +72,14 @@ def check_for_updates(
         (has_update, latest_version, download_url, error_message)
     """
     cache_path = get_app_paths().ensure().data_dir / CACHE_FILE_NAME
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # 1. Try to read from cache if not forced
     if not force and cache_path.exists():
         try:
-            with open(cache_path, "r", encoding="utf-8") as f:
+            with open(cache_path, encoding="utf-8") as f:
                 cache = json.load(f)
-            
+
             last_checked_str = cache.get("last_checked_at")
             if last_checked_str:
                 last_checked = datetime.fromisoformat(last_checked_str)
@@ -109,7 +108,7 @@ def check_for_updates(
             data = json.loads(response.read().decode("utf-8"))
             latest_version = data.get("tag_name", "").strip()
             download_url = data.get("html_url", "").strip()
-            
+
             if not latest_version:
                 raise ValueError("tag_name not found in GitHub API response")
             if not download_url:

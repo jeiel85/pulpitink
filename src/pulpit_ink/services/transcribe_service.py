@@ -178,7 +178,13 @@ def _resolve_reference(
 
 
 def _build_lexicon(request: TranscribeRequest) -> Lexicon:
-    return load_user_lexicon(request.user_dict_path)
+    path = request.user_dict_path
+    if path is None:
+        from pulpit_ink.app.paths import get_app_paths
+        default_path = get_app_paths().data_dir / "user_dict.json"
+        if default_path.exists():
+            path = default_path
+    return load_user_lexicon(path)
 
 
 def _enrich_segments(

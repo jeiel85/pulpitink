@@ -1,57 +1,41 @@
 # Roadmap Tasks
 
-## Next Session Candidates (2026-05-20)
+## Next Session Candidates (2026-05-21)
 
-현재 `main` 기준 릴리즈 검증은 대부분 완료된 상태입니다. 최신 확인 결과:
+v0.4.6 마일스톤이 성공적으로 완수되었습니다. 다음 세션 및 차기 출시 마일스톤에서 즉각 적용할 수 있는 고부가가치 5대 핵심 작업 후보군 명세는 다음과 같습니다.
 
-- GitHub Actions `Test`: 성공 (`fix: Windows 빌드 spec 파일 추적`)
-- GitHub Actions `Build Windows Portable`: 태그 `v0.3.0` 실행 성공, GitHub Release 생성 및 artifact 업로드 확인
-- 로컬 기록: `ruff check .`, `pytest 91/91`, `PulpitInk doctor`, `scripts/build_windows.ps1 -SkipChecks` 통과
-- 완료: `Build Windows Portable`의 태그 푸시 트리거는 `v0.3.0`에서 검증되었습니다.
-- 주의: 작업트리에 untracked `frontend/` 산출물이 남아 있습니다. 다음 작업자가 보존/분리/정리 정책을 먼저 확인해야 합니다.
+1. **[후보 1] PyInstaller 배포본 물리 패키징 검증 및 Portable ZIP 검수**
+   - **세부 작업**: `scripts/build_windows.ps1`을 구동하여 PyInstaller 컴파일 단일 `PulpitInk.exe` 배포 바이너리를 실제 물리 기동하고 라이브러리 누락 여부 검증.
+   - **기대 가치**: 최종 릴리즈 품질을 100% 무결하게 확립하여 최종 사용자 설치 배포 리스크 제거.
 
-다음 세션에서 바로 잡기 좋은 기능 후보:
+2. **[후보 2] 프로 검수 단축키 및 Markdown 리치 텍스트 편집 모드**
+   - **세부 작업**: 마우스 조작을 원천 제거하는 재생/일시정지/세그먼트 탐색 키보드 핫키(`Ctrl+Space`, `Alt+Left/Right` 등) 연동 및 리치 텍스트 실시간 검수 편집기 지원.
+   - **기대 가치**: 교역자/강연 타이피스트들의 텍스트 교정 및 정제 속도를 비약적으로 상승.
 
-1. [x] CSV Export 추가 (2026-05-20 완료)
-   - `core.export.csv_exporter`, CLI/GUI/서비스 기본 포맷 csv 포함, 단위 테스트 4건 추가, README/사용자 가이드/통합 시나리오 갱신
-   - 결과: `pytest 95/95`, `ruff check .` 통과
-   - 후속(낮은 우선): 짧은 2글자 한글 false positive와 별개로 발견되는 한계 있으면 별도 정리
+3. **[후보 3] GPU 가속 (CUDA/cuDNN) 자동 진단 GUI 및 셋업 가이드**
+   - **세부 작업**: 앱 기동 시 CUDA 런타임 및 `.dll` 유무를 자동 감지하고, CPU/GPU 가속 사용 상태를 메인 창 하단 상태바에 시각적으로 상시 표시 및 간편 설정 연계.
+   - **기대 가치**: 대용량 오디오 STT 작업의 연산 시간을 최대 5배 이상 대폭 단축할 수 있는 진입 장벽 제거.
 
-2. [x] 캐시 삭제 / 작업 삭제 UX 보강 (2026-05-20 완료)
-   - 구현: CLI `jobs delete <job_id>` 및 `jobs clean-cache` 명령어 구현.
-   - GUI: 최근 작업 목록 마우스 우클릭 시 컨텍스트 메뉴로 "작업 및 캐시 삭제" 메뉴 추가, `QMessageBox` 최종 확인 후 DB 레코드와 물리 캐시(`cache/jobs/<job_id>`) 연쇄 삭제 처리.
-   - 결과: `pytest` 통과 및 `ruff` 린트 완료.
+4. **[후보 4] 로컬 오프라인 한국어 맞춤법 사전 및 띄어쓰기 가이드 연동**
+   - **세부 작업**: 완전 오프라인으로 작동하는 Hunspell 사전 패키지를 내장하여, 검수 시 맞춤법이 어긋난 단어 아래에 붉은 밑줄 표시 및 우클릭 추천 교정어 팝업 탑재.
+   - **기대 가치**: 최종 Word 내보내기 전 오프라인에서도 완벽한 맞춤법 검수가 가능해 최종 문서 품질 완성.
 
-3. [x] 최근 작업 기록 비활성화 옵션 (2026-05-20 완료)
-   - 구현: settings 스키마에 `keep_history: bool` 추가. 토글 시 즉시 설정 저장 및 최근 작업 목록을 `"(최근 작업 기록 기능이 비활성화되었습니다)"` 고지 처리.
-   - STT: `settings.keep_history`가 False이면 `persist` 매개변수를 오버라이드하여 DB 영속화 과정을 완벽히 생략하도록 우회 처리.
-   - 결과: `test_settings_service.py`, `test_transcribe_persistence.py` 테스트 케이스 추가 및 통과.
+5. **[후보 5] 사용자 맞춤 용어(Glossary) 교정 기여도 분석 통계 대시보드**
+   - **세부 작업**: 사용자가 등록한 단어장이 변환 파이프라인에서 실제로 몇 차례 동작해 교정했는지 트래킹/SQLite 저장하고, GUI 탭 내에서 교정 기여도를 매력적인 통계 카드 형태로 시각화.
+   - **기대 가치**: "사전을 채울수록 업무가 효율화되는 과정"을 사용자에게 직관적으로 보상 및 피드백하여 사전 활용률 유도.
 
-4. [x] Jamo fuzzy 문서 상태 정리 (2026-05-20 완료)
-   - 작업: `docs/design/jamo-fuzzy-matching.md` 상단 상태를 "구현 완료 (v1.0 완비)"로 최신화하고, 2글자 한글 단어 노이즈 한계 및 임계값 상향 우회 가이드를 6절에 명문화하여 다음 작업자의 혼선 최소화.
+### v0.4.6 마일스톤 개발 완료 이력 (2026-05-21 완료)
 
-5. [x] 오디오 싱크 플레이어 (2026-05-20 완료)
-   - 근거: `docs/known-limitations.md`에 편집기 후속 작업으로 명시되어 있습니다.
-   - 범위: 세그먼트 선택 시 해당 구간 재생, 재생/정지, 위치 이동, GUI 검증.
-   - 추천도: 중간. 사용자 가치는 크지만 작업량이 큽니다.
+1. [x] **Word (.docx) 3대 맞춤형 템플릿 및 성경 하이라이트 박스 내보내기 엔진 개발 완료**
+   - `docx_exporter.py` 신규 설계 및 3대 스타일(강대상용, 주보용, 검수용) 서식, 대조 구절 상단 하이라이트 블록 단락 구현 완비.
+2. [x] **GitHub Releases API 연동 실시간 업데이트 알리미 및 24시간 로컬 캐싱 체계 도입**
+   - 비동기 `UpdateCheckWorker` 및 딥 블루 그라데이션 `UpdateBannerWidget` GUI 통합.
+   - API Rate Limit 완벽 방지를 위한 24시간 로컬 캐싱(`update_cache.json`) 및 수동 업데이트(Bypass) 가동 체계 구축.
+3. [x] **사용자 맞춤 Glossary 사전 GUI 및 백엔드 지능형 자동 연동 완비**
+   - PySide6 기반 `GlossaryTab` 신설(단어 추가/수정/삭제/실시간 검색).
+   - 로컬 `%LOCALAPPDATA%/PulpitInk/user_dict.json` 백업/복구 지원형 안전 디스크 세이브(`save_user_lexicon`) 엔진 완비.
+   - CSV 사전 파일 일괄 가져오기(Import) 및 내보내기(Export) 파이프라인 완비.
 
-6. [x] 다중 작업 큐 개선 (2026-05-20 완료)
-   - 근거: GUI는 여러 파일 추가가 가능하지만 변환은 한 번에 한 작업입니다.
-   - 범위: 순차 큐 처리, 완료/실패 상태 표시, 중단/재시도 UX.
-   - 추천도: 중간. 긴 파일 배치 처리 니즈가 커질 때 우선순위가 올라갑니다.
-
-7. [x] `frontend/` untracked 산출물 정책 결정 (2026-05-21 완료)
-   - 근거: 현재 작업트리에 `frontend/`가 추적되지 않은 상태로 남아 있습니다 (`.vscode`, `dist`, `node_modules`, `src-tauri` 포함).
-   - 결정: 로컬 Tauri/프론트엔드 실험 산출물로 보존하되 `main`에는 추적하지 않습니다. `.gitignore`와 Ruff 제외 설정을 유지하고, 병합 판단은 별도 브랜치(`feat/tauri-hybrid`) 검토 작업으로 분리합니다.
-   - 브랜치 확인: `feat/tauri-hybrid`는 React/Tauri 골격과 사이드카 연동을 포함하지만, `main` 대비 대규모 변경(165개 파일)이며 일부 문서/패키지명이 과거 `sermonscript` 상태로 되돌아가는 diff가 있어 현재 `main`에 직접 병합하지 않습니다.
-   - 주의: 사용자/이전 세션 산출물일 수 있으므로 임의 삭제하지 않습니다.
-
-8. [x] 현재 PC 기준 GUI 스크린샷 갱신 (2026-05-21 완료)
-   - 결과: `docs/assets/pulpit-ink-gui-main.png`, `docs/assets/pulpit-ink-gui-editor.png` 추가.
-   - 한계: 깨끗한 Windows VM 설치 산출물 실행 검증은 릴리즈 직전 별도 항목으로 유지합니다.
-
-9. [x] YouTube/화자 분리 문서 상태 정합성 정리 (2026-05-21 완료)
-   - 결과: v0.4.4 이후 구현된 YouTube opt-in 입력과 Heuristic 화자 분리 상태를 README, 제품 명세, 사용자 가이드, 릴리즈 체크리스트에 반영했습니다.
 
 ## Phase 0: 저장소 초기화
 

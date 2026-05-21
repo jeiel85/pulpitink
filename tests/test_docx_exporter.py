@@ -1,9 +1,10 @@
 from pathlib import Path
+
 from docx import Document
 
-from pulpit_ink.core.export import DocxExporter, ExportFormat, ExportRequest
+from pulpit_ink.core.export import DocxExporter, ExportRequest
 from pulpit_ink.core.transcription.base import TranscriptionResult, TranscriptSegment
-from pulpit_ink.services.settings_service import SettingsService, Settings
+from pulpit_ink.services.settings_service import Settings, SettingsService
 
 
 def _sample_result(tmp_path: Path) -> TranscriptionResult:
@@ -44,14 +45,14 @@ def test_docx_exporter_pulpit_desk_style(tmp_path: Path):
 
     # Load and verify document
     doc = Document(str(path))
-    
+
     # In pulpit_desk:
     # 1. Large title
     # 2. Large body text
     # 3. No timestamps or bold speakers in paragraph texts
     assert len(doc.paragraphs) > 0
     text_content = [p.text for p in doc.paragraphs if p.text.strip()]
-    
+
     # Title must be there
     assert "Sermon" in text_content[0]
     # Bible highlight box text must be there
@@ -75,7 +76,6 @@ def test_docx_exporter_church_bulletin_style(tmp_path: Path):
     assert path.exists()
 
     doc = Document(str(path))
-    text_content = [p.text for p in doc.paragraphs if p.text.strip()]
 
     # In church_bulletin:
     # Speakers should be bold and prefixed like "[목사님]" and timestamps like "(00:00)"
@@ -86,7 +86,7 @@ def test_docx_exporter_church_bulletin_style(tmp_path: Path):
             has_speaker = True
         if "(00:00)" in p.text or "(00:02)" in p.text:
             has_timestamp = True
-            
+
     assert has_speaker
     assert has_timestamp
 
@@ -103,16 +103,16 @@ def test_docx_exporter_grid_review_style(tmp_path: Path):
     assert path.exists()
 
     doc = Document(str(path))
-    
+
     # In grid_review:
     # There must be a table
     assert len(doc.tables) == 1
     table = doc.tables[0]
-    
+
     # Verify header and rows
     assert len(table.rows) == 3  # Header + 2 segments
     assert len(table.columns) == 4
-    
+
     hdr_cells = [cell.text for cell in table.rows[0].cells]
     assert "번호" in hdr_cells
     assert "시간" in hdr_cells
@@ -140,7 +140,7 @@ def test_docx_exporter_scripture_highlight_fallback(tmp_path: Path):
 
     doc = Document(str(path))
     text_content = [p.text for p in doc.paragraphs if p.text.strip()]
-    
+
     # Fallback should extract "창세기 1장 1절" from the text
     assert "[ 성경 본문 ]" in text_content[1]
     assert "창세기 1장 1절" in text_content[1]

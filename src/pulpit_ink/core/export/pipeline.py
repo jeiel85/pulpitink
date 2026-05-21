@@ -9,12 +9,12 @@ from pathlib import Path
 from pulpit_ink.app.exceptions import ExportError
 from pulpit_ink.core.export.base import Exporter, ExportFormat, ExportRequest
 from pulpit_ink.core.export.csv_exporter import CsvExporter
+from pulpit_ink.core.export.docx_exporter import DocxExporter
 from pulpit_ink.core.export.json_exporter import JsonExporter
 from pulpit_ink.core.export.markdown_exporter import MarkdownExporter
 from pulpit_ink.core.export.srt_exporter import SrtExporter
 from pulpit_ink.core.export.txt_exporter import TxtExporter
 from pulpit_ink.core.export.vtt_exporter import VttExporter
-from pulpit_ink.core.export.docx_exporter import DocxExporter
 from pulpit_ink.core.transcription.base import TranscriptionResult
 
 logger = logging.getLogger("pulpit_ink.export")

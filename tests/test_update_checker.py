@@ -1,18 +1,13 @@
 import json
-import time
-from pathlib import Path
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
-from datetime import datetime, timezone, timedelta
-
-import pytest
 
 from pulpit_ink.core.utils.update_checker import (
-    parse_version,
-    is_new_version_available,
-    check_for_updates,
     CACHE_FILE_NAME,
+    check_for_updates,
+    is_new_version_available,
+    parse_version,
 )
-from pulpit_ink.app.paths import get_app_paths
 
 
 def test_parse_version():
@@ -109,8 +104,8 @@ def test_check_for_updates_caching_24h(mock_urlopen, tmp_path):
     with patch("pulpit_ink.core.utils.update_checker.get_app_paths", return_value=mock_paths):
         # 1. Populate cache with checked time 5 hours ago
         cache_file = tmp_path / CACHE_FILE_NAME
-        checked_time = datetime.now(timezone.utc) - timedelta(hours=5)
-        
+        checked_time = datetime.now(UTC) - timedelta(hours=5)
+
         cache_data = {
             "last_checked_at": checked_time.isoformat(),
             "latest_version": "v1.5.0",
@@ -139,8 +134,8 @@ def test_check_for_updates_cache_expired(mock_urlopen, tmp_path):
     with patch("pulpit_ink.core.utils.update_checker.get_app_paths", return_value=mock_paths):
         # 1. Populate cache with checked time 25 hours ago
         cache_file = tmp_path / CACHE_FILE_NAME
-        checked_time = datetime.now(timezone.utc) - timedelta(hours=25)
-        
+        checked_time = datetime.now(UTC) - timedelta(hours=25)
+
         cache_data = {
             "last_checked_at": checked_time.isoformat(),
             "latest_version": "v1.5.0",
@@ -161,7 +156,7 @@ def test_check_for_updates_cache_expired(mock_urlopen, tmp_path):
         assert mock_urlopen.call_count == 1
 
         # Check if cache is updated
-        with open(cache_file, "r", encoding="utf-8") as f:
+        with open(cache_file, encoding="utf-8") as f:
             updated_cache = json.load(f)
         assert updated_cache["latest_version"] == "v1.6.0"
 
@@ -175,8 +170,8 @@ def test_check_for_updates_forced_bypass(mock_urlopen, tmp_path):
     with patch("pulpit_ink.core.utils.update_checker.get_app_paths", return_value=mock_paths):
         # 1. Populate cache with checked time 1 hour ago
         cache_file = tmp_path / CACHE_FILE_NAME
-        checked_time = datetime.now(timezone.utc) - timedelta(hours=1)
-        
+        checked_time = datetime.now(UTC) - timedelta(hours=1)
+
         cache_data = {
             "last_checked_at": checked_time.isoformat(),
             "latest_version": "v1.5.0",
@@ -198,6 +193,6 @@ def test_check_for_updates_forced_bypass(mock_urlopen, tmp_path):
         assert mock_urlopen.call_count == 1
 
         # Check if cache is updated
-        with open(cache_file, "r", encoding="utf-8") as f:
+        with open(cache_file, encoding="utf-8") as f:
             updated_cache = json.load(f)
         assert updated_cache["latest_version"] == "v1.7.0"
