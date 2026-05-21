@@ -1,5 +1,19 @@
 # HISTORY.md
 
+## 2026-05-21 (v0.4.7 프로 검수 단축키 및 Markdown 리치 편집 모드 완비)
+- 작업: 검수 및 타이핑 생산성을 극대화하기 위해 `QShortcut` 기반 키보드 단축키 시스템을 완성하고, 편집기 하단에 `QTextBrowser` 기반의 **Markdown 실시간 리치 텍스트 뷰어**를 연동 완료. 또한, 사용자 제안 깃허브 이슈 #1(실시간 녹음 및 STT)의 대대적 아키텍처 연계 설계를 로드맵 및 의사결정 로그에 인계 가이드로 명시하여 완벽히 안전 격리 이관 완료.
+- 변경 파일:
+  - src/pulpit_ink/ui/transcript_editor.py (글로벌 핫키 Ctrl+Space, Ctrl+Left/Right, Ctrl+Up/Down, Ctrl+P 구현 및 속도 레이블, QTextBrowser Markdown 실시간 HTML 뷰어 연동, 간이 정규식 파서 _markdown_to_html 추가)
+  - tests/test_editor_hotkeys.py (신규: 핫키 단축키 생성, 배속 연산 범위 0.5x~2.0x 경계 검사, Markdown 변환 정합성 검증 유닛 테스트 3건 추가)
+  - docs/roadmap-tasks.md (실시간 마이크 녹음 및 오프라인 스트리밍 STT 인계용 핵심 아키텍처 상세 가이드 작성)
+  - docs/decision-log.md (v0.4.7 단축키/Markdown 뷰어 도입 및 실시간 녹음 격리 이관 결정 기록 추가)
+- 검증:
+  - `$env:PYTHONPATH="src"; python -m pytest tests/test_editor_hotkeys.py`: 3/3 PASS
+  - 전체 회귀 테스트 (`pytest`): **136/136 PASS** (100% 무결성 통과 완료)
+  - 린트 검사 (`ruff check .`): All checks passed! (0 Lint Error)
+  - CLI doctor 실행 (`python -m pulpit_ink.cli.main doctor`): 모든 환경 지단 항목 OK
+- 결과: 성공. 마우스 없는 쾌속 키보드 단축키 검수 및 Markdown 리치 스타일 실시간 피드백 편집 환경이 완벽히 가동되었습니다.
+
 ## 2026-05-21 (v0.4.6 핵심 4대 후속 과제 구현 및 사용자 맞춤 Glossary 사전 완비)
 - 작업: v1.0+ 핵심 4대 후속 과제(1. Word 3대 템플릿 및 성경 구절 하이라이트 박스 내보내기 엔진 개발, 2. GitHub Releases API 연동 실시간 자동/수동 업데이트 알리미 및 24시간 로컬 캐싱 체계 구축, 3. Inno Setup 인스톨러 ps1 빌드 스크립트 실행 유효성 검증, 4. Lexicon Fuzzy 오역 보정 튜닝) 및 **사용자 맞춤 Glossary 사전 GUI 탭 및 백엔드 지능형 자동 연동** 시스템을 자율권 하에 완벽히 구현 및 검증 완료.
 - 변경 파일:

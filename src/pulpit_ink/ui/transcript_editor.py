@@ -23,7 +23,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl, Signal
-from PySide6.QtGui import QBrush, QColor
+from PySide6.QtGui import QBrush, QColor, QKeySequence, QShortcut
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
+    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -68,6 +69,31 @@ def _format_time(value: float) -> str:
     return f"{int(minutes):02d}:{seconds:05.2f}"
 
 
+def _markdown_to_html(text: str) -> str:
+    import re
+    if not text:
+        return ""
+    # HTML escape
+    html = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    # Bold: **text** or __text__
+    html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', html)
+    html = re.sub(r'__(.*?)__', r'<b>\1</b>', html)
+    # Italic: *text* or _text_
+    html = re.sub(r'\*(.*?)\*', r'<i>\1</i>', html)
+    html = re.sub(r'_(.*?)_', r'<i>\1</i>', html)
+    # Strikethrough: ~~text~~
+    html = re.sub(r'~~(.*?)~~', r'<del>\1</del>', html)
+    # Inline code: `code`
+    html = re.sub(
+        r'`(.*?)`',
+        r'<code style="background-color: #ededed; color: #b94a48; padding: 2px 4px; border-radius: 3px; font-family: monospace;">\1</code>',
+        html
+    )
+    # Lines
+    html = html.replace("\n", "<br>")
+    return f"<div style='font-family: sans-serif; font-size: 13px; line-height: 1.4;'>{html}</div>"
+
+
 class TranscriptEditorWidget(QWidget):
     """Edit a single job's segments + manage its correction suggestions."""
 
@@ -87,12 +113,14 @@ class TranscriptEditorWidget(QWidget):
         self._suggestions: list[CorrectionSuggestionRecord] = []
         self._suppress_table_change = False
         self._suppress_slider_change = False
+        self._playback_rate = 1.0
 
         self._player = QMediaPlayer()
         self._audio_output = QAudioOutput()
         self._player.setAudioOutput(self._audio_output)
 
         self._build_ui()
+        self._setup_shortcuts()
 
     # ---------- UI ----------
 
@@ -186,6 +214,9 @@ class TranscriptEditorWidget(QWidget):
 
         self.time_label = QLabel("00:00.00 / 00:00.00")
 
+        self.speed_label = QLabel("속도: 1.0x")
+        self.speed_label.setStyleSheet("font-weight: bold; color: #1e3c72;")
+
         self.play_segment_btn = QPushButton("선택 구간 재생")
         self.play_segment_btn.clicked.connect(self._on_play_segment_clicked)
         self.play_segment_btn.setEnabled(False)
@@ -196,15 +227,28 @@ class TranscriptEditorWidget(QWidget):
         player_row.addWidget(self.play_btn)
         player_row.addWidget(self.position_slider, 1)
         player_row.addWidget(self.time_label)
+        player_row.addWidget(self.speed_label)
         player_row.addWidget(self.play_segment_btn)
         player_row.addWidget(self.sync_scroll_check)
 
         layout.addLayout(player_row)
 
+        # Markdown 실시간 리치 뷰어 및 단축키 안내바 탑재
+        self.markdown_viewer = QTextBrowser()
+        self.markdown_viewer.setPlaceholderText("선택된 세그먼트의 Markdown 실시간 리치 텍스트 뷰어입니다. (예: **강조**, *이탤릭* 등)")
+        self.markdown_viewer.setMaximumHeight(80)
+        self.markdown_viewer.setStyleSheet("background-color: #fdfdfd; border: 1px solid #cccccc; padding: 6px; border-radius: 4px;")
+        layout.addWidget(self.markdown_viewer)
+
+        self.shortcut_guide = QLabel("⌨️ <b>단축키 가이드:</b> [Ctrl+Space] 재생/정지 | [Ctrl+←/→] 이전/다음 | [Ctrl+↑/↓] 재생속도 | [Ctrl+P] 구간 재생")
+        self.shortcut_guide.setStyleSheet("color: #666666; padding: 2px 4px; font-size: 11px;")
+        layout.addWidget(self.shortcut_guide)
+
         # 플레이어 시그널 연동
         self._player.positionChanged.connect(self._on_player_position_changed)
         self._player.durationChanged.connect(self._on_player_duration_changed)
         self.segment_table.cellDoubleClicked.connect(self._on_table_double_clicked)
+        self.segment_table.itemSelectionChanged.connect(self._on_table_selection_changed)
 
     # ---------- DB helpers ----------
 
@@ -364,6 +408,79 @@ class TranscriptEditorWidget(QWidget):
             self._player.play()
             self.play_btn.setText("일시정지")
 
+    def _setup_shortcuts(self) -> None:
+        # Ctrl+Space: 재생 / 일시정지 토글
+        self._shortcut_play = QShortcut(QKeySequence("Ctrl+Space"), self)
+        self._shortcut_play.activated.connect(self._on_shortcut_play)
+
+        # Ctrl+Left: 이전 세그먼트로 이동
+        self._shortcut_prev = QShortcut(QKeySequence("Ctrl+Left"), self)
+        self._shortcut_prev.activated.connect(self._on_shortcut_prev)
+
+        # Ctrl+Right: 다음 세그먼트로 이동
+        self._shortcut_next = QShortcut(QKeySequence("Ctrl+Right"), self)
+        self._shortcut_next.activated.connect(self._on_shortcut_next)
+
+        # Ctrl+P: 현재 세그먼트 재생
+        self._shortcut_play_seg = QShortcut(QKeySequence("Ctrl+P"), self)
+        self._shortcut_play_seg.activated.connect(self._on_shortcut_play_seg)
+
+        # Ctrl+Up: 재생 속도 증가
+        self._shortcut_speed_up = QShortcut(QKeySequence("Ctrl+Up"), self)
+        self._shortcut_speed_up.activated.connect(self._on_shortcut_speed_up)
+
+        # Ctrl+Down: 재생 속도 감소
+        self._shortcut_speed_down = QShortcut(QKeySequence("Ctrl+Down"), self)
+        self._shortcut_speed_down.activated.connect(self._on_shortcut_speed_down)
+
+    def _on_shortcut_play(self) -> None:
+        if self.play_btn.isEnabled():
+            self._on_play_clicked()
+
+    def _on_shortcut_prev(self) -> None:
+        row = self.segment_table.currentRow()
+        if row > 0:
+            self.segment_table.selectRow(row - 1)
+            self.segment_table.setCurrentCell(row - 1, 4)
+
+    def _on_shortcut_next(self) -> None:
+        row = self.segment_table.currentRow()
+        if 0 <= row < self.segment_table.rowCount() - 1:
+            self.segment_table.selectRow(row + 1)
+            self.segment_table.setCurrentCell(row + 1, 4)
+
+    def _on_shortcut_play_seg(self) -> None:
+        if self.play_segment_btn.isEnabled():
+            self._on_play_segment_clicked()
+
+    def _on_shortcut_speed_up(self) -> None:
+        new_rate = min(2.0, self._playback_rate + 0.1)
+        self._set_playback_rate(new_rate)
+
+    def _on_shortcut_speed_down(self) -> None:
+        new_rate = max(0.5, self._playback_rate - 0.1)
+        self._set_playback_rate(new_rate)
+
+    def _set_playback_rate(self, rate: float) -> None:
+        self._playback_rate = round(rate, 2)
+        self._player.setPlaybackRate(self._playback_rate)
+        self.speed_label.setText(f"속도: {self._playback_rate:.1f}x")
+
+    def _on_table_selection_changed(self) -> None:
+        row = self.segment_table.currentRow()
+        visible = [
+            seg
+            for seg in self._segments
+            if not self.review_only.isChecked() or seg.needs_review
+        ]
+        if 0 <= row < len(visible):
+            seg = visible[row]
+            display_text = seg.edited_text or seg.clean_text or seg.raw_text
+            html_content = _markdown_to_html(display_text)
+            self.markdown_viewer.setHtml(html_content)
+        else:
+            self.markdown_viewer.clear()
+
     # ---------- segment view ----------
 
     def _refresh_segment_view(self) -> None:
@@ -451,6 +568,7 @@ class TranscriptEditorWidget(QWidget):
             self._persist_segment(seg.id, edited_text=new_text)
             seg.edited_text = new_text
             self.segment_updated.emit(seg.id or 0)
+            self._on_table_selection_changed()
 
     def _find_segment(self, segment_id: int) -> SegmentRecord | None:
         for seg in self._segments:
