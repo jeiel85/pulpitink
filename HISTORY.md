@@ -1,5 +1,31 @@
 # HISTORY.md
 
+## 2026-05-21 (문서 정합성 정리 · 현재 PC GUI 스크린샷 갱신)
+- 작업: GitHub 연결 및 현재 진행 상태 점검 후, v0.4.4/v0.4.5에서 이미 구현된 YouTube URL opt-in 입력과 Heuristic 화자 분리 상태가 README/제품 명세/사용자 가이드/릴리즈 체크리스트의 과거 제외 문구와 충돌하던 문제를 정리. 깨끗한 Windows VM 검증 항목은 릴리즈 직전 별도 검증으로 남기고, 현재 Windows 11 PC에서 PySide6 메인 창과 편집기 위젯 렌더링 스크린샷을 캡처해 문서에 반영.
+- 변경 파일:
+  - AGENTS.md, README.md
+  - docs/product-spec.md
+  - docs/user-guide.md
+  - docs/known-limitations.md
+  - docs/deferred-youtube-import.md, docs/youtube-import-deferred.md
+  - docs/license-policy.md
+  - docs/release/release-checklist.md
+  - docs/release-roadmap.md
+  - docs/roadmap-tasks.md
+  - docs/decision-log.md
+  - docs/index.html
+  - docs/assets/pulpit-ink-gui-main.png
+  - docs/assets/pulpit-ink-gui-editor.png
+- 검증:
+  - 현재 PC에서 PySide6 `MainWindow` 렌더링 및 `grab()` 기반 PNG 저장 확인
+  - `python -m ruff check .`: PASS
+  - `PYTHONPATH=src python -m pytest`: 115/115 PASS
+  - `PYTHONPATH=src python -m pulpit_ink.cli.main doctor`: PASS
+- 결과: 성공. 현재 구현 상태와 사용자-facing 문서가 같은 방향을 말하도록 정리했고, GUI/편집기 스크린샷 문서화를 완료.
+- 후속 작업:
+  - 릴리즈 직전 깨끗한 Windows VM에서 설치 산출물 실행 검증
+  - `feat/tauri-hybrid` 브랜치 병합 여부는 별도 제품 방향 결정 후 검토
+
 ## 2026-05-20 (yt-dlp 자동설치 UI · 성능 프로파일 · Inno Setup 인스톨러 도입 및 v0.4.5 패치 릴리즈)
 - 작업: GUI 저작권 Disclaimer 다이얼로그에 yt-dlp 자동 진단/원클릭 설치 UI를 통합하고 백그라운드 워커 스레드로 UI 프리즈를 해소, 1시간 오디오 스트레스 테스트 스크립트 및 실측 성능 프로파일 보고서 추가, Windows 정식 설치 관리자(Inno Setup .exe) 빌드 스크립트 도입, 관련 단위 테스트 5건 보강 및 v0.4.5 패치 릴리즈.
 - 변경 파일:

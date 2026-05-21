@@ -1,6 +1,6 @@
 # PulpitInk 사용자 가이드
 
-본 가이드는 PulpitInk v0.3.x(예정 v1.0) 의 일반 사용자 워크플로우를 다룹니다.
+본 가이드는 PulpitInk v0.4.x(예정 v1.0) 의 일반 사용자 워크플로우를 다룹니다.
 프로그래머가 아니더라도 따라할 수 있도록 PowerShell 명령 위주로 안내합니다.
 
 목차
@@ -150,12 +150,19 @@ python -m pulpit_ink.app.main
 ```
 
 1. 좌측 패널에 파일을 드래그 앤 드롭하거나 “파일 추가” 로 선택합니다.
+   YouTube URL을 사용할 때는 “YouTube 주소 추가”를 누른 뒤 저작권/이용 권한 고지에 동의해야 합니다.
 2. 상단의 언어 / 모델 / 전처리 프리셋 / 출력 폴더를 확인합니다 (설정의 기본값이 미리 채워집니다).
 3. “변환 시작” 을 누릅니다. 변환은 워커 스레드에서 실행되어 UI 가 멈추지 않습니다.
 4. 진행률 / 로그 영역에서 단계별 상태를 확인합니다.
 5. 변환이 끝나면 결과 미리보기 패널에 텍스트가 표시되고, 같은 창의 “편집기” 탭에서 세그먼트를 열 수 있습니다.
 
 GUI 가 시작하지 않고 `PySide6가 설치되어 있지 않습니다` 안내가 나오면 `pip install "pulpit-ink[gui]"` 를 실행하세요.
+
+YouTube URL 입력은 `yt-dlp`가 필요합니다. GUI는 고지 다이얼로그에서 설치 여부를 진단하고, 미설치 시 원클릭 설치 버튼을 제공합니다. 이 기능은 본인이 권리를 보유했거나 처리 권한이 있는 콘텐츠에만 사용해야 합니다.
+
+현재 PC에서 캡처한 GUI 예시:
+
+![PulpitInk GUI main](assets/pulpit-ink-gui-main.png)
 
 ---
 
@@ -172,11 +179,15 @@ GUI 가 시작하지 않고 `PySide6가 설치되어 있지 않습니다` 안내
 
 기능 요약:
 
-- 시작/종료 시간, 확인(`needs_review`), 텍스트 컬럼 표시.
+- 시작/종료 시간, 확인(`needs_review`), 화자, 텍스트 컬럼 표시.
 - 셀을 더블클릭해 텍스트 편집 → 저장 시 `edited_text` 갱신.
 - 검색 / 치환: 일치한 세그먼트의 `edited_text` 만 갱신합니다.
 - 확인 필요 토글: STT 신뢰도(avg_logprob, no_speech_prob) 가 낮으면 자동으로 표시되며, 사용자가 직접 켜고 끌 수 있습니다.
 - 우측 패널에 “교정 후보(pending)” 가 표시되고 적용/무시 버튼이 있습니다.
+
+현재 PC에서 캡처한 편집기 예시:
+
+![PulpitInk transcript editor](assets/pulpit-ink-gui-editor.png)
 
 ---
 
@@ -332,8 +343,8 @@ PulpitInk --verbose transcribe sermon.mp3
 
 자세한 목록은 [docs/known-limitations.md](known-limitations.md) 를 참고하세요. 요약:
 
-- v1.0 은 로컬 오디오/비디오 파일만 지원합니다. YouTube URL 입력과 온라인 다운로드는 의도적으로 제외했습니다 ([docs/deferred-youtube-import.md](deferred-youtube-import.md)).
-- 화자 분리(diarization) 는 포함되지 않습니다.
+- v1.0 은 로컬 오디오/비디오 파일과 고지 동의 기반 YouTube URL 입력을 지원합니다. 일반 온라인 다운로드와 클라우드 입력은 제외합니다.
+- 화자 분리(diarization) 는 무음구간 갭 기반의 경량 Heuristic 방식입니다. 전문 화자 인식 모델 수준의 정확도를 보장하지 않으며, 편집기에서 직접 수정할 수 있습니다.
 - FFmpeg / STT 모델은 패키징에 번들되지 않습니다. 사용자가 별도로 준비합니다.
 - Windows 패키징(Portable ZIP) 만 공식 지원합니다. macOS·Linux 에서는 소스 설치로 사용하세요.
 - PySide6 는 LGPL 입니다. 재배포 시 라이선스 정책을 검토하세요 ([THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)).

@@ -18,7 +18,8 @@
 - [x] `python -m pytest` 통과 (2026-05-20, 100/100)
 - [x] `python -m ruff check .` 통과 (2026-05-20)
 - [x] CLI `PulpitInk doctor` 통과 (2026-05-20)
-- [ ] GUI 가 깨끗한 Windows VM 에서 정상 실행
+- [x] GUI 가 현재 Windows 11 PC 에서 PySide6 위젯 렌더링 및 스크린샷 캡처 가능 (2026-05-21, [메인 화면](../assets/pulpit-ink-gui-main.png), [편집기](../assets/pulpit-ink-gui-editor.png))
+- [ ] 깨끗한 Windows VM 에서 설치 산출물 실행 검증 (릴리즈 직전 별도 확인)
 - [x] 30분 분량 MP3 변환 + Export(txt/json/md/srt/vtt/csv) 검증 (회차 #1, 35분 45초, [tests/integration/results.md](../../tests/integration/results.md))
 - [x] 편집기에서 edited_text 저장이 raw_text 를 덮어쓰지 않는지 확인 (회귀 테스트로 보장: `tests/test_transcript_editor_repo.py`)
 - [x] 원문 대조 워크플로우: 교정 후보 생성 → 적용/무시 가능 (Fuzzy 매칭 도입으로 적중률 확보 완료, 2026-05-20, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10) 참고)
@@ -59,6 +60,6 @@
 
 - [x] README 업데이트 (`README.md` 본 프로젝트 진입점으로 재작성, 2026-05-20)
 - [x] 사용자 가이드 업데이트 (`docs/user-guide.md` 신규 작성, 2026-05-20)
-- [ ] 스크린샷 갱신 (GUI 변환/편집기 캡처 추가 예정)
+- [x] 스크린샷 갱신 (2026-05-21, 현재 PC PySide6 렌더링: [메인 화면](../assets/pulpit-ink-gui-main.png), [편집기](../assets/pulpit-ink-gui-editor.png))
 - [x] 알려진 제한 사항 문서화 (`docs/known-limitations.md` 신규 작성, 2026-05-20)
-- [x] `docs/deferred-youtube-import.md` 로 YouTube 비포함 정책 명시
+- [x] YouTube URL 입력 정책 최신화 (v0.4.4 이후 고지 동의 기반 opt-in 기능으로 전환, `docs/deferred-youtube-import.md` 갱신)

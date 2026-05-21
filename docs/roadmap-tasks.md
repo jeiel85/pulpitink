@@ -40,10 +40,18 @@
    - 범위: 순차 큐 처리, 완료/실패 상태 표시, 중단/재시도 UX.
    - 추천도: 중간. 긴 파일 배치 처리 니즈가 커질 때 우선순위가 올라갑니다.
 
-7. [ ] `frontend/` untracked 산출물 정책 결정
+7. [x] `frontend/` untracked 산출물 정책 결정 (2026-05-21 완료)
    - 근거: 현재 작업트리에 `frontend/`가 추적되지 않은 상태로 남아 있습니다 (`.vscode`, `dist`, `node_modules`, `src-tauri` 포함).
-   - 범위: 실험 산출물 보존 여부, 별도 브랜치/저장소 분리 여부, `.gitignore` 정책 결정.
+   - 결정: 로컬 Tauri/프론트엔드 실험 산출물로 보존하되 `main`에는 추적하지 않습니다. `.gitignore`와 Ruff 제외 설정을 유지하고, 병합 판단은 별도 브랜치(`feat/tauri-hybrid`) 검토 작업으로 분리합니다.
+   - 브랜치 확인: `feat/tauri-hybrid`는 React/Tauri 골격과 사이드카 연동을 포함하지만, `main` 대비 대규모 변경(165개 파일)이며 일부 문서/패키지명이 과거 `sermonscript` 상태로 되돌아가는 diff가 있어 현재 `main`에 직접 병합하지 않습니다.
    - 주의: 사용자/이전 세션 산출물일 수 있으므로 임의 삭제하지 않습니다.
+
+8. [x] 현재 PC 기준 GUI 스크린샷 갱신 (2026-05-21 완료)
+   - 결과: `docs/assets/pulpit-ink-gui-main.png`, `docs/assets/pulpit-ink-gui-editor.png` 추가.
+   - 한계: 깨끗한 Windows VM 설치 산출물 실행 검증은 릴리즈 직전 별도 항목으로 유지합니다.
+
+9. [x] YouTube/화자 분리 문서 상태 정합성 정리 (2026-05-21 완료)
+   - 결과: v0.4.4 이후 구현된 YouTube opt-in 입력과 Heuristic 화자 분리 상태를 README, 제품 명세, 사용자 가이드, 릴리즈 체크리스트에 반영했습니다.
 
 ## Phase 0: 저장소 초기화
 

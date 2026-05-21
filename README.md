@@ -15,19 +15,20 @@
 
 PulpitInk는 긴 한국어 설교 녹음처럼 검수가 필요한 STT 작업을 로컬 우선 방식으로 처리합니다. 오디오와 변환 텍스트는 기본적으로 외부 서버로 전송하지 않으며, 원본 오디오와 STT 원문(`raw_text`)을 보존합니다. 사용자가 고친 내용은 별도의 `edited_text`로 저장됩니다.
 
-현재 입력 범위는 로컬 파일입니다. YouTube URL, 온라인 다운로드, 클라우드 동기화, 실시간 녹음은 v1.0 범위에 포함되지 않습니다.
+현재 입력 범위는 로컬 파일과 사용자가 권리를 확인한 YouTube URL입니다. YouTube 입력은 저작권 고지 동의 후 `yt-dlp`로 로컬 임시 오디오를 만든 뒤 기존 STT 파이프라인에 전달합니다. 일반 온라인 다운로드, 클라우드 동기화, 실시간 녹음은 v1.0 범위에 포함되지 않습니다.
 
 ## 주요 기능
 
 | 영역 | 내용 |
 | --- | --- |
-| 입력 | `mp3`, `wav`, `m4a`, `aac`, `flac`, `ogg`, `mp4` 등 로컬 파일 |
+| 입력 | `mp3`, `wav`, `m4a`, `aac`, `flac`, `ogg`, `mp4` 등 로컬 파일, YouTube URL(고지 동의 후) |
 | STT | faster-whisper 기반 변환, `tiny`부터 `large-v3`까지 모델 선택 |
 | 전처리 | FFmpeg 16kHz mono WAV 변환, `none`, `stt_basic`, `sermon`, `noisy` 프리셋 |
 | GUI | PySide6 데스크톱 앱, 파일 추가, 진행 로그, 최근 작업, 편집기 탭 |
 | CLI | 변환, 환경 점검, 작업 조회/export, 설정, 모델 캐시 확인 |
 | 편집 | 세그먼트별 타임스탬프/텍스트 편집, 검색, 치환, 확인 필요 표시 |
 | 후처리 | 성경 구절 정규화, 사용자 사전, 원문 대조, 한국어 Jamo fuzzy 교정 후보 |
+| 화자 | 무음구간 갭 기반 Heuristic 화자 태그와 편집기 내 화자 열 수정 |
 | 출력 | TXT, JSON, Markdown, SRT, VTT, CSV |
 | 저장 | SQLite 기반 작업, 세그먼트, export, 원문 대조, 교정 후보 기록 |
 | 배포 | PyInstaller Windows Portable ZIP, 태그 기반 GitHub Release 자동화 |
@@ -147,10 +148,9 @@ scripts/            Windows 빌드/패키징 스크립트
 
 ## v1.0 범위 제외
 
-- YouTube URL 입력 / 온라인 다운로드: [docs/deferred-youtube-import.md](docs/deferred-youtube-import.md)
 - 클라우드 동기화 / 외부 API 송신
+- 일반 온라인 다운로드 / DRM 또는 접근 제한 우회
 - 실시간 마이크 녹음
-- 화자 분리
 - 자동 요약
 - 자동 업데이트 설치
 

@@ -1,8 +1,9 @@
-# Deferred Feature: YouTube URL Import
+# Historical Note: YouTube URL Import
 
 ## 1. 상태
 
-YouTube URL 입력은 v1.0 범위에서 제외합니다.
+이 문서는 초기 기획 단계의 보류 결정을 남긴 과거 기록입니다.
+현재 정책은 [deferred-youtube-import.md](deferred-youtube-import.md)를 따릅니다.
 
 후보 버전:
 
