@@ -1,5 +1,20 @@
 # HISTORY.md
 
+## 2026-05-21 (GitHub Actions Node 24 및 Windows 2025/VS2026 runner 전환)
+- 작업: GitHub Actions 실행 로그의 Node.js 20 deprecation 경고와 `windows-latest` 리디렉션 공지를 선제 대응하기 위해 CI runner/runtime 설정을 명시화.
+- 변경 파일:
+  - .github/workflows/test.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026` 적용)
+  - .github/workflows/build-windows.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026` 적용)
+  - CHANGELOG.md (Unreleased CI 항목 기록)
+  - HISTORY.md (작업 이력 기록)
+- 검증:
+  - 로컬 YAML 파싱 확인: PASS (`test.yml`, `build-windows.yml`)
+  - `python -m ruff check .`: PASS
+  - `$env:PYTHONPATH="src"; python -m pytest`: 136/136 PASS
+- 결과: 로컬 검증 성공. Node 24 강제 실행 및 Windows 2025/VS2026 runner 명시 전환 준비 완료.
+- 후속 작업:
+  - 푸시 후 GitHub Actions `Test` 및 필요 시 `Build Windows Portable` 재실행 결과 확인
+
 ## 2026-05-21 (v0.4.7 프로 검수 단축키 및 Markdown 리치 편집 모드 완비)
 - 작업: 검수 및 타이핑 생산성을 극대화하기 위해 `QShortcut` 기반 키보드 단축키 시스템을 완성하고, 편집기 하단에 `QTextBrowser` 기반의 **Markdown 실시간 리치 텍스트 뷰어**를 연동 완료. 또한, 사용자 제안 깃허브 이슈 #1(실시간 녹음 및 STT)의 대대적 아키텍처 연계 설계를 로드맵 및 의사결정 로그에 인계 가이드로 명시하여 완벽히 안전 격리 이관 완료.
 - 변경 파일:
