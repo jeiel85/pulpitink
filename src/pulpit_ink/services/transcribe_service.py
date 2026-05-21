@@ -439,7 +439,8 @@ def run_transcribe(
         emit("[3/3] Export 시작")
         pipeline = ExportPipeline(request.formats)
         base_name = source.stem
-        exports = pipeline.run(transcription, request.output_dir, base_name)
+        bible_refs = parsed_reference.bible_refs if parsed_reference else []
+        exports = pipeline.run(transcription, request.output_dir, base_name, bible_refs=bible_refs)
         for path in exports:
             emit(f"      생성: {path}")
 

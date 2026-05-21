@@ -628,6 +628,20 @@ class TranscriptEditorWidget(QWidget):
         if not target:
             return
         result = _build_transcription_result(self._segments, self._job_id)
+        
+        # Load bible_refs from database reference documents
+        bible_refs = []
+        conn, repo = self._open_repo()
+        try:
+            ref_docs = repo.list_reference_documents(self._job_id)
+            for doc in ref_docs:
+                if doc.bible_refs:
+                    bible_refs.extend(doc.bible_refs)
+        except Exception:
+            pass
+        finally:
+            conn.close()
+
         pipeline = ExportPipeline(
             (
                 ExportFormat.TXT,
@@ -636,9 +650,10 @@ class TranscriptEditorWidget(QWidget):
                 ExportFormat.SRT,
                 ExportFormat.VTT,
                 ExportFormat.CSV,
+                ExportFormat.DOCX,
             )
         )
-        out_paths = pipeline.run(result, Path(target), self._job_id)
+        out_paths = pipeline.run(result, Path(target), self._job_id, bible_refs=bible_refs)
         QMessageBox.information(
             self,
             "설교필기",

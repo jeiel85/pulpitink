@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QThread, Signal
-from PySide6.QtGui import QDragEnterEvent, QDropEvent
+from PySide6.QtCore import QPoint, Qt, QThread, Signal, QUrl, QTimer
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QColor, QDesktopServices
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -36,11 +36,15 @@ from PySide6.QtWidgets import (
     QTextBrowser,
     QVBoxLayout,
     QWidget,
+    QFrame,
+    QGraphicsDropShadowEffect,
 )
 
+from pulpit_ink import __version__
 from pulpit_ink.core.audio.enhancement_presets import PRESETS
 from pulpit_ink.core.export.base import ExportFormat
 from pulpit_ink.core.utils.i18n import tr
+from pulpit_ink.core.utils.update_checker import check_for_updates
 from pulpit_ink.services.model_service import list_models
 from pulpit_ink.services.settings_service import SettingsService
 from pulpit_ink.services.transcribe_service import (
@@ -162,6 +166,112 @@ class DisclaimerDialog(QDialog):
             self._check_status()
 
 
+class UpdateCheckWorker(QThread):
+    """Worker thread to check for updates without freezing the UI."""
+    # (has_update, latest_version, download_url, is_manual, error_message)
+    finished_signal = Signal(bool, str, str, bool, str)
+
+    def __init__(self, current_version: str, is_manual: bool = False, force: bool = False, parent = None) -> None:
+        super().__init__(parent)
+        self.current_version = current_version
+        self.is_manual = is_manual
+        self.force = force
+
+    def run(self) -> None:
+        has_update, latest_version, download_url, error_message = check_for_updates(
+            self.current_version, force=self.force
+        )
+        self.finished_signal.emit(
+            has_update, latest_version, download_url, self.is_manual, error_message or ""
+        )
+
+
+class UpdateBannerWidget(QFrame):
+    """A premium custom banner widget displayed at the top for update notifications."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.download_url = ""
+        
+        # Style sheet for premium styling: modern gradient from deep navy to soft blue
+        self.setStyleSheet("""
+            UpdateBannerWidget {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1e3c72, stop:1 #2a5298);
+                border-radius: 8px;
+                min-height: 48px;
+            }
+            QLabel {
+                color: #ffffff;
+                font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+                font-size: 11pt;
+                font-weight: 500;
+                background: transparent;
+            }
+            QPushButton#download_btn {
+                background-color: #ffffff;
+                color: #1e3c72;
+                border: none;
+                border-radius: 4px;
+                padding: 6px 14px;
+                font-weight: bold;
+                font-size: 10pt;
+            }
+            QPushButton#download_btn:hover {
+                background-color: #f1f5f9;
+            }
+            QPushButton#close_btn {
+                background: transparent;
+                color: rgba(255, 255, 255, 0.7);
+                border: none;
+                font-weight: bold;
+                font-size: 11pt;
+                padding: 4px;
+            }
+            QPushButton#close_btn:hover {
+                color: #ffffff;
+            }
+        """)
+
+        # Drop shadow for a 3D overlay feel
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(8)
+        shadow.setColor(QColor(0, 0, 0, 60))
+        shadow.setOffset(0, 2)
+        self.setGraphicsEffect(shadow)
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(16, 8, 16, 8)
+        layout.setSpacing(12)
+
+        self.info_label = QLabel()
+        layout.addWidget(self.info_label, 1)
+
+        self.download_btn = QPushButton(tr("다운로드"))
+        self.download_btn.setObjectName("download_btn")
+        self.download_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.download_btn.clicked.connect(self._on_download_click)
+        layout.addWidget(self.download_btn)
+
+        self.close_btn = QPushButton("✕")
+        self.close_btn.setObjectName("close_btn")
+        self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.close_btn.clicked.connect(self.hide)
+        layout.addWidget(self.close_btn)
+
+        self.hide()
+
+    def show_update(self, latest_version: str, download_url: str) -> None:
+        self.download_url = download_url
+        self.info_label.setText(
+            f"✨ {tr('새로운 버전')} <b>v{latest_version}</b>{tr('이 출시되었습니다! 지금 다운로드하여 최신 기능을 만나보세요.')}"
+        )
+        self.show()
+
+    def _on_download_click(self) -> None:
+        if self.download_url:
+            QDesktopServices.openUrl(QUrl(self.download_url))
+
+
 
 class MainWindow(QMainWindow):
     """PulpitInk GUI entry point."""
@@ -184,11 +294,20 @@ class MainWindow(QMainWindow):
         self._retranslate_ui()
         self._refresh_recent_jobs()
 
+        # 1초 후 백그라운드에서 자동 업데이트 체크 실행 (무소음)
+        QTimer.singleShot(1000, lambda: self._check_for_updates(force=False, is_manual=False))
+
     # ---------- UI ----------
 
     def _build_ui(self) -> None:
         central = QWidget(self)
-        root = QHBoxLayout(central)
+        main_layout = QVBoxLayout(central)
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(8)
+
+        # 상단 업데이트 알림 배너
+        self.update_banner = UpdateBannerWidget(self)
+        main_layout.addWidget(self.update_banner)
 
         # Left column: file queue + actions
         left = QVBoxLayout()
@@ -257,10 +376,16 @@ class MainWindow(QMainWindow):
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
 
-        root.addWidget(splitter)
+        main_layout.addWidget(splitter, 1)
         self.setCentralWidget(central)
 
         self.setStatusBar(QStatusBar())
+
+        # 수동 업데이트 체크를 위한 메뉴바 구성
+        menu_bar = self.menuBar()
+        self.help_menu = menu_bar.addMenu(tr("도움말"))
+        self.check_update_action = self.help_menu.addAction(tr("업데이트 확인..."))
+        self.check_update_action.triggered.connect(self._on_check_update_triggered)
 
     def _build_options_group(self) -> QGroupBox:
         self.options_group = QGroupBox("")
@@ -367,6 +492,9 @@ class MainWindow(QMainWindow):
         self.tabs.setTabText(0, tr("로그"))
         self.tabs.setTabText(1, tr("결과 미리보기"))
         self.tabs.setTabText(2, tr("편집기"))
+
+        self.help_menu.setTitle(tr("도움말"))
+        self.check_update_action.setText(tr("업데이트 확인..."))
 
     def _on_app_language_changed(self) -> None:
         lang = self.app_language_combo.currentData()
@@ -770,3 +898,64 @@ class MainWindow(QMainWindow):
                     self._refresh_recent_jobs()
                 except Exception as exc:  # noqa: BLE001
                     QMessageBox.warning(self, "오류", f"작업 삭제 중 오류가 발생했습니다:\n{exc}")
+
+    # ---------- Update Checker ----------
+
+    def _check_for_updates(self, force: bool = False, is_manual: bool = False) -> None:
+        """Starts the background thread to check for updates."""
+        if hasattr(self, "_update_worker") and self._update_worker and self._update_worker.isRunning():
+            if is_manual:
+                QMessageBox.information(self, tr("업데이트 확인"), tr("이미 업데이트 검사가 진행 중입니다."))
+            return
+
+        self._update_worker = UpdateCheckWorker(__version__, is_manual=is_manual, force=force, parent=self)
+        self._update_worker.finished_signal.connect(self._on_update_checked)
+        self._update_worker.start()
+
+    def _on_update_checked(
+        self, has_update: bool, latest_version: str, download_url: str, is_manual: bool, error_message: str
+    ) -> None:
+        """Handles the update check result and provides appropriate UI feedback."""
+        if has_update:
+            if is_manual:
+                msg = tr(
+                    "새로운 버전 (v{latest})이 준비되어 있습니다.\n현재 설치된 버전: v{current}\n\n최신 다운로드 페이지로 이동하시겠습니까?"
+                ).format(latest=latest_version, current=__version__)
+                reply = QMessageBox.question(
+                    self,
+                    tr("업데이트 발견"),
+                    msg,
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.Yes,
+                )
+                if reply == QMessageBox.StandardButton.Yes:
+                    QDesktopServices.openUrl(QUrl(download_url))
+                else:
+                    self.update_banner.show_update(latest_version, download_url)
+            else:
+                self.update_banner.show_update(latest_version, download_url)
+        else:
+            if is_manual:
+                if error_message:
+                    QMessageBox.warning(
+                        self,
+                        tr("업데이트 확인 오류"),
+                        tr(
+                            "업데이트 정보를 확인하는 중 오류가 발생했습니다.\n인터넷 연결이나 GitHub API 한도 상태를 확인해주세요.\n\n상세 에러: {err}"
+                        ).format(err=error_message),
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        tr("업데이트 확인"),
+                        tr("현재 최신 버전(v{current})을 사용 중입니다.").format(current=__version__),
+                    )
+            else:
+                # Silent fallback on automatic background check failures/already-latest
+                if error_message:
+                    import logging
+                    logging.getLogger("pulpit_ink").warning(f"Automatic update check failed: {error_message}")
+
+    def _on_check_update_triggered(self) -> None:
+        """Triggered by the manual update check menu action."""
+        self._check_for_updates(force=True, is_manual=True)

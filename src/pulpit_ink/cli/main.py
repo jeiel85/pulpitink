@@ -139,10 +139,10 @@ def transcribe(
         Path("./exports"), "--output", "-o", help="변환 결과를 저장할 디렉터리"
     ),
     fmt: str = typer.Option(
-        "txt,json,md,srt,vtt,csv",
+        "txt,json,md,srt,vtt,csv,docx",
         "--format",
         "-f",
-        help="콤마로 구분된 출력 포맷 목록",
+        help="콤마로 구분된 출력 포맷 목록 (지원: txt, json, md, srt, vtt, csv, docx)",
     ),
     device: str = typer.Option("auto", "--device", help="STT 디바이스 (auto|cpu|cuda)"),
     compute_type: str = typer.Option(
@@ -344,7 +344,10 @@ def jobs_export(
         Path("./exports"), "--output", "-o", help="export 결과를 저장할 디렉터리"
     ),
     fmt: str = typer.Option(
-        "txt,json,md,srt,vtt,csv", "--format", "-f", help="콤마로 구분된 포맷 목록"
+        "txt,json,md,srt,vtt,csv,docx",
+        "--format",
+        "-f",
+        help="콤마로 구분된 포맷 목록 (지원: txt, json, md, srt, vtt, csv, docx)",
     ),
 ) -> None:
     """저장된 작업을 다시 export 합니다 (원본 오디오 재처리 없이 세그먼트 사용)."""
@@ -357,6 +360,16 @@ def jobs_export(
             console.print(f"[red]작업을 찾을 수 없습니다: {job_id}[/red]")
             raise typer.Exit(code=1)
         seg_rows = repo.list_segments(job_id)
+        
+        # Load bible_refs from database reference documents
+        bible_refs = []
+        try:
+            ref_docs = repo.list_reference_documents(job_id)
+            for doc in ref_docs:
+                if doc.bible_refs:
+                    bible_refs.extend(doc.bible_refs)
+        except Exception:
+            pass
     finally:
         conn.close()
 
@@ -389,7 +402,7 @@ def jobs_export(
     )
     pipeline = ExportPipeline(formats)
     base_name = source.stem or job.title or job.id
-    paths = pipeline.run(result, output, base_name)
+    paths = pipeline.run(result, output, base_name, bible_refs=bible_refs)
     console.print(f"[green]생성된 파일 {len(paths)}개[/green]")
     for path in paths:
         console.print(f"  • {path}")

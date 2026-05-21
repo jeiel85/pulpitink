@@ -35,6 +35,8 @@ class Settings:
     fuzzy_threshold: float = 0.70
     keep_history: bool = True
     diarize: bool = False
+    docx_template_style: str = "pulpit_desk"  # "pulpit_desk", "church_bulletin", "grid_review"
+
 
     def resolved_output_dir(self) -> Path:
         if self.output_dir:
@@ -112,6 +114,10 @@ class SettingsService:
                 if v not in ("ko", "en"):
                     raise ValueError(f"'{v}'는 유효하지 않은 언어 코드입니다. 'ko' 또는 'en'만 지원됩니다.")
                 converted[k] = str(v)
+            elif k == "docx_template_style":
+                if v not in ("pulpit_desk", "church_bulletin", "grid_review"):
+                    raise ValueError(f"'{v}'는 유효하지 않은 Word 템플릿 스타일입니다. 'pulpit_desk', 'church_bulletin', 'grid_review' 중 하나여야 합니다.")
+                converted[k] = str(v)
             else:
                 converted[k] = v
 
@@ -119,6 +125,7 @@ class SettingsService:
         self.save(merged)
         set_language(merged.app_language)
         return merged
+
 
     @staticmethod
     def known_keys() -> tuple[str, ...]:

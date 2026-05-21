@@ -14,6 +14,7 @@ from pulpit_ink.core.export.markdown_exporter import MarkdownExporter
 from pulpit_ink.core.export.srt_exporter import SrtExporter
 from pulpit_ink.core.export.txt_exporter import TxtExporter
 from pulpit_ink.core.export.vtt_exporter import VttExporter
+from pulpit_ink.core.export.docx_exporter import DocxExporter
 from pulpit_ink.core.transcription.base import TranscriptionResult
 
 logger = logging.getLogger("pulpit_ink.export")
@@ -25,6 +26,7 @@ EXPORTERS: dict[ExportFormat, type[Exporter]] = {
     ExportFormat.SRT: SrtExporter,
     ExportFormat.VTT: VttExporter,
     ExportFormat.CSV: CsvExporter,
+    ExportFormat.DOCX: DocxExporter,
 }
 
 
@@ -43,6 +45,7 @@ class ExportPipeline:
         result: TranscriptionResult,
         output_dir: Path,
         base_name: str,
+        bible_refs: list[str] | None = None,
     ) -> list[Path]:
         output_dir.mkdir(parents=True, exist_ok=True)
         produced: list[Path] = []
@@ -53,7 +56,12 @@ class ExportPipeline:
             exporter = exporter_cls()
             try:
                 path = exporter.export(
-                    ExportRequest(result=result, output_dir=output_dir, base_name=base_name)
+                    ExportRequest(
+                        result=result,
+                        output_dir=output_dir,
+                        base_name=base_name,
+                        bible_refs=bible_refs or []
+                    )
                 )
             except OSError as exc:
                 raise ExportError(
@@ -69,5 +77,6 @@ def run_exports(
     output_dir: Path,
     base_name: str,
     formats: Iterable[ExportFormat | str],
+    bible_refs: list[str] | None = None,
 ) -> list[Path]:
-    return ExportPipeline(formats).run(result, output_dir, base_name)
+    return ExportPipeline(formats).run(result, output_dir, base_name, bible_refs=bible_refs)

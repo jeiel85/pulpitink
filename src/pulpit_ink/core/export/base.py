@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
@@ -17,6 +17,7 @@ class ExportFormat(StrEnum):
     SRT = "srt"
     VTT = "vtt"
     CSV = "csv"
+    DOCX = "docx"
 
     @classmethod
     def parse(cls, value: str) -> ExportFormat:
@@ -34,6 +35,7 @@ class ExportRequest:
     result: TranscriptionResult
     output_dir: Path
     base_name: str
+    bible_refs: list[str] = field(default_factory=list)
 
 
 class Exporter(ABC):

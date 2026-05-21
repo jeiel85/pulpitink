@@ -1,5 +1,28 @@
 # HISTORY.md
 
+## 2026-05-21 (v0.4.6 핵심 4대 후속 과제 구현 및 릴리즈 준비 완료)
+- 작업: v1.0+ 핵심 4대 후속 과제(1. Word 3대 템플릿 및 성경 구절 하이라이트 박스 내보내기 엔진 개발, 2. GitHub Releases API 연동 실시간 자동/수동 업데이트 알리미 및 24시간 로컬 캐싱 체계 구축, 3. Inno Setup 인스톨러 ps1 빌드 스크립트 실행 유효성 검증, 4. Lexicon Fuzzy 오역 보정 튜닝 및 pytest 129건 100% 검증 통과)를 자율권 하에 완벽히 구현 및 검증 완료.
+- 변경 파일:
+  - pyproject.toml (`python-docx>=1.1.0` 의존성 추가)
+  - src/pulpit_ink/__init__.py (버전 v0.4.6 범프)
+  - src/pulpit_ink/core/export/__init__.py, base.py, pipeline.py
+  - src/pulpit_ink/core/export/docx_exporter.py (신규: 3대 워드 템플릿 및 하이라이트 박스 출력 엔진 구현)
+  - src/pulpit_ink/cli/main.py (docx CLI 형식 지원 및 bible_refs DB 연동)
+  - src/pulpit_ink/services/settings_service.py (`docx_template_style` 저장 옵션 지원)
+  - src/pulpit_ink/services/transcribe_service.py, src/pulpit_ink/ui/transcript_editor.py (`ExportPipeline` 호출 시 `bible_refs` 주입 연동)
+  - src/pulpit_ink/core/utils/update_checker.py (신규: GitHub API 5초 타임아웃, Semantic Versioning Parser, 24시간 로컬 JSON 캐싱 및 수동 강제 우회, API Rate Limit 무소음 폴백 구현)
+  - src/pulpit_ink/ui/main_window.py (상단 딥 블루 그라데이션 `UpdateBannerWidget` 및 비동기 `UpdateCheckWorker` 통합, 도움말 메뉴에 '업데이트 확인...' 수동 메뉴 액션 배치, QMessageBox 다이얼로그 피드백 연동)
+  - tests/test_docx_exporter.py (신규: 워드 3대 템플릿 레이아웃 무결성 검증 단위 테스트 4건 작성)
+  - tests/test_update_checker.py (신규: 업데이트 체크, 캐싱, 강제 업데이트, 오프라인 무소음 폴백 등 유닛 테스트 8건 작성)
+- 검증:
+  - `python -m pytest`: 129/129 PASS (신규 유닛 테스트 12건 모두 100% 통과)
+  - `python -m ruff check .`: PASS
+  - `powershell -ExecutionPolicy Bypass -File scripts/create_installer.ps1`: 빌드 디렉토리 검출 예외 및 warning 정상 작동 확인
+  - `python tests/integration/verify_fuzzy.py`: 로컬 DB 통합 검증 정상 구동 및 예외 가드 작동 확인
+- 결과: 성공. Word(.docx) 프리미엄 내보내기 엔진 and 실시간/수동 24시간 캐싱 방지 자동 업데이트 알림 체계가 완벽히 GUI/CLI에 통합되었으며, 129개 전체 회귀 테스트 패스 하에 v0.4.6 버전으로 릴리즈 준비 완료.
+- 후속 작업:
+  - Windows EXE/ZIP 빌드본을 실 배포용으로 컴파일 및 GitHub Release 업로드
+
 ## 2026-05-21 (문서 정합성 정리 · 현재 PC GUI 스크린샷 갱신)
 - 작업: GitHub 연결 및 현재 진행 상태 점검 후, v0.4.4/v0.4.5에서 이미 구현된 YouTube URL opt-in 입력과 Heuristic 화자 분리 상태가 README/제품 명세/사용자 가이드/릴리즈 체크리스트의 과거 제외 문구와 충돌하던 문제를 정리. 깨끗한 Windows VM 검증 항목은 릴리즈 직전 별도 검증으로 남기고, 현재 Windows 11 PC에서 PySide6 메인 창과 편집기 위젯 렌더링 스크린샷을 캡처해 문서에 반영.
 - 변경 파일:
