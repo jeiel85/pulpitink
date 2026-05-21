@@ -3,8 +3,8 @@
 ## 2026-05-21 (GitHub Actions Node 24 및 Windows 2025/VS2026 runner 전환)
 - 작업: GitHub Actions 실행 로그의 Node.js 20 deprecation 경고와 `windows-latest` 리디렉션 공지를 선제 대응하기 위해 CI runner/runtime 설정을 명시화.
 - 변경 파일:
-  - .github/workflows/test.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026`, `checkout@v5`, `setup-python@v6` 적용)
-  - .github/workflows/build-windows.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026`, `checkout@v5`, `setup-python@v6`, `upload-artifact@v5`, `download-artifact@v5` 적용)
+  - .github/workflows/test.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026`, `checkout@v6`, `setup-python@v6.2.0` 적용)
+  - .github/workflows/build-windows.yml (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`, `windows-2025-vs2026`, `checkout@v6`, `setup-python@v6.2.0`, `upload-artifact@v7`, `download-artifact@v8` 적용)
   - CHANGELOG.md (Unreleased CI 항목 기록)
   - HISTORY.md (작업 이력 기록)
 - 검증:
