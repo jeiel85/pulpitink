@@ -5,6 +5,7 @@
 ### CI
 - GitHub Actions의 Node.js 20 deprecation 경고에 대응하기 위해 워크플로우 전역에 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`를 설정했습니다.
 - `windows-latest` 리디렉션 공지에 대응해 `Test` 및 `Build Windows Portable` 워크플로우 runner를 `windows-2025-vs2026`으로 명시 고정했습니다.
+- 공식 Actions를 Node 24 기반 major(`checkout@v5`, `setup-python@v6`, `upload-artifact@v5`, `download-artifact@v5`)로 업데이트했습니다.
 
 ## [0.4.7] - 2026-05-21
 
