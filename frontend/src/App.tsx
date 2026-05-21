@@ -4,7 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { 
   Play, Pause, Volume2, Settings, List, FileAudio, 
   RefreshCw, CheckCircle2, AlertTriangle, 
-  ArrowRight, Search, Plus, Database, Sparkles
+  ArrowRight, Search, Plus, Database, Sparkles, Sun, Moon, HelpCircle
 } from "lucide-react";
 import "./App.css";
 
@@ -50,7 +50,7 @@ interface CorrectionSuggestion {
 
 interface AppSettings {
   language: string;
-  default_model: string;
+  model: string;
   preset: string;
   output_dir: string;
   model_cache_dir: string;
@@ -63,6 +63,12 @@ interface AppSettings {
 function App() {
   // Navigation
   const [activeTab, setActiveTab] = useState<"dashboard" | "transcribe" | "editor" | "settings">("dashboard");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    return localStorage.getItem("pulpitink-theme") === "light" ? "light" : "dark";
+  });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return localStorage.getItem("pulpitink-onboarding") !== "done";
+  });
   
   // Dashboard & Jobs Data
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -101,7 +107,7 @@ function App() {
   // System Settings state
   const [settings, setSettings] = useState<AppSettings>({
     language: "ko",
-    default_model: "small",
+    model: "small",
     preset: "sermon",
     output_dir: "",
     model_cache_dir: "",
@@ -123,6 +129,11 @@ function App() {
     loadSettings();
     getDatabasePath();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("pulpitink-theme", theme);
+  }, [theme]);
 
   // Auto-scroll logs
   useEffect(() => {
@@ -211,7 +222,7 @@ function App() {
   const loadJobs = async () => {
     setIsLoadingJobs(true);
     try {
-      const output = await invoke<string>("run_sermonscript_sidecar_sync", {
+      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
         args: ["jobs", "list", "--json"]
       });
       const parsed = JSON.parse(output);
@@ -242,12 +253,12 @@ function App() {
 
   const loadSettings = async () => {
     try {
-      const output = await invoke<string>("run_sermonscript_sidecar_sync", {
+      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
         args: ["settings", "show", "--json"]
       });
       const parsed = JSON.parse(output);
       setSettings(parsed);
-      setSelectedModel(parsed.default_model || "small");
+      setSelectedModel(parsed.model || "small");
       setSelectedPreset(parsed.preset || "sermon");
       setIsFuzzyEnabled(parsed.fuzzy_matching_enabled ?? true);
       setFuzzyThreshold(parsed.fuzzy_threshold ?? 0.70);
@@ -258,13 +269,13 @@ function App() {
 
   const getDatabasePath = async () => {
     try {
-      const output = await invoke<string>("run_sermonscript_sidecar_sync", {
+      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
         args: ["db-path"]
       });
       setDbPath(output.trim());
     } catch (err) {
       console.warn("Failed to load db-path", err);
-      setDbPath("C:\\Users\\jeiel\\AppData\\Roaming\\sermonscript\\sermonscript.db");
+      setDbPath("C:\\Users\\jeiel\\AppData\\Local\\PulpitInk\\PulpitInk\\pulpit_ink.db");
     }
   };
 
@@ -272,7 +283,7 @@ function App() {
     setIsDiagnosing(true);
     setDoctorReport([]);
     try {
-      const output = await invoke<string>("run_sermonscript_sidecar_sync", {
+      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
         args: ["doctor"]
       });
       
@@ -307,7 +318,7 @@ function App() {
       console.error(err);
       setDoctorReport([
         { name: "사이드카 커맨드 통신", ok: true, detail: "Tauri IPC 정상 동작" },
-        { name: "SQLite 데이터베이스", ok: true, detail: "sermonscript.db 접속 연결 완료" },
+        { name: "SQLite 데이터베이스", ok: true, detail: "pulpit_ink.db 접속 연결 완료" },
         { name: "FFmpeg 디바이스", ok: true, detail: "오디오 전처리 코덱 가용" }
       ]);
     } finally {
@@ -337,7 +348,7 @@ function App() {
     args.push("--fuzzy-threshold", fuzzyThreshold.toString());
 
     try {
-      await invoke("run_sermonscript_sidecar", { args });
+      await invoke("run_pulpit_ink_sidecar", { args });
     } catch (err: any) {
       setIsTranscribing(false);
       setTranscribeStatusText(`변환 시작 실패: ${err}`);
@@ -347,7 +358,7 @@ function App() {
 
   const loadJobIntoEditor = async (jobId: string) => {
     try {
-      const output = await invoke<string>("run_sermonscript_sidecar_sync", {
+      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
         args: ["jobs", "show", jobId, "--json"]
       });
       const data = JSON.parse(output);
@@ -494,14 +505,19 @@ function App() {
     }
   };
 
+  const dismissOnboarding = () => {
+    localStorage.setItem("pulpitink-onboarding", "done");
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
       <aside className="sidebar">
         <div>
           <div className="brand-section">
-            <div className="brand-logo">S</div>
-            <h1 className="brand-name">SermonScript</h1>
+            <div className="brand-logo">P</div>
+            <h1 className="brand-name">PulpitInk</h1>
           </div>
 
           <nav className="nav-links">
@@ -537,10 +553,10 @@ function App() {
         </div>
 
         <div className="user-profile">
-          <div className="avatar">JD</div>
+          <div className="avatar">PI</div>
           <div className="user-info">
-            <span className="user-name">Jeiel Kim</span>
-            <span className="user-role">Sermon Editor</span>
+            <span className="user-name">로컬 작업 공간</span>
+            <span className="user-role">Private Desktop</span>
           </div>
         </div>
       </aside>
@@ -565,7 +581,21 @@ function App() {
                 <span>새로고침</span>
               </button>
             )}
-            <span className="badge badge-accent">v1.0.0 Hybrid Edition</span>
+            <button
+              className="icon-btn"
+              onClick={() => setShowOnboarding(true)}
+              title="처음 시작 안내 다시 보기"
+            >
+              <HelpCircle size={18} />
+            </button>
+            <button
+              className="icon-btn"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              title={theme === "dark" ? "라이트 테마로 전환" : "다크 테마로 전환"}
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <span className="badge badge-accent">v0.4.7 Tauri Hybrid</span>
           </div>
         </header>
 
@@ -574,6 +604,43 @@ function App() {
           {/* TAB 1: DASHBOARD */}
           {activeTab === "dashboard" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {showOnboarding && (
+                <section className="onboarding-panel">
+                  <div className="onboarding-copy">
+                    <span className="eyebrow">처음 시작</span>
+                    <h2>녹음 파일 하나로 변환, 검수, 내보내기까지 이어갑니다.</h2>
+                    <p>
+                      먼저 시스템 진단으로 로컬 환경을 확인하고, 오디오 경로를 넣어 새 STT 작업을 시작하세요.
+                      변환이 끝나면 최근 작업에서 검수 에디터를 열 수 있습니다.
+                    </p>
+                  </div>
+
+                  <div className="onboarding-steps">
+                    <button className="onboarding-step" onClick={() => setActiveTab("settings")}>
+                      <CheckCircle2 size={20} />
+                      <span>
+                        <strong>1. 시스템 진단</strong>
+                        <small>FFmpeg, DB, Python 사이드카 확인</small>
+                      </span>
+                    </button>
+                    <button className="onboarding-step" onClick={() => setActiveTab("transcribe")}>
+                      <FileAudio size={20} />
+                      <span>
+                        <strong>2. 새 STT 변환</strong>
+                        <small>오디오 파일과 모델을 선택</small>
+                      </span>
+                    </button>
+                    <button className="onboarding-step" onClick={dismissOnboarding}>
+                      <ArrowRight size={20} />
+                      <span>
+                        <strong>안내 닫기</strong>
+                        <small>필요하면 상단 ? 버튼으로 다시 열기</small>
+                      </span>
+                    </button>
+                  </div>
+                </section>
+              )}
+
               <div className="glass-card flex-between" style={{ padding: "1rem 1.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "50%" }}>
                   <Search size={18} style={{ color: "var(--text-secondary)" }} />
@@ -610,10 +677,14 @@ function App() {
                     <span>로컬 DB에서 최근 작업들을 로딩 중입니다...</span>
                   </div>
                 ) : jobs.length === 0 ? (
-                  <div style={{ padding: "4rem 2rem", textAlign: "center", color: "var(--text-muted)" }}>
-                    <AlertTriangle size={36} style={{ margin: "0 auto 1rem", color: "var(--color-warning)" }} />
-                    <p>등록된 변환 작업이 전혀 없습니다.</p>
-                    <p style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>"새 STT 변환" 탭에서 최초 1회 변환을 실행해 보세요!</p>
+                  <div className="empty-state">
+                    <AlertTriangle size={34} />
+                    <h3>아직 변환 작업이 없습니다.</h3>
+                    <p>오디오 파일 경로를 준비한 뒤 첫 STT 변환을 시작하세요.</p>
+                    <button className="btn btn-primary" onClick={() => setActiveTab("transcribe")}>
+                      <Plus size={17} />
+                      <span>첫 작업 만들기</span>
+                    </button>
                   </div>
                 ) : (
                   jobs
@@ -971,7 +1042,7 @@ function App() {
                           alert("검수 수정본이 로컬 데이터베이스와 export 목록에 안전하게 내보내기 갱신되었습니다!");
                           // call jobs export inside sidecar
                           try {
-                            await invoke("run_sermonscript_sidecar_sync", {
+                            await invoke("run_pulpit_ink_sidecar_sync", {
                               args: ["jobs", "export", selectedJob.id]
                             });
                           } catch (err) {
@@ -1006,7 +1077,7 @@ function App() {
                   <input 
                     type="text" 
                     className="form-input" 
-                    value={settings.model_cache_dir || "System Default (Roaming\\sermonscript\\cache)"}
+                    value={settings.model_cache_dir || "System Default (Local\\PulpitInk\\PulpitInk\\models)"}
                     onChange={(e) => setSettings({ ...settings, model_cache_dir: e.target.value })}
                   />
                 </div>
@@ -1043,8 +1114,8 @@ function App() {
                   onClick={async () => {
                     // call settings set command
                     try {
-                      await invoke("run_sermonscript_sidecar_sync", {
-                        args: ["settings", "set", "default_model", settings.default_model]
+                      await invoke("run_pulpit_ink_sidecar_sync", {
+                        args: ["settings", "set", "model", settings.model]
                       });
                       alert("사용자 설정이 영속적으로 저장되었습니다.");
                     } catch (err) {
@@ -1061,7 +1132,7 @@ function App() {
               {/* System Diagnostics */}
               <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 <div className="flex-between" style={{ borderBottom: "1px solid var(--border-light)", paddingBottom: "0.75rem" }}>
-                  <h2 style={{ fontSize: "1.1rem", fontWeight: 600 }}>SermonScript Doctor 시스템 진단</h2>
+                  <h2 style={{ fontSize: "1.1rem", fontWeight: 600 }}>PulpitInk Doctor 시스템 진단</h2>
                   <button 
                     className="btn btn-secondary btn-outline" 
                     style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}

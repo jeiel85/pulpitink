@@ -1,7 +1,10 @@
+import csv
+import io
 import json
 from pathlib import Path
 
-from sermonscript.core.export import (
+from pulpit_ink.core.export import (
+    CsvExporter,
     ExportFormat,
     JsonExporter,
     MarkdownExporter,
@@ -9,9 +12,10 @@ from sermonscript.core.export import (
     TxtExporter,
     VttExporter,
 )
-from sermonscript.core.export.base import ExportRequest
-from sermonscript.core.export.pipeline import ExportPipeline
-from sermonscript.core.transcription.base import (
+from pulpit_ink.core.export.base import ExportRequest
+from pulpit_ink.core.export.csv_exporter import CSV_COLUMNS
+from pulpit_ink.core.export.pipeline import ExportPipeline
+from pulpit_ink.core.transcription.base import (
     TranscriptionResult,
     TranscriptSegment,
     segment_display_text,
@@ -84,6 +88,90 @@ def test_vtt_exporter_starts_with_webvtt(tmp_path: Path):
     assert "00:00:00.000 --> 00:00:02.500" in vtt
 
 
+def test_csv_exporter_writes_header_and_rows(tmp_path: Path):
+    result = _sample_result(tmp_path)
+    path = CsvExporter().export(_make_request(result, tmp_path))
+
+    # UTF-8 BOM so Excel renders Korean correctly
+    raw = path.read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf")
+
+    rows = list(csv.reader(io.StringIO(raw.decode("utf-8-sig"))))
+    assert rows[0] == list(CSV_COLUMNS)
+    assert len(rows) == 3
+    assert rows[1][0] == "1"
+    assert rows[1][1] == "0.000"
+    assert rows[1][2] == "2.500"
+    assert rows[1][3] == "00:00:00.000"
+    assert rows[1][4] == "00:00:02.500"
+    assert rows[1][5] == "첫 문장입니다."
+    assert rows[1][6] == "첫 문장입니다."  # raw_text
+    assert rows[2][5] == "두 번째 문장입니다."
+
+
+def test_csv_exporter_uses_edited_text_for_display(tmp_path: Path):
+    result = TranscriptionResult(
+        source_path=Path("sermon.mp3"),
+        audio_path=tmp_path / "processed.wav",
+        language="ko",
+        model_name="small",
+        preset="sermon",
+        segments=[
+            TranscriptSegment(
+                start=0.0,
+                end=1.0,
+                text="raw",
+                clean_text="clean",
+                edited_text="edited",
+                speaker="목사",
+            ),
+        ],
+        duration=1.0,
+    )
+    path = CsvExporter().export(_make_request(result, tmp_path))
+    rows = list(csv.reader(io.StringIO(path.read_text(encoding="utf-8-sig"))))
+
+    assert rows[1][5] == "edited"
+    assert rows[1][6] == "raw"
+    assert rows[1][7] == "clean"
+    assert rows[1][8] == "edited"
+    assert rows[1][9] == "목사"
+
+
+def test_csv_exporter_escapes_commas_quotes_and_newlines(tmp_path: Path):
+    tricky = 'He said, "안녕"\n다음 줄'
+    result = TranscriptionResult(
+        source_path=Path("sermon.mp3"),
+        audio_path=tmp_path / "processed.wav",
+        language="ko",
+        model_name="small",
+        preset="sermon",
+        segments=[TranscriptSegment(start=0.0, end=1.0, text=tricky)],
+        duration=1.0,
+    )
+    path = CsvExporter().export(_make_request(result, tmp_path))
+
+    # Round-trip through csv.reader to verify escaping is valid
+    rows = list(csv.reader(io.StringIO(path.read_text(encoding="utf-8-sig"))))
+    assert rows[1][5] == tricky
+    assert rows[1][6] == tricky
+
+
+def test_csv_exporter_handles_empty_segments(tmp_path: Path):
+    result = TranscriptionResult(
+        source_path=Path("sermon.mp3"),
+        audio_path=tmp_path / "processed.wav",
+        language="ko",
+        model_name="small",
+        preset="sermon",
+        segments=[],
+        duration=0.0,
+    )
+    path = CsvExporter().export(_make_request(result, tmp_path))
+    rows = list(csv.reader(io.StringIO(path.read_text(encoding="utf-8-sig"))))
+    assert rows == [list(CSV_COLUMNS)]
+
+
 def test_export_pipeline_runs_all_formats(tmp_path: Path):
     result = _sample_result(tmp_path)
     formats = [
@@ -92,10 +180,11 @@ def test_export_pipeline_runs_all_formats(tmp_path: Path):
         ExportFormat.MD,
         ExportFormat.SRT,
         ExportFormat.VTT,
+        ExportFormat.CSV,
     ]
     produced = ExportPipeline(formats).run(result, tmp_path / "out", "sermon")
     suffixes = {p.suffix for p in produced}
-    assert suffixes == {".txt", ".json", ".md", ".srt", ".vtt"}
+    assert suffixes == {".txt", ".json", ".md", ".srt", ".vtt", ".csv"}
     for path in produced:
         assert path.exists() and path.stat().st_size > 0
 
@@ -113,3 +202,5 @@ def test_export_format_parse_normalises():
     assert ExportFormat.parse("TXT") is ExportFormat.TXT
     assert ExportFormat.parse(".md") is ExportFormat.MD
     assert ExportFormat.parse("vtt") is ExportFormat.VTT
+    assert ExportFormat.parse("CSV") is ExportFormat.CSV
+    assert ExportFormat.parse(".csv") is ExportFormat.CSV

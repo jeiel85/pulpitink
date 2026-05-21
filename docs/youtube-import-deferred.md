@@ -1,8 +1,9 @@
-# Deferred Feature: YouTube URL Import
+# Historical Note: YouTube URL Import
 
 ## 1. 상태
 
-YouTube URL 입력은 v1.0 범위에서 제외합니다.
+이 문서는 초기 기획 단계의 보류 결정을 남긴 과거 기록입니다.
+현재 정책은 [deferred-youtube-import.md](deferred-youtube-import.md)를 따릅니다.
 
 후보 버전:
 
@@ -35,7 +36,7 @@ YouTube URL 입력
 
 ```text
 이 기능은 본인이 권리를 보유했거나 변환 권한이 있는 콘텐츠에만 사용해야 합니다.
-SermonScript는 저작권 침해 목적의 다운로드나 변환을 권장하지 않습니다.
+PulpitInk는 저작권 침해 목적의 다운로드나 변환을 권장하지 않습니다.
 사용자는 콘텐츠 처리 권한을 직접 확인할 책임이 있습니다.
 ```
 

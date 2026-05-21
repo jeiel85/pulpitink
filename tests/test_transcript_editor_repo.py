@@ -10,9 +10,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sermonscript.core.reference.corrections import apply_correction_to_segment
-from sermonscript.storage.database import connect, initialise_database
-from sermonscript.storage.job_repository import (
+from pulpit_ink.core.reference.corrections import apply_correction_to_segment
+from pulpit_ink.storage.database import connect, initialise_database
+from pulpit_ink.storage.job_repository import (
     CorrectionSuggestionRecord,
     JobRepository,
     SegmentRecord,

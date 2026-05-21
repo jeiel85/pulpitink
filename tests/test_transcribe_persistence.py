@@ -6,20 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.app.exceptions import SermonScriptError
-from sermonscript.core.audio.enhancement_presets import AudioEnhancementPreset
-from sermonscript.core.export.base import ExportFormat
-from sermonscript.core.transcription.base import (
+from pulpit_ink.app.exceptions import PulpitInkError
+from pulpit_ink.core.audio.enhancement_presets import AudioEnhancementPreset
+from pulpit_ink.core.export.base import ExportFormat
+from pulpit_ink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from sermonscript.services.transcribe_service import (
+from pulpit_ink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )
-from sermonscript.storage.database import connect
-from sermonscript.storage.job_repository import JobRepository
+from pulpit_ink.storage.database import connect
+from pulpit_ink.storage.job_repository import JobRepository
 
 
 class _StubEngine(TranscriptionEngine):
@@ -171,7 +171,7 @@ def test_run_transcribe_persists_validation_failure(tmp_path: Path) -> None:
         cache_root=tmp_path / "cache" / "jobs",
     )
     db = tmp_path / "db.sqlite"
-    with pytest.raises(SermonScriptError):
+    with pytest.raises(PulpitInkError):
         run_transcribe(
             request,
             engine=_StubEngine(),
@@ -184,3 +184,26 @@ def test_run_transcribe_persists_validation_failure(tmp_path: Path) -> None:
         jobs = JobRepository(conn).list_jobs(limit=5)
         assert len(jobs) == 1
         assert jobs[0].status == "failed"
+
+
+def test_run_transcribe_skips_persistence_when_keep_history_is_false(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    request, db = _build_request(tmp_path)
+    fake_settings_path = tmp_path / "settings.json"
+    fake_settings_path.write_text('{"keep_history": false}', encoding="utf-8")
+
+    import pulpit_ink.services.settings_service
+    monkeypatch.setattr(pulpit_ink.services.settings_service, "settings_path", lambda: fake_settings_path)
+
+    result = run_transcribe(
+        request,
+        engine=_StubEngine(),
+        ffmpeg=_StubFFmpeg(),
+        persist=True,
+        db_path=db,
+    )
+
+    if db.exists():
+        with connect(db) as conn:
+            repo = JobRepository(conn)
+            job = repo.get_job(result.job_id)
+            assert job is None

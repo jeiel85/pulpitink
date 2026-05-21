@@ -12,13 +12,13 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.core.export.base import ExportFormat
-from sermonscript.core.transcription.base import (
+from pulpit_ink.core.export.base import ExportFormat
+from pulpit_ink.core.transcription.base import (
     TranscriptionEngine,
     TranscriptionOptions,
     TranscriptSegment,
 )
-from sermonscript.services.transcribe_service import (
+from pulpit_ink.services.transcribe_service import (
     TranscribeRequest,
     run_transcribe,
 )
@@ -57,6 +57,7 @@ def test_run_transcribe_end_to_end(tmp_path: Path):
             ExportFormat.MD,
             ExportFormat.SRT,
             ExportFormat.VTT,
+            ExportFormat.CSV,
         ),
         cache_root=tmp_path / "cache" / "jobs",
     )
@@ -66,7 +67,7 @@ def test_run_transcribe_end_to_end(tmp_path: Path):
 
     assert result.processed_audio.exists()
     assert result.processed_audio.stat().st_size > 0
-    assert {p.suffix for p in result.exports} == {".txt", ".json", ".md", ".srt", ".vtt"}
+    assert {p.suffix for p in result.exports} == {".txt", ".json", ".md", ".srt", ".vtt", ".csv"}
     assert any("전처리 완료" in line for line in progress)
     assert any("Export" in line for line in progress)
     assert src.exists()  # original must remain untouched

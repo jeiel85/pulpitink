@@ -1,12 +1,12 @@
 # Design Note — 자모(jamo) 기반 fuzzy 매칭
 
 작성: 2026-05-20 (회차 #1 결과 기반)
-범위: v1.x 후속 (v1.0 출시 범위 외, [known-limitations §10](../known-limitations.md#10-원문-대조--자동-교정-적중률-v10))
-상태: 설계 제안 (PoC 실측 완료, 구현 미착수)
+범위: v1.0 정식 탑재
+상태: 구현 완료 (v1.0 완비)
 
 ## 1. 문제
 
-`CorrectionEngine.suggestions_for` ([src/sermonscript/core/reference/corrections.py:92](../../src/sermonscript/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
+`CorrectionEngine.suggestions_for` ([src/pulpit_ink/core/reference/corrections.py:92](../../src/pulpit_ink/core/reference/corrections.py)) 는 다음 세 가지 kind 로 교정 후보를 생성합니다.
 
 | kind | 매칭 방식 | 회차 #1 적중 |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ similarity(a, b) =
 ### 5.1 신규 모듈: `core.postprocess.jamo`
 
 ```text
-src/sermonscript/core/postprocess/
+src/pulpit_ink/core/postprocess/
 └── jamo.py
     - jamo_seq(s)        -> str
     - choseong(s)        -> str
@@ -91,7 +91,7 @@ src/sermonscript/core/postprocess/
 
 ### 5.2 `CorrectionEngine` 통합
 
-기존 `proper_noun` 매칭 ([corrections.py:144](../../src/sermonscript/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
+기존 `proper_noun` 매칭 ([corrections.py:144](../../src/pulpit_ink/core/reference/corrections.py)) 의 squeeze 비교를 다음 순서로 확장:
 
 1. 정확 매칭 (현행) — 가장 신뢰도 높음
 2. squeeze 매칭 (현행) — 공백/대소문자 변형용
@@ -108,7 +108,7 @@ src/sermonscript/core/postprocess/
     "fuzzy_threshold": 0.70
   }
   ```
-- CLI: `sermonscript transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
+- CLI: `PulpitInk transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
 - GUI: 설정 패널에 토글 + 슬라이더(0.6~0.9)
 
 ### 5.4 데이터/스키마 영향
@@ -125,6 +125,11 @@ src/sermonscript/core/postprocess/
 2. **이중 통과 요구**: `jamo.ratio < 0.5` 이면 hybrid 점수가 높아도 제외
 3. **중복 제거**: 한 세그먼트 내 동일 (kind, original) 쌍은 한 번만 emit (현행 동작 유지)
 4. **threshold 보수적 디폴트** 0.70
+
+> [!NOTE]
+> **짧은 2글자 한글 단어의 매칭 노이즈 한계와 우회 가이드**
+> - 2글자 한글 단어(예: "에서" ↔ "에스더", "우리" ↔ "그리스") 등은 자모 거리 상 fuzzy 매칭 임계치를 간신히 넘겨 거짓 양성(False Positive)을 발생시킬 수 있습니다.
+> - **우회 가이드**: 만약 노이즈가 과다하게 발생하는 경우에는 CLI `--fuzzy-threshold 0.75` ~ `0.80` 또는 GUI Fuzzy 임계값 스핀박스를 통해 임계값을 **0.75 이상(추천 0.78~0.80)** 으로 상향 조정하여 통제하는 것을 권장합니다.
 
 ## 7. 회귀/검증 계획
 
@@ -160,6 +165,6 @@ src/sermonscript/core/postprocess/
 ## 10. 참고
 
 - 회차 #1 실측 데이터 추출: [tests/integration/results.md](../../tests/integration/results.md)
-- 현행 매칭 코드: [src/sermonscript/core/reference/corrections.py](../../src/sermonscript/core/reference/corrections.py)
-- 현행 lexicon: [src/sermonscript/core/postprocess/lexicon.py](../../src/sermonscript/core/postprocess/lexicon.py)
+- 현행 매칭 코드: [src/pulpit_ink/core/reference/corrections.py](../../src/pulpit_ink/core/reference/corrections.py)
+- 현행 lexicon: [src/pulpit_ink/core/postprocess/lexicon.py](../../src/pulpit_ink/core/postprocess/lexicon.py)
 - PoC 스크립트 (커밋 안 함, 본 노트의 §3 표 산출): 작업 디렉터리에서 인라인 실행. 재현 필요 시 본 노트 §4 알고리즘으로 1시간 내 재구성 가능.

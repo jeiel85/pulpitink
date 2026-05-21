@@ -1,7 +1,7 @@
 """Shared pytest fixtures.
 
 The key responsibility is keeping every test isolated from the user's
-real SermonScript data directory. We point ``platformdirs`` at a temp
+real PulpitInk data directory. We point ``platformdirs`` at a temp
 location for the whole test session.
 """
 
@@ -11,16 +11,16 @@ from pathlib import Path
 
 import pytest
 
-import sermonscript.app.paths as paths_module
+import pulpit_ink.app.paths as paths_module
 
 
 @pytest.fixture(autouse=True)
 def _isolated_app_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Redirect ``get_app_paths`` to a temp directory for each test."""
 
-    base = tmp_path / "sermonscript_data"
-    cache = tmp_path / "sermonscript_cache"
-    logs = tmp_path / "sermonscript_logs"
+    base = tmp_path / "PulpitInk_data"
+    cache = tmp_path / "PulpitInk_cache"
+    logs = tmp_path / "PulpitInk_logs"
     fake = paths_module.AppPaths(
         data_dir=base,
         cache_dir=cache,

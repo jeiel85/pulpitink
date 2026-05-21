@@ -19,6 +19,8 @@ dist/
 wheels/
 *.manifest
 *.spec
+!pulpit-ink.spec
+!pulpit-ink-sidecar.spec
 
 # ----- Test/Lint caches -----
 .pytest_cache/
@@ -46,7 +48,7 @@ desktop.ini
 *.zip
 installer/output/
 
-# ----- SermonScript runtime -----
+# ----- PulpitInk runtime -----
 exports/
 cache/
 logs/
@@ -75,3 +77,7 @@ tests/integration/fixtures/*
 .env
 .env.*
 !.env.example
+
+# ----- AI tool & Experimental -----
+.antigravitycli/
+frontend/

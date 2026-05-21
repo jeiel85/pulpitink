@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sermonscript.services.model_service import (
+from pulpit_ink.services.model_service import (
     is_supported,
     list_models,
     model_cache_dir,

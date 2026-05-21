@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    sermonscript_app_lib::run()
+    pulpit_ink_app_lib::run()
 }

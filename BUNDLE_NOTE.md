@@ -1,6 +1,6 @@
-# SermonScript 3-Goal Integrated Design Bundle
+# PulpitInk 3-Goal Integrated Design Bundle
 
-이 묶음은 SermonScript 통합 설계서에 3단계 대형 바이브 코딩 `/goal` 프롬프트를 반영한 버전입니다.
+이 묶음은 PulpitInk 통합 설계서에 3단계 대형 바이브 코딩 `/goal` 프롬프트를 반영한 버전입니다.
 
 주요 변경:
 

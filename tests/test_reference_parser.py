@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from sermonscript.core.reference import (
+from pulpit_ink.core.reference import (
     align_segments_to_reference,
     build_reference_prompt,
     parse_reference,

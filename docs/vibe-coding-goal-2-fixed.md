@@ -2,7 +2,7 @@
 
 ```text
 /goal
-SermonScript의 로컬 DB, 설정, 모델 관리, PySide6 GUI, 작업 큐를 구현한다.
+PulpitInk의 로컬 DB, 설정, 모델 관리, PySide6 GUI, 작업 큐를 구현한다.
 
 배경:
 Goal 1에서 CLI transcribe, FFmpeg 전처리, faster-whisper STT, Export가 동작한다고 가정한다. 이번 목표는 일반 사용자가 GUI에서 파일을 추가하고 변환할 수 있는 데스크톱 앱 기반을 만드는 것이다.
@@ -25,7 +25,7 @@ SQLite, platformdirs, Typer, PySide6, QThread 또는 QThreadPool, pytest, ruff.
 12. model service를 만들고 지원 모델 목록과 캐시 경로를 표시한다.
 13. models list/cache-dir CLI를 추가한다.
 14. 테스트는 임시 DB를 사용하고 실제 사용자 DB를 건드리지 않는다.
-15. python -m sermonscript.app.main으로 PySide6 GUI를 실행한다.
+15. python -m pulpit_ink.app.main으로 PySide6 GUI를 실행한다.
 16. GUI에는 파일 추가, 드래그 앤 드롭, 작업 목록, 언어/모델/프리셋 선택, 출력 폴더, 변환 시작, 진행률, 로그, 결과 미리보기를 둔다.
 17. GUI 변환은 기존 core/service 파이프라인을 재사용한다.
 18. 긴 작업은 worker thread에서 실행해 UI가 멈추지 않게 한다.

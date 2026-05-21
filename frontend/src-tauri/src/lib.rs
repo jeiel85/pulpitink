@@ -9,7 +9,7 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-async fn run_sermonscript_sidecar(
+async fn run_pulpit_ink_sidecar(
     app: tauri::AppHandle,
     args: Vec<String>,
 ) -> Result<String, String> {
@@ -17,7 +17,7 @@ async fn run_sermonscript_sidecar(
     
     // Create sidecar command with specified arguments
     let sidecar = shell
-        .sidecar("sermonscript-sidecar")
+        .sidecar("pulpit-ink-sidecar")
         .map_err(|e| e.to_string())?
         .args(args);
 
@@ -50,14 +50,14 @@ async fn run_sermonscript_sidecar(
 }
 
 #[tauri::command]
-async fn run_sermonscript_sidecar_sync(
+async fn run_pulpit_ink_sidecar_sync(
     app: tauri::AppHandle,
     args: Vec<String>,
 ) -> Result<String, String> {
     let shell = app.shell();
     
     let sidecar = shell
-        .sidecar("sermonscript-sidecar")
+        .sidecar("pulpit-ink-sidecar")
         .map_err(|e| e.to_string())?
         .args(args);
 
@@ -79,10 +79,9 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init()) // Initialize tauri-plugin-shell
         .invoke_handler(tauri::generate_handler![
             greet, 
-            run_sermonscript_sidecar,
-            run_sermonscript_sidecar_sync
+            run_pulpit_ink_sidecar,
+            run_pulpit_ink_sidecar_sync
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-

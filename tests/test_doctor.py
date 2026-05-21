@@ -1,4 +1,4 @@
-from sermonscript.services.diagnostics import run_doctor
+from pulpit_ink.services.diagnostics import run_doctor
 
 
 def test_doctor_returns_report_with_expected_checks():

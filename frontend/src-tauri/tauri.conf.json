@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "sermonscript-app",
-  "version": "0.1.0",
-  "identifier": "com.sermonscript.app",
+  "productName": "PulpitInk",
+  "version": "0.4.7",
+  "identifier": "com.jeiel85.pulpitink",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "sermonscript-app",
-        "width": 800,
-        "height": 600
+        "title": "설교필기 (PulpitInk)",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 1024,
+        "minHeight": 680
       }
     ],
     "security": {
@@ -25,7 +27,7 @@
     "active": true,
     "targets": "all",
     "externalBin": [
-      "binaries/sermonscript-sidecar"
+      "binaries/pulpit-ink-sidecar"
     ],
     "icon": [
       "icons/32x32.png",

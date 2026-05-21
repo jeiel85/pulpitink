@@ -2,7 +2,7 @@
 
 ## 1. Product Name
 
-**SermonScript**
+**PulpitInk**
 
 ## 2. One-line Description
 

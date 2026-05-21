@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    SermonScript Windows portable build (PyInstaller + ZIP).
+    설교필기 (PulpitInk) Windows portable build (PyInstaller + ZIP).
 
 .DESCRIPTION
     1. Installs dev + runtime dependencies into the current Python environment.
     2. Runs ruff and pytest as a smoke gate (skipped with -SkipChecks).
-    3. Builds the PyInstaller bundle from sermonscript.spec.
+    3. Builds the PyInstaller bundle from pulpit-ink.spec.
     4. Calls scripts/make_portable_zip.ps1 to produce
-       dist/SermonScript_Portable_{version}.zip.
+       dist/PulpitInk_Portable_{version}.zip.
 
     FFmpeg binaries and STT model files are intentionally NOT bundled. See
     docs/release/release-checklist.md and THIRD_PARTY_NOTICES.md for the
@@ -18,7 +18,7 @@
 
 .PARAMETER Version
     Override the version string baked into the ZIP filename. Defaults to
-    the project version exposed by ``python -c "import sermonscript"``.
+    the project version exposed by ``python -c "import pulpit_ink"``.
 #>
 
 [CmdletBinding()]
@@ -50,10 +50,10 @@ if (-not $SkipChecks) {
 }
 
 Write-Host "[4/5] PyInstaller build" -ForegroundColor Cyan
-$env:SERMONSCRIPT_ROOT = "$RepoRoot"
+$env:PULPIT_INK_ROOT = "$RepoRoot"
 if (Test-Path "build") { Remove-Item "build" -Recurse -Force }
-if (Test-Path "dist/SermonScript") { Remove-Item "dist/SermonScript" -Recurse -Force }
-python -m PyInstaller --clean --noconfirm sermonscript.spec
+if (Test-Path "dist/PulpitInk") { Remove-Item "dist/PulpitInk" -Recurse -Force }
+python -m PyInstaller --clean --noconfirm pulpit-ink.spec
 
 Write-Host "[5/5] Packaging portable ZIP" -ForegroundColor Cyan
 $portableArgs = @{}
