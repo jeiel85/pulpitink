@@ -55,65 +55,76 @@
 
 ## Phase 0: 저장소 초기화
 
-- [ ] pyproject.toml 작성
-- [ ] src/pulpit_ink 패키지 생성
-- [ ] Typer CLI 생성
-- [ ] PulpitInk doctor 구현
-- [ ] pytest/ruff 설정
-- [ ] README 개발 실행법 정리
+- [x] pyproject.toml 작성
+- [x] src/pulpit_ink 패키지 생성
+- [x] Typer CLI 생성
+- [x] PulpitInk doctor 구현
+- [x] pytest/ruff 설정
+- [x] README 개발 실행법 정리
 
 ## Phase 1: CLI 변환기
 
-- [ ] transcribe 명령 추가
-- [ ] 입력 파일 검증
-- [ ] FFmpeg 변환
-- [ ] faster-whisper 실행
-- [ ] TXT/JSON Export
-- [ ] 에러 메시지 정리
+- [x] transcribe 명령 추가
+- [x] 입력 파일 검증
+- [x] FFmpeg 변환
+- [x] faster-whisper 실행
+- [x] TXT/JSON Export
+- [x] 에러 메시지 정리
 
 ## Phase 2: 오디오 전처리
 
-- [ ] enhancement_presets.py
-- [ ] preprocess.py
-- [ ] --preset 옵션
-- [ ] processed.wav 생성
-- [ ] 전처리 테스트
+- [x] enhancement_presets.py
+- [x] preprocess.py
+- [x] --preset 옵션
+- [x] processed.wav 생성
+- [x] 전처리 테스트
+- [x] yt-dlp 기반 비동기 YouTube 오디오 다운로드 파이프라인 구축 (v0.4.4)
 
 ## Phase 3: SQLite
 
-- [ ] jobs 테이블
-- [ ] segments 테이블
-- [ ] exports 테이블
-- [ ] jobs list/show 명령
+- [x] jobs 테이블
+- [x] segments 테이블
+- [x] exports 테이블
+- [x] jobs list/show 명령
+- [x] jobs delete 및 clean-cache 명령어로 DB 및 물리 캐시 디렉터리 연쇄 삭제 보강 (v0.4.0)
 
 ## Phase 4: GUI
 
-- [ ] PySide6 main window
-- [ ] 파일 드래그 앤 드롭
-- [ ] 모델/언어/프리셋 선택
-- [ ] 변환 worker
-- [ ] 결과 표시
+- [x] PySide6 main window
+- [x] 파일 드래그 앤 드롭
+- [x] 모델/언어/프리셋 선택
+- [x] 변환 worker
+- [x] 결과 표시
+- [x] 다중 작업 배치 큐 순차적 연쇄 처리 및 개별 실패 시 연속 변환 기동 루프 구현 (v0.4.0)
+- [x] 경량 i18n 실시간 영한 UI 번역 프레임워크 탑재 및 번역 스위치 UI 연동 (v0.4.4)
 
 ## Phase 5: 편집기
 
-- [ ] 타임스탬프 세그먼트 표시
-- [ ] edited_text 저장
-- [ ] 검색/치환
-- [ ] Export 반영
+- [x] 타임스탬프 세그먼트 표시
+- [x] edited_text 저장
+- [x] 검색/치환
+- [x] Export 반영
+- [x] PySide6.QtMultimedia 기반의 오디오 싱크 플레이어 재생 제어 및 테이블 하이라이트 스크롤 연동 (v0.4.0)
+- [x] 세그먼트별 화자(Speaker) 편집 열 제공 및 SQLite DB 실시간 수정 영속화 연동 (v0.4.4)
 
 ## Phase 6: 원문 대조
 
-- [ ] reference 문서 입력
-- [ ] 키워드/성경구절 추출
-- [ ] initial_prompt 생성
-- [ ] RapidFuzz 정렬
-- [ ] 교정 후보 저장
-- [ ] UI 적용/무시
+- [x] reference 문서 입력
+- [x] 키워드/성경구절 추출
+- [x] initial_prompt 생성
+- [x] RapidFuzz 정렬
+- [x] 교정 후보 저장
+- [x] UI 적용/무시
+- [x] 한글 NFD 자모 분해 및 초성 가중치를 결합한 Hybrid Scorer 기반 한국어 자모 Fuzzy 매칭 탑재 (v0.4.0)
+- [x] 자모 Fuzzy 매칭 2글자 오탐 방지를 위한 스톱워드(Stop-words) 게이트 적용 (v0.4.3)
 
 ## Phase 7: 배포
 
-- [ ] PyInstaller
-- [ ] Portable ZIP
-- [ ] Setup EXE
-- [ ] GitHub Actions
-- [ ] 릴리즈 체크리스트
+- [x] PyInstaller (pulpit-ink.spec, pulpit-ink-sidecar.spec)
+- [x] Portable ZIP
+- [x] Setup EXE (Inno Setup pulpit-ink.iss 및 create_installer.ps1 스크립트 도입 - v0.4.5)
+- [x] GitHub Actions (태그 푸시 및 수동 트리거 기반 Windows Portable ZIP 자동 릴리즈 - v0.3.0)
+- [x] 릴리즈 체크리스트 수립 및 갱신 (docs/release/release-checklist.md)
+- [x] yt-dlp 자동 진단 및 GUI 저작권 Disclaimer 창 내 백그라운드 원클릭 pip 설치 워커 제공 (v0.4.5)
+- [x] 1시간 오디오 벤치마크 및 psutil 기반 CPU/RSS 실측 성능 프로파일 보고서 제공 (v0.4.5)
+

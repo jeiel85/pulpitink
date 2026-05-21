@@ -21,9 +21,15 @@ CHO_TABLE: tuple[str, ...] = (
 )
 
 DEFAULT_STOP_WORDS: set[str] = {
+    # 기존 불용어
     "에서", "하고", "그리고", "우리", "그의", "그들", "어떤", "또한", "으로", "로써", "로서",
     "에게", "한테", "하며", "했다", "한다", "하여", "때문", "대한", "대해", "위해", "위한",
-    "아니", "모든", "가장", "같이", "같은", "이런", "저런", "그런"
+    "아니", "모든", "가장", "같이", "같은", "이런", "저런", "그런",
+    # 실사용 설교/강의용 다수 어미, 지시어, 조사 추가 보강
+    "이다", "이며", "이고", "하는", "은", "는", "이", "가", "을", "를", "의", "와", "과", "에",
+    "우리가", "그들의", "오늘", "지금", "그것", "이것", "저것", "어떻게", "그렇게", "이렇게", "저렇게",
+    "하여튼", "아주", "매우", "너무", "진짜", "정말", "그녀", "너희", "너희가", "너희들", "그들가",
+    "했다가", "하면서", "했으나", "했더니", "하더니", "하니까", "해서", "하니", "합니다"
 }
 
 
@@ -114,15 +120,21 @@ def find_fuzzy_matches(
                     continue
                 if sub in DEFAULT_STOP_WORDS:
                     continue
+
+                # 2글자 이하의 짧은 텍스트 조각에 대해 더 엄격한 자모 매칭 Double-pass 비율 적용
+                min_j_ratio = 0.65 if len(sub) <= 2 else 0.50
+
                 score = hybrid_similarity(sub, candidate)
                 if score > best_score:
-                    # Double-pass gate: raw jamo ratio must be >= 50%
+                    # Double-pass gate: raw jamo ratio must be >= min_j_ratio
                     j_ratio = _ratio(jamo_seq(sub), jamo_seq(candidate))
-                    if j_ratio >= 0.50:
+                    if j_ratio >= min_j_ratio:
                         best_score = score
                         best_snippet = sub
 
-        if best_score >= threshold and best_snippet:
+        # 최종 매칭 판단 시에도 2글자 이하면 더욱 보수적인 동적 임계값 가드 적용
+        final_threshold = max(threshold, 0.78) if best_snippet and len(best_snippet) <= 2 else threshold
+        if best_score >= final_threshold and best_snippet:
             out.append((best_snippet, candidate, best_score))
 
     return out

@@ -93,3 +93,29 @@ def test_find_fuzzy_matches_stop_words_exclusion() -> None:
     matches = find_fuzzy_matches(text, candidates, threshold=0.70, min_len=3)
     assert len(matches) == 0
 
+
+def test_find_fuzzy_matches_extended_stop_words() -> None:
+    # 새로 추가된 스톱워드 "하여튼", "진짜", "정말" 등이 스캔 시 스킵되는지 확인
+    text = "진짜 하여튼 대단한 오늘"
+    candidates = ["진실한", "하늘나라", "오늘날"]
+    matches = find_fuzzy_matches(text, candidates, threshold=0.70, min_len=3)
+    # 진짜 -> 진실한 (우연한 유사도 매치 가능하나 스톱워드로 스킵됨)
+    # 하여튼 -> 하늘나라 (유사도 매칭 스킵됨)
+    assert len(matches) == 0
+
+
+def test_find_fuzzy_matches_short_snippet_tuning() -> None:
+    # 2글자 이하의 짧은 조각("오늘", "지금")이 우연히 높은 유사도로 "오늘날", "지극히"와 오탐 매치되는 것을
+    # 동적 임계값 가드(0.78) 및 Double-pass ratio(0.65)가 안전하게 차단하는지 확인
+    text = "오늘 지금 그곳에 갔다"
+    candidates = ["오늘날", "지극히"] # 각각 3글자이므로 min_len=3 게이트 통과
+    
+    # 2글자 조각 "오늘"과 "오늘날"의 hybrid_similarity는 약 0.76 (자모 5/7겹침)
+    # 2글자 조각 "지금"과 "지극히"의 hybrid_similarity는 약 0.72
+    # threshold가 0.70일 때, 2글자 이하 동적 가드가 없다면 오탐 매칭 발생함
+    matches = find_fuzzy_matches(text, candidates, threshold=0.70, min_len=3)
+    
+    # 동적 임계치(0.78)에 의해 2글자 조각 오탐은 모두 걸러져야 함
+    assert len(matches) == 0
+
+
