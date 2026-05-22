@@ -1,5 +1,21 @@
 # HISTORY.md
 
+## 2026-05-22 (사용자 노출 브랜드 표기 정리)
+- 작업: GUI/CLI 및 사용자 문서에서 화면에 보이는 제품 표기를 `pulpit-ink`로 정리하여 붙어 보이는 `PulpitInk` 표기의 가독성을 개선.
+- 변경 파일:
+  - src/pulpit_ink/ui/main_window.py (창 제목 `설교필기 (pulpit-ink)` 적용)
+  - src/pulpit_ink/cli/main.py (도움말, doctor/settings 표 제목, version 출력 표기 정리)
+  - README.md, docs/user-guide.md, docs/design/jamo-fuzzy-matching.md, docs/implementation/cli-spec.md, docs/implementation/gui-spec.md (사용자-facing 명령 예시와 제목 표기 정리)
+  - CHANGELOG.md, HISTORY.md (변경 이력 기록)
+- 검증:
+  - `python -m ruff check .`: PASS
+  - `$env:PYTHONPATH="src"; python -m pytest`: 136/136 PASS
+  - `$env:PYTHONPATH="src"; python -m pulpit_ink.cli.main doctor`: PASS
+  - `$env:PYTHONPATH="src"; python -m pulpit_ink.cli.main version`: `pulpit-ink 0.4.7` 출력 확인
+- 결과: 성공. 사용자에게 보이는 GUI/CLI/문서 표기가 `pulpit-ink` 중심으로 정리됨.
+- 후속 작업:
+  - 없음
+
 ## 2026-05-21 (GitHub Actions Node 24 및 Windows 2025/VS2026 runner 전환)
 - 작업: GitHub Actions 실행 로그의 Node.js 20 deprecation 경고와 `windows-latest` 리디렉션 공지를 선제 대응하기 위해 CI runner/runtime 설정을 명시화.
 - 변경 파일:

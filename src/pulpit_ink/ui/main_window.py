@@ -464,7 +464,7 @@ class MainWindow(QMainWindow):
         return self.options_group
 
     def _retranslate_ui(self) -> None:
-        self.setWindowTitle(tr("설교필기") + " (PulpitInk)")
+        self.setWindowTitle(tr("설교필기") + " (pulpit-ink)")
         self.statusBar().showMessage(tr("파일을 추가하거나 드래그하여 변환을 시작하세요."))
 
         self.file_title_label.setText(tr("변환 대기 파일"))

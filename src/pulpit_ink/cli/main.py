@@ -35,7 +35,7 @@ from pulpit_ink.storage.database import connect, default_db_path, initialise_dat
 from pulpit_ink.storage.job_repository import JobRepository
 
 app = typer.Typer(
-    help="설교필기 (PulpitInk): 로컬 설교/강의 녹음 STT 도구",
+    help="설교필기 (pulpit-ink): 로컬 설교/강의 녹음 STT 도구",
     no_args_is_help=True,
     add_completion=False,
 )
@@ -43,7 +43,7 @@ console = Console()
 
 
 def _print_doctor_report(report: DoctorReport) -> None:
-    table = Table(title="PulpitInk 환경 진단", show_lines=False)
+    table = Table(title="pulpit-ink 환경 진단", show_lines=False)
     table.add_column("항목", style="bold")
     table.add_column("상태")
     table.add_column("내용")
@@ -78,14 +78,14 @@ def _root(
 
 @app.command()
 def version() -> None:
-    """현재 PulpitInk 버전을 출력합니다."""
+    """현재 pulpit-ink 버전을 출력합니다."""
 
-    console.print(f"PulpitInk {__version__}")
+    console.print(f"pulpit-ink {__version__}")
 
 
 @app.command()
 def doctor() -> None:
-    """현재 환경이 PulpitInk 실행에 적합한지 확인합니다."""
+    """현재 환경이 pulpit-ink 실행에 적합한지 확인합니다."""
 
     report = run_doctor()
     _print_doctor_report(report)
@@ -508,7 +508,7 @@ def settings_show() -> None:
 
     svc = SettingsService()
     current = svc.load()
-    table = Table(title="PulpitInk 설정")
+    table = Table(title="pulpit-ink 설정")
     table.add_column("키", style="bold")
     table.add_column("값")
     for key in SettingsService.known_keys():
@@ -668,7 +668,7 @@ def _resolve_job_for_suggestion(repo: JobRepository, suggestion_id: int) -> str:
 
 @app.command("db-path")
 def db_path() -> None:
-    """PulpitInk SQLite DB 파일 경로를 표시합니다."""
+    """pulpit-ink SQLite DB 파일 경로를 표시합니다."""
 
     console.print(str(default_db_path()))
 

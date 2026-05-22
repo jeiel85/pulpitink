@@ -108,7 +108,7 @@ src/pulpit_ink/core/postprocess/
     "fuzzy_threshold": 0.70
   }
   ```
-- CLI: `PulpitInk transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
+- CLI: `pulpit-ink transcribe ... --fuzzy-threshold 0.65` / `--no-fuzzy`
 - GUI: 설정 패널에 토글 + 슬라이더(0.6~0.9)
 
 ### 5.4 데이터/스키마 영향
