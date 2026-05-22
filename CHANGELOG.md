@@ -1,11 +1,42 @@
 # CHANGELOG.md
 
-## Unreleased
+## [0.5.0] - 2026-05-23
+
+### Added — Tauri 하이브리드 UI 기능 parity 2차 포팅
+- **네이티브 파일/폴더 다이얼로그**: `tauri-plugin-dialog` 도입. 오디오/원문/사용자 사전/모델 캐시 경로 입력을 절대경로 직접 입력 대신 OS 네이티브 다이얼로그로 선택할 수 있는 `PathPicker` 컴포넌트 신설.
+- **Wavesurfer.js 기반 2단 대조 편집기**: `wavesurfer.js`를 React 편집기 상단에 도킹하여 오디오 파형을 실시간 렌더링. 타임스탬프 클릭/더블클릭으로 해당 구간 이동/구간 재생, Tauri `convertFileSrc` + asset 프로토콜로 로컬 미디어 스트리밍. 세그먼트별 Fuzzy 교정 후보를 팝오버 형태로 노출하고 클릭 한 번에 `edited_text`에 반영 및 SQLite에 영속화.
+- **배치 큐 UI**: 새 STT 변환 시 큐에 누적되고 순차적으로 사이드카에 위임. 개별 항목 진행률·상태 표시, 실패 시에도 다음 항목 계속 진행, 완료/실패 일괄 정리 버튼 제공.
+- **YouTube opt-in 동의 모달**: 저작권 고지 + 동의 체크박스 + URL 검증 + yt-dlp 진단/원클릭 자동 설치를 묶은 모달. 동의 후 큐에 추가하고 사이드카 `transcribe`가 URL을 처리.
+- **Glossary(사용자 용어 사전) 탭**: 사전 항목 추가/수정/삭제/검색 + CSV import/export. 사이드카 `user-dict` 서브명령으로 위임하며 기본 위치는 `%LOCALAPPDATA%/PulpitInk/user_dict.json`.
+- **업데이트 알림 배너**: 앱 부팅 시 사이드카 `update-check --json`을 호출해 GitHub Releases 최신 버전을 확인하고, 신규 버전 존재 시 상단 배너로 표시. 사용자 dismiss는 버전 단위로 `localStorage`에 기록.
+
+### Added — 사이드카 IPC 보강
+- `pulpit-ink user-dict list/add/remove/import/export/path [--json]` — 사용자 사전 CRUD 및 CSV 입출력.
+- `pulpit-ink update-check [--force] [--json]` — 24시간 캐시 적용된 GitHub Releases 비교.
+- `pulpit-ink youtube check/install [--json]` — yt-dlp 설치 여부 진단 및 pip 자동 설치.
+- `pulpit-ink segments update <id> [--edited-text/--clean-text/--speaker] [--json]` — React 편집기가 호출하는 세그먼트 영속화 엔드포인트.
+
+### Changed
+- `frontend/package.json` / `Cargo.toml` / `tauri.conf.json` / `pyproject.toml` / `src/pulpit_ink/__init__.py` 버전을 `0.5.0`으로 일제히 범프.
+- Tauri 윈도우 기본 크기를 1180×760 → 1280×820으로 확장 (편집기 + 파형 도킹용 여유 확보).
+- `tauri.conf.json`의 `security.assetProtocol.enable = true`로 로컬 미디어 스트리밍 활성화.
+
+### Tests
+- `tests/test_cli_tauri_helpers.py` 신규 8건: user-dict CRUD/CSV 라운드트립, update-check JSON, youtube check/install JSON 게이트 검증.
+- 전체 회귀: pytest 144/144 PASS, ruff 0건.
+
+## [0.4.7-tauri.1] - 2026-05-21 (사전 단계)
+
+### Tauri
+- `feat/tauri-hybrid` 브랜치를 현재 `main` 기능 위로 병합하여 PulpitInk Python 코어와 React/Tauri 셸을 다시 연결.
+- Tauri 사이드카 명칭과 앱 메타데이터를 `PulpitInk` / `pulpit-ink-sidecar` / `com.jeiel85.pulpitink` 기준으로 정리.
+- Tauri UI에 첫 실행 온보딩 패널, 라이트/다크 테마 전환, 더 큰 기본 버튼 크기, PulpitInk 브랜딩 반영.
+- Tauri IPC에서 작업 목록과 설정을 안정적으로 읽을 수 있도록 `jobs list --json`, `jobs show --json`, `settings show --json` 출력 추가.
 
 ### CI
-- GitHub Actions의 Node.js 20 deprecation 경고에 대응하기 위해 워크플로우 전역에 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`를 설정했습니다.
-- `windows-latest` 리디렉션 공지에 대응해 `Test` 및 `Build Windows Portable` 워크플로우 runner를 `windows-2025-vs2026`으로 명시 고정했습니다.
-- 공식 Actions를 Node 24 기반 최신 stable(`checkout@v6`, `setup-python@v6.2.0`, `upload-artifact@v7`, `download-artifact@v8`)로 업데이트했습니다.
+- GitHub Actions의 Node.js 20 deprecation 경고에 대응하기 위해 워크플로우 전역에 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` 설정.
+- `windows-latest` 리디렉션 공지에 대응해 `Test` 및 `Build Windows Portable` 워크플로우 runner를 `windows-2025-vs2026`으로 명시 고정.
+- 공식 Actions를 Node 24 기반 최신 stable(`checkout@v6`, `setup-python@v6.2.0`, `upload-artifact@v7`, `download-artifact@v8`)로 업데이트.
 
 ## [0.4.7] - 2026-05-21
 

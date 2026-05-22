@@ -80,4 +80,9 @@ tests/integration/fixtures/*
 
 # ----- AI tool & Experimental -----
 .antigravitycli/
-frontend/
+
+# ----- Tauri / Frontend build artifacts (sources are tracked) -----
+frontend/node_modules/
+frontend/dist/
+frontend/src-tauri/target/
+frontend/src-tauri/gen/
