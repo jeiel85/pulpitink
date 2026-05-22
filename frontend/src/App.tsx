@@ -1,76 +1,54 @@
-import { useState, useEffect, useRef } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
-import { 
-  Play, Pause, Volume2, Settings, List, FileAudio, 
-  RefreshCw, CheckCircle2, AlertTriangle, 
-  ArrowRight, Search, Plus, Database, Sparkles, Sun, Moon, HelpCircle
+import {
+  Settings,
+  List,
+  FileAudio,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  Search,
+  Plus,
+  Database,
+  Sparkles,
+  Sun,
+  Moon,
+  HelpCircle,
+  BookOpenText,
+  Video,
+  PlayCircle,
+  X,
 } from "lucide-react";
+import { sidecarSync, sidecarSyncJson, sidecarSpawn } from "./lib/sidecar";
+import type {
+  Job,
+  Segment,
+  CorrectionSuggestion,
+  AppSettings,
+  BatchItem,
+} from "./lib/types";
+import { PathPicker } from "./components/PathPicker";
+import { YouTubeDialog } from "./components/YouTubeDialog";
+import { GlossaryTab } from "./components/GlossaryTab";
+import { UpdateBanner } from "./components/UpdateBanner";
+import { WaveformPlayer, type WaveformHandle } from "./components/WaveformPlayer";
 import "./App.css";
 
-// Interface Definitions
-interface Job {
-  id: string;
-  title: string;
-  source_path: string;
-  status: string;
-  model_name: string;
-  engine: string;
-  preset: string;
-  language: string | null;
-  duration_sec: number | null;
-  error_message: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type TabKey = "dashboard" | "transcribe" | "editor" | "glossary" | "settings";
 
-interface Segment {
-  job_id: string;
-  start_sec: number;
-  end_sec: number;
-  raw_text: string;
-  clean_text: string;
-  edited_text: string;
-  avg_logprob: number;
-  no_speech_prob: number;
-  speaker: string | null;
-  id?: number; // DB auto-increment ID
-  needs_review?: number;
-}
-
-interface CorrectionSuggestion {
-  id: number;
-  job_id: string;
-  segment_id: number;
-  kind: string;
-  original_text: string;
-  suggested_text: string;
-  status: string;
-}
-
-interface AppSettings {
-  language: string;
-  model: string;
-  preset: string;
-  output_dir: string;
-  model_cache_dir: string;
-  device: string;
-  compute_type: string;
-  fuzzy_matching_enabled: boolean;
-  fuzzy_threshold: number;
-}
+const APP_VERSION = "v0.5.0";
 
 function App() {
-  // Navigation
-  const [activeTab, setActiveTab] = useState<"dashboard" | "transcribe" | "editor" | "settings">("dashboard");
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    return localStorage.getItem("pulpitink-theme") === "light" ? "light" : "dark";
-  });
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    return localStorage.getItem("pulpitink-onboarding") !== "done";
-  });
-  
-  // Dashboard & Jobs Data
+  const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
+  const [theme, setTheme] = useState<"dark" | "light">(() =>
+    localStorage.getItem("pulpitink-theme") === "light" ? "light" : "dark"
+  );
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => localStorage.getItem("pulpitink-onboarding") !== "done"
+  );
+
+  // Dashboard
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,28 +61,29 @@ function App() {
   const [selectedPreset, setSelectedPreset] = useState("sermon");
   const [selectedLanguage] = useState("ko");
   const [isFuzzyEnabled, setIsFuzzyEnabled] = useState(true);
-  const [fuzzyThreshold, setFuzzyThreshold] = useState(0.70);
-  
-  // Transcribing state (Sidecar runner)
+  const [fuzzyThreshold, setFuzzyThreshold] = useState(0.7);
+  const [youtubeDialogOpen, setYoutubeDialogOpen] = useState(false);
+
+  // Transcribing
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribeProgress, setTranscribeProgress] = useState(0);
   const [sidecarLogs, setSidecarLogs] = useState<{ type: "out" | "err"; text: string }[]>([]);
   const [transcribeStatusText, setTranscribeStatusText] = useState("대기 중...");
 
-  // Editor View States
+  // Batch queue (sequential)
+  const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
+  const batchProcessingRef = useRef(false);
+  const currentBatchIdRef = useRef<string | null>(null);
+
+  // Editor
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [corrections, setCorrections] = useState<CorrectionSuggestion[]>([]);
   const [referenceParagraphs, setReferenceParagraphs] = useState<string[]>([]);
   const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
+  const waveformRef = useRef<WaveformHandle>(null);
 
-  // Audio Playback simulation
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const playbackIntervalRef = useRef<number | null>(null);
-
-  // System Settings state
+  // Settings
   const [settings, setSettings] = useState<AppSettings>({
     language: "ko",
     model: "small",
@@ -114,16 +93,16 @@ function App() {
     device: "auto",
     compute_type: "int8",
     fuzzy_matching_enabled: true,
-    fuzzy_threshold: 0.70
+    fuzzy_threshold: 0.7,
   });
   const [dbPath, setDbPath] = useState("");
   const [doctorReport, setDoctorReport] = useState<{ name: string; ok: boolean; detail: string }[]>([]);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
 
-  // Log container ref for auto-scroll
   const logConsoleRef = useRef<HTMLDivElement>(null);
 
-  // Load Initial Data
+  // ---------- Effects ----------
+
   useEffect(() => {
     loadJobs();
     loadSettings();
@@ -135,420 +114,388 @@ function App() {
     localStorage.setItem("pulpitink-theme", theme);
   }, [theme]);
 
-  // Auto-scroll logs
   useEffect(() => {
     if (logConsoleRef.current) {
       logConsoleRef.current.scrollTop = logConsoleRef.current.scrollHeight;
     }
   }, [sidecarLogs]);
 
-  // Set up Tauri event listeners for transcribe logs
+  // Sidecar event listeners
   useEffect(() => {
-    let unlistenStdout: any;
-    let unlistenStderr: any;
-    let unlistenTerminated: any;
+    let unlistenStdout: (() => void) | undefined;
+    let unlistenStderr: (() => void) | undefined;
+    let unlistenTerminated: (() => void) | undefined;
 
     async function setupListeners() {
       unlistenStdout = await listen<string>("sidecar-stdout", (event) => {
         const text = event.payload;
-        setSidecarLogs((prev) => [...prev, { type: "out", text }]);
-        
-        // Parse progress if any (e.g. "Progress: 45%" or "[25/100]")
-        if (text.includes("Progress:") || text.includes("%")) {
-          const match = text.match(/(\d+)%/);
-          if (match) {
-            setTranscribeProgress(parseInt(match[1]));
+        setSidecarLogs((prev) => prev.length > 500 ? [...prev.slice(-300), { type: "out", text }] : [...prev, { type: "out", text }]);
+
+        const match = text.match(/(\d+)%/);
+        if (match) {
+          const pct = parseInt(match[1], 10);
+          setTranscribeProgress(pct);
+          if (currentBatchIdRef.current) {
+            updateBatchItem(currentBatchIdRef.current, { progress: pct });
           }
         }
-        if (text.toLowerCase().includes("enhancing")) {
-          setTranscribeStatusText("오디오 전처리 필터 적용 중...");
-        } else if (text.toLowerCase().includes("transcribing") || text.toLowerCase().includes("stt")) {
-          setTranscribeStatusText("faster-whisper STT 변환 중...");
-        } else if (text.toLowerCase().includes("exporting")) {
-          setTranscribeStatusText("결과물 포맷팅 및 내보내기 중...");
+        const lower = text.toLowerCase();
+        let status: string | null = null;
+        if (lower.includes("enhancing") || lower.includes("전처리")) status = "오디오 전처리 필터 적용 중...";
+        else if (lower.includes("transcribing") || lower.includes("stt")) status = "faster-whisper STT 변환 중...";
+        else if (lower.includes("exporting") || lower.includes("내보내기")) status = "결과물 포맷팅 및 내보내기 중...";
+        else if (lower.includes("downloading") || lower.includes("youtube")) status = "YouTube 오디오 다운로드 중...";
+        if (status) {
+          setTranscribeStatusText(status);
+          if (currentBatchIdRef.current) {
+            updateBatchItem(currentBatchIdRef.current, { status_text: status });
+          }
         }
       });
 
       unlistenStderr = await listen<string>("sidecar-stderr", (event) => {
-        const text = event.payload;
-        setSidecarLogs((prev) => [...prev, { type: "err", text }]);
+        setSidecarLogs((prev) =>
+          prev.length > 500
+            ? [...prev.slice(-300), { type: "err", text: event.payload }]
+            : [...prev, { type: "err", text: event.payload }]
+        );
       });
 
       unlistenTerminated = await listen<number | null>("sidecar-terminated", (event) => {
         setIsTranscribing(false);
         const exitCode = event.payload;
-        if (exitCode === 0) {
+        const ok = exitCode === 0;
+        if (ok) {
           setTranscribeProgress(100);
           setTranscribeStatusText("변환 완료! 성공적으로 저장되었습니다.");
-          loadJobs(); // Reload jobs on success
         } else {
           setTranscribeStatusText(`변환 실패 (종료 코드: ${exitCode}). 로그를 확인하세요.`);
+        }
+        const batchId = currentBatchIdRef.current;
+        if (batchId) {
+          updateBatchItem(batchId, {
+            status: ok ? "completed" : "failed",
+            progress: ok ? 100 : 0,
+            status_text: ok ? "완료" : `실패 (코드 ${exitCode})`,
+            error: ok ? undefined : `종료 코드 ${exitCode}`,
+          });
+          currentBatchIdRef.current = null;
+          batchProcessingRef.current = false;
+          loadJobs();
+          setTimeout(() => processBatchQueue(), 200);
+        } else {
+          loadJobs();
         }
       });
     }
 
     setupListeners();
-
     return () => {
-      if (unlistenStdout) unlistenStdout();
-      if (unlistenStderr) unlistenStderr();
-      if (unlistenTerminated) unlistenTerminated();
+      unlistenStdout?.();
+      unlistenStderr?.();
+      unlistenTerminated?.();
     };
   }, []);
 
-  // Simulation of audio playback time
-  useEffect(() => {
-    if (isPlaying) {
-      playbackIntervalRef.current = window.setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= duration) {
-            setIsPlaying(false);
-            return duration;
-          }
-          return prev + 0.5;
-        });
-      }, 500);
-    } else {
-      if (playbackIntervalRef.current) {
-        clearInterval(playbackIntervalRef.current);
-      }
-    }
-    return () => {
-      if (playbackIntervalRef.current) clearInterval(playbackIntervalRef.current);
-    };
-  }, [isPlaying, duration]);
+  // ---------- Data loaders ----------
 
-  // Core functions communicating with Sidecar
-  const loadJobs = async () => {
+  async function loadJobs() {
     setIsLoadingJobs(true);
     try {
-      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
-        args: ["jobs", "list", "--json"]
-      });
-      const parsed = JSON.parse(output);
+      const parsed = await sidecarSyncJson<Job[]>(["jobs", "list", "--json"]);
       setJobs(parsed);
     } catch (err) {
-      console.warn("Failed to load jobs from sidecar, using mock fallback", err);
-      // Fallback mock data for pristine initial load
-      setJobs([
-        {
-          id: "job_20260520_1418",
-          title: "수요밤설교 - 로마서의 서론",
-          source_path: "D:\\Media\\romans_intro.mp3",
-          status: "completed",
-          model_name: "small",
-          engine: "faster-whisper",
-          preset: "sermon",
-          language: "ko",
-          duration_sec: 2145.5,
-          error_message: null,
-          created_at: "2026-05-20T14:18:37",
-          updated_at: "2026-05-20T14:19:55"
-        }
-      ]);
+      console.warn("jobs list 실패", err);
     } finally {
       setIsLoadingJobs(false);
     }
-  };
+  }
 
-  const loadSettings = async () => {
+  async function loadSettings() {
     try {
-      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
-        args: ["settings", "show", "--json"]
-      });
-      const parsed = JSON.parse(output);
+      const parsed = await sidecarSyncJson<AppSettings>(["settings", "show", "--json"]);
       setSettings(parsed);
       setSelectedModel(parsed.model || "small");
       setSelectedPreset(parsed.preset || "sermon");
       setIsFuzzyEnabled(parsed.fuzzy_matching_enabled ?? true);
-      setFuzzyThreshold(parsed.fuzzy_threshold ?? 0.70);
+      setFuzzyThreshold(parsed.fuzzy_threshold ?? 0.7);
     } catch (err) {
-      console.warn("Failed to load settings from sidecar", err);
+      console.warn("settings show 실패", err);
     }
-  };
+  }
 
-  const getDatabasePath = async () => {
+  async function getDatabasePath() {
     try {
-      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
-        args: ["db-path"]
-      });
+      const output = await sidecarSync(["db-path"]);
       setDbPath(output.trim());
     } catch (err) {
-      console.warn("Failed to load db-path", err);
-      setDbPath("C:\\Users\\jeiel\\AppData\\Local\\PulpitInk\\PulpitInk\\pulpit_ink.db");
+      console.warn("db-path 실패", err);
     }
-  };
+  }
 
-  const runDoctorDiagnostic = async () => {
+  async function runDoctorDiagnostic() {
     setIsDiagnosing(true);
     setDoctorReport([]);
     try {
-      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
-        args: ["doctor"]
-      });
-      
-      // Parse console output into diagnostic rows
+      const output = await sidecarSync(["doctor"]);
       const rows: { name: string; ok: boolean; detail: string }[] = [];
-      const lines = output.split("\n");
-      lines.forEach(line => {
-        if (line.includes("OK") || line.includes("실패") || line.includes("√") || line.includes("x")) {
-          const isOk = line.includes("OK") || line.includes("√");
-          // Extract title and details from clean parser
-          const cleanLine = line.replace(/\[\d+m/g, "").replace(/[\u001b\u009b]/g, "");
+      output.split("\n").forEach((line) => {
+        const cleanLine = line.replace(/\[[0-9;]*m/g, "");
+        if (cleanLine.includes("OK") || cleanLine.includes("실패")) {
+          const isOk = cleanLine.includes("OK");
+          const parts = cleanLine.split("|").map((s) => s.trim()).filter(Boolean);
           rows.push({
-            name: cleanLine.split("|")[1]?.trim() || "시스템 진단",
+            name: parts[0] || "진단 항목",
             ok: isOk,
-            detail: cleanLine.split("|")[3]?.trim() || cleanLine
+            detail: parts.slice(2).join(" / ") || (isOk ? "정상" : "재확인 필요"),
           });
         }
       });
-
-      if (rows.length === 0) {
-        // Fallback parsed
-        setDoctorReport([
-          { name: "Python 3.11+ 환경", ok: true, detail: "정상 감지됨" },
-          { name: "FFmpeg 코덱", ok: true, detail: "WAV/MP3 인코더 사용 가능" },
-          { name: "faster-whisper GPU (CUDA)", ok: false, detail: "CUDA 미감지, CPU 자동 폴백" },
-          { name: "SQLite DB 영속성 계층", ok: true, detail: "스키마 버전 v2 완벽 호환" }
-        ]);
-      } else {
-        setDoctorReport(rows);
-      }
+      setDoctorReport(rows.length ? rows : [{ name: "전체", ok: true, detail: "Doctor 명령이 정상 종료됨" }]);
     } catch (err) {
-      console.error(err);
-      setDoctorReport([
-        { name: "사이드카 커맨드 통신", ok: true, detail: "Tauri IPC 정상 동작" },
-        { name: "SQLite 데이터베이스", ok: true, detail: "pulpit_ink.db 접속 연결 완료" },
-        { name: "FFmpeg 디바이스", ok: true, detail: "오디오 전처리 코덱 가용" }
-      ]);
+      setDoctorReport([{ name: "Doctor 실행 실패", ok: false, detail: String(err) }]);
     } finally {
       setIsDiagnosing(false);
     }
-  };
+  }
 
-  const startTranscription = async () => {
-    if (!audioPath) {
-      alert("오디오 파일 경로를 올바르게 입력해주세요.");
-      return;
-    }
+  // ---------- Transcribe ----------
 
-    setIsTranscribing(true);
-    setTranscribeProgress(0);
-    setTranscribeStatusText("변환 요청 중...");
-    setSidecarLogs([]);
-
-    const args = ["transcribe", audioPath, "--model", selectedModel, "--preset", selectedPreset, "--language", selectedLanguage];
-    if (referencePath) {
-      args.push("--reference", referencePath);
-    }
-    if (userDictPath) {
-      args.push("--user-dict", userDictPath);
-    }
+  function buildTranscribeArgs(source: string): string[] {
+    const args = [
+      "transcribe",
+      source,
+      "--model",
+      selectedModel,
+      "--preset",
+      selectedPreset,
+      "--language",
+      selectedLanguage,
+    ];
+    if (referencePath) args.push("--reference", referencePath);
+    if (userDictPath) args.push("--user-dict", userDictPath);
     args.push(isFuzzyEnabled ? "--fuzzy" : "--no-fuzzy");
     args.push("--fuzzy-threshold", fuzzyThreshold.toString());
+    return args;
+  }
 
-    try {
-      await invoke("run_pulpit_ink_sidecar", { args });
-    } catch (err: any) {
-      setIsTranscribing(false);
-      setTranscribeStatusText(`변환 시작 실패: ${err}`);
-      setSidecarLogs((prev) => [...prev, { type: "err", text: err.toString() }]);
+  async function startTranscription() {
+    if (!audioPath.trim()) {
+      alert("오디오 파일 경로를 입력하거나 [찾아보기]로 선택하세요.");
+      return;
     }
-  };
+    enqueueBatch([audioPath.trim()]);
+    setAudioPath("");
+  }
 
-  const loadJobIntoEditor = async (jobId: string) => {
-    try {
-      const output = await invoke<string>("run_pulpit_ink_sidecar_sync", {
-        args: ["jobs", "show", jobId, "--json"]
+  function enqueueBatch(paths: string[]) {
+    const newItems: BatchItem[] = paths.map((p) => ({
+      id: `batch_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      audio_path: p,
+      status: "pending",
+      progress: 0,
+      status_text: "대기 중",
+    }));
+    setBatchItems((prev) => [...prev, ...newItems]);
+    setTimeout(() => processBatchQueue(), 50);
+  }
+
+  function updateBatchItem(id: string, patch: Partial<BatchItem>) {
+    setBatchItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+  }
+
+  function removeBatchItem(id: string) {
+    setBatchItems((prev) => prev.filter((it) => it.id !== id));
+  }
+
+  function clearCompletedBatches() {
+    setBatchItems((prev) => prev.filter((it) => it.status === "pending" || it.status === "running"));
+  }
+
+  function processBatchQueue() {
+    if (batchProcessingRef.current) return;
+    setBatchItems((prev) => {
+      const next = prev.find((it) => it.status === "pending");
+      if (!next) return prev;
+      batchProcessingRef.current = true;
+      currentBatchIdRef.current = next.id;
+      setIsTranscribing(true);
+      setTranscribeProgress(0);
+      setSidecarLogs([]);
+      setTranscribeStatusText("변환 요청 중...");
+      const args = buildTranscribeArgs(next.audio_path);
+      sidecarSpawn(args).catch((err) => {
+        const message = String(err);
+        setSidecarLogs((logs) => [...logs, { type: "err", text: message }]);
+        updateBatchItem(next.id, { status: "failed", error: message, status_text: "사이드카 호출 실패" });
+        batchProcessingRef.current = false;
+        currentBatchIdRef.current = null;
+        setIsTranscribing(false);
+        setTimeout(() => processBatchQueue(), 200);
       });
-      const data = JSON.parse(output);
-      
+      return prev.map((it) =>
+        it.id === next.id ? { ...it, status: "running", status_text: "변환 요청 중..." } : it
+      );
+    });
+  }
+
+  function handleYoutubeSubmit(url: string) {
+    enqueueBatch([url]);
+  }
+
+  // ---------- Editor ----------
+
+  async function loadJobIntoEditor(jobId: string) {
+    try {
+      const data = await sidecarSyncJson<{
+        job: Job;
+        segments: Segment[];
+        corrections: CorrectionSuggestion[];
+        reference?: { raw_content?: string } | null;
+      }>(["jobs", "show", jobId, "--json"]);
       setSelectedJob(data.job);
       setSegments(data.segments);
       setCorrections(data.corrections);
-      setDuration(data.job.duration_sec || 1200);
-      setCurrentTime(0);
-
-      // Load reference text if present, splitting into clean paragraphs
-      if (data.reference && data.reference.raw_content) {
+      setActiveSegmentIndex(null);
+      if (data.reference?.raw_content) {
         setReferenceParagraphs(
-          data.reference.raw_content.split("\n\n").filter((p: string) => p.trim())
+          data.reference.raw_content.split("\n\n").map((p) => p.trim()).filter(Boolean)
         );
       } else {
         setReferenceParagraphs([
-          "설교 원문이 첨부되지 않은 작업입니다.",
-          "변환할 때 원문 Markdown/TXT 파일을 등록하면 실시간 성경 구절 정규화 및 교정 제안이 여기에 노출됩니다."
+          "이 작업에는 설교 원문이 첨부되지 않았습니다.",
+          "변환 시 --reference 옵션으로 Markdown/TXT 파일을 등록하면 우측 패널에 원문이 표시됩니다.",
         ]);
       }
-
       setActiveTab("editor");
     } catch (err) {
-      console.warn("Failed to query full job detail via JSON, loading mocks", err);
-      // editor fallback
-      setSelectedJob({
-        id: jobId,
-        title: "수요밤설교 - 로마서의 서론",
-        source_path: "D:\\Media\\romans_intro.mp3",
-        status: "completed",
-        model_name: "small",
-        engine: "faster-whisper",
-        preset: "sermon",
-        language: "ko",
-        duration_sec: 120,
-        error_message: null,
-        created_at: "2026-05-20T14:18:37",
-        updated_at: "2026-05-20T14:19:55"
-      });
-      setSegments([
-        {
-          job_id: jobId,
-          start_sec: 0.0,
-          end_sec: 8.5,
-          raw_text: "오늘 사도 바울은 로마서 일장 일절에서 하나님의 복음을 설명하고 있습니다.",
-          clean_text: "오늘 사도 바울은 로마서 1장 1절에서 하나님의 복음을 설명하고 있습니다.",
-          edited_text: "",
-          avg_logprob: -0.12,
-          no_speech_prob: 0.01,
-          speaker: null,
-          needs_review: 0
-        },
-        {
-          job_id: jobId,
-          start_sec: 9.0,
-          end_sec: 18.2,
-          raw_text: "특히 이에수 그리스도의 보궁을 들고 나아갈 때 우리 안에 구원이 임합니다.",
-          clean_text: "특히 이에수 그리스도의 보궁을 들고 나아갈 때 우리 안에 구원이 임합니다.",
-          edited_text: "특히 예수 그리스도의 복음을 들고 나아갈 때 우리 안에 구원이 임합니다.",
-          avg_logprob: -0.45,
-          no_speech_prob: 0.02,
-          speaker: null,
-          needs_review: 1
-        }
-      ]);
-      setCorrections([
-        {
-          id: 1,
-          job_id: jobId,
-          segment_id: 2,
-          kind: "proper_noun",
-          original_text: "이에수",
-          suggested_text: "예수",
-          status: "pending"
-        },
-        {
-          id: 2,
-          job_id: jobId,
-          segment_id: 2,
-          kind: "lexicon",
-          original_text: "보궁",
-          suggested_text: "복음",
-          status: "pending"
-        }
-      ]);
-      setReferenceParagraphs([
-        "예수 그리스도의 종 바울은 사도로 부르심을 받아 하나님의 복음을 위하여 택정함을 입었으니",
-        "이 복음은 하나님이 선지자들을 통하여 그의 아들에 관하여 성경에 미리 약속하신 것이라"
-      ]);
-      setDuration(120);
-      setCurrentTime(0);
-      setActiveTab("editor");
+      alert(`작업 상세 로딩 실패: ${String(err)}`);
     }
-  };
+  }
 
-  const handleSegmentChange = async (index: number, text: string) => {
-    const updated = [...segments];
-    updated[index].edited_text = text;
-    setSegments(updated);
-
-    // Save synchronously to SQLite via Sidecar update_segment_text or direct SQLite API if necessary
-    // In our spec, we can call the corrections apply or write a script.
-    // For raw mock/fallback, we just update the UI state.
-    // But if we want actual persist, we trigger a CLI call or SQLite insert.
+  async function persistSegmentText(segment: Segment, text: string) {
+    if (segment.id == null) return;
     try {
-      // In python cli, segment_id is numerical. If we don't have it, we search by start_sec.
-      const segment = updated[index];
-      // A quick sidecar update mock (in actual production, we have specific repo methods)
-      console.log("Saving segment edited text:", segment.start_sec, text);
+      await sidecarSyncJson([
+        "segments",
+        "update",
+        String(segment.id),
+        "--edited-text",
+        text,
+        "--json",
+      ]);
     } catch (err) {
-      console.error("Failed to persist segment change", err);
+      console.error("segments update 실패", err);
     }
-  };
+  }
 
-  const applyCorrection = (suggestionId: number, segmentIndex: number, original: string, suggested: string) => {
-    // Update local suggestions status
-    setCorrections(prev => prev.map(c => c.id === suggestionId ? { ...c, status: "applied" } : c));
-    
-    // Update edited text in segment
+  function handleSegmentChange(index: number, text: string) {
+    setSegments((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], edited_text: text };
+      persistSegmentText(updated[index], text);
+      return updated;
+    });
+  }
+
+  async function applyCorrection(
+    suggestionId: number,
+    segmentIndex: number,
+    original: string,
+    suggested: string
+  ) {
+    setCorrections((prev) => prev.map((c) => (c.id === suggestionId ? { ...c, status: "applied" } : c)));
     const segment = segments[segmentIndex];
     const currentText = segment.edited_text || segment.clean_text || segment.raw_text;
     const replaced = currentText.replace(original, suggested);
     handleSegmentChange(segmentIndex, replaced);
-  };
+    try {
+      await sidecarSyncJson(["corrections", "apply", String(suggestionId)]);
+    } catch (err) {
+      console.warn("corrections apply 실패", err);
+    }
+  }
 
-  const formatTime = (seconds: number) => {
+  function seekToSegment(index: number) {
+    setActiveSegmentIndex(index);
+    const seg = segments[index];
+    if (!seg) return;
+    waveformRef.current?.seek(seg.start_sec);
+  }
+
+  function playSegmentRange(index: number) {
+    const seg = segments[index];
+    if (!seg) return;
+    setActiveSegmentIndex(index);
+    waveformRef.current?.playRange(seg.start_sec, seg.end_sec);
+  }
+
+  // ---------- Helpers ----------
+
+  function formatTime(seconds: number): string {
+    if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+  }
 
-  // Render helpers
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return <span className="badge badge-success">Completed</span>;
-      case "running":
-        return <span className="badge badge-info">Running...</span>;
-      case "failed":
-        return <span className="badge badge-danger">Failed</span>;
-      default:
-        return <span className="badge badge-warning">{status}</span>;
-    }
-  };
+  function getStatusBadge(status: string) {
+    const s = status.toLowerCase();
+    if (s === "completed") return <span className="badge badge-success">완료</span>;
+    if (s === "running") return <span className="badge badge-info">진행 중</span>;
+    if (s === "failed") return <span className="badge badge-danger">실패</span>;
+    return <span className="badge badge-warning">{status}</span>;
+  }
 
-  const dismissOnboarding = () => {
+  function dismissOnboarding() {
     localStorage.setItem("pulpitink-onboarding", "done");
     setShowOnboarding(false);
-  };
+  }
+
+  const filteredJobs = useMemo(() => {
+    if (!searchQuery.trim()) return jobs;
+    const q = searchQuery.toLowerCase();
+    return jobs.filter(
+      (j) =>
+        j.title.toLowerCase().includes(q) ||
+        j.source_path.toLowerCase().includes(q)
+    );
+  }, [jobs, searchQuery]);
+
+  const batchSummary = useMemo(() => {
+    const pending = batchItems.filter((it) => it.status === "pending").length;
+    const running = batchItems.filter((it) => it.status === "running").length;
+    const completed = batchItems.filter((it) => it.status === "completed").length;
+    const failed = batchItems.filter((it) => it.status === "failed").length;
+    return { pending, running, completed, failed };
+  }, [batchItems]);
+
+  // ---------- Render ----------
 
   return (
     <div className="app-container">
-      {/* Sidebar Navigation */}
       <aside className="sidebar">
         <div>
           <div className="brand-section">
             <div className="brand-logo">P</div>
             <h1 className="brand-name">PulpitInk</h1>
           </div>
-
           <nav className="nav-links">
-            <div 
-              className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
-              onClick={() => setActiveTab("dashboard")}
-            >
-              <List size={18} />
-              <span>최근 작업 목록</span>
-            </div>
-            <div 
-              className={`nav-item ${activeTab === "transcribe" ? "active" : ""}`}
-              onClick={() => setActiveTab("transcribe")}
-            >
-              <FileAudio size={18} />
-              <span>새 STT 변환</span>
-            </div>
-            <div 
-              className={`nav-item ${activeTab === "editor" ? "active" : ""}`}
-              onClick={() => setActiveTab("editor")}
-            >
-              <Sparkles size={18} />
-              <span>검수 에디터</span>
-            </div>
-            <div 
-              className={`nav-item ${activeTab === "settings" ? "active" : ""}`}
-              onClick={() => setActiveTab("settings")}
-            >
-              <Settings size={18} />
-              <span>설정 및 시스템</span>
-            </div>
+            <NavItem icon={<List size={18} />} active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")}>
+              최근 작업 목록
+            </NavItem>
+            <NavItem icon={<FileAudio size={18} />} active={activeTab === "transcribe"} onClick={() => setActiveTab("transcribe")}>
+              새 STT 변환
+            </NavItem>
+            <NavItem icon={<Sparkles size={18} />} active={activeTab === "editor"} onClick={() => setActiveTab("editor")}>
+              검수 에디터
+            </NavItem>
+            <NavItem icon={<BookOpenText size={18} />} active={activeTab === "glossary"} onClick={() => setActiveTab("glossary")}>
+              용어 사전
+            </NavItem>
+            <NavItem icon={<Settings size={18} />} active={activeTab === "settings"} onClick={() => setActiveTab("settings")}>
+              설정 및 시스템
+            </NavItem>
           </nav>
         </div>
 
@@ -561,22 +508,28 @@ function App() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="main-content">
+        <UpdateBanner />
+
         <header className="header-bar">
           <div className="header-title">
             {activeTab === "dashboard" && <>최근 작업 대시보드</>}
             {activeTab === "transcribe" && <>새로운 설교 파일 STT 변환</>}
-            {activeTab === "editor" && <>
-              <span>2단 대조 검수 편집기</span>
-              {selectedJob && <span style={{ fontSize: "0.85rem", opacity: 0.6 }}>— {selectedJob.title}</span>}
-            </>}
+            {activeTab === "editor" && (
+              <>
+                <span>2단 대조 검수 편집기</span>
+                {selectedJob && (
+                  <span style={{ fontSize: "0.85rem", opacity: 0.6 }}>— {selectedJob.title}</span>
+                )}
+              </>
+            )}
+            {activeTab === "glossary" && <>사용자 용어 사전 (Glossary)</>}
             {activeTab === "settings" && <>시스템 상태 및 환경 설정</>}
           </div>
 
           <div className="header-actions">
             {activeTab === "dashboard" && (
-              <button className="btn btn-secondary btn-outline" onClick={loadJobs}>
+              <button className="btn btn-outline" onClick={loadJobs}>
                 <RefreshCw size={14} />
                 <span>새로고침</span>
               </button>
@@ -595,13 +548,11 @@ function App() {
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <span className="badge badge-accent">v0.4.7 Tauri Hybrid</span>
+            <span className="badge badge-accent">{APP_VERSION} Tauri Hybrid</span>
           </div>
         </header>
 
-        {/* Tab Contents */}
         <div className="content-body">
-          {/* TAB 1: DASHBOARD */}
           {activeTab === "dashboard" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {showOnboarding && (
@@ -610,24 +561,23 @@ function App() {
                     <span className="eyebrow">처음 시작</span>
                     <h2>녹음 파일 하나로 변환, 검수, 내보내기까지 이어갑니다.</h2>
                     <p>
-                      먼저 시스템 진단으로 로컬 환경을 확인하고, 오디오 경로를 넣어 새 STT 작업을 시작하세요.
+                      먼저 시스템 진단으로 로컬 환경을 확인하고, 오디오 파일이나 YouTube URL을 입력해 변환을 시작하세요.
                       변환이 끝나면 최근 작업에서 검수 에디터를 열 수 있습니다.
                     </p>
                   </div>
-
                   <div className="onboarding-steps">
                     <button className="onboarding-step" onClick={() => setActiveTab("settings")}>
                       <CheckCircle2 size={20} />
                       <span>
                         <strong>1. 시스템 진단</strong>
-                        <small>FFmpeg, DB, Python 사이드카 확인</small>
+                        <small>FFmpeg, DB, 사이드카 확인</small>
                       </span>
                     </button>
                     <button className="onboarding-step" onClick={() => setActiveTab("transcribe")}>
                       <FileAudio size={20} />
                       <span>
                         <strong>2. 새 STT 변환</strong>
-                        <small>오디오 파일과 모델을 선택</small>
+                        <small>오디오 파일/YouTube + 모델</small>
                       </span>
                     </button>
                     <button className="onboarding-step" onClick={dismissOnboarding}>
@@ -644,26 +594,31 @@ function App() {
               <div className="glass-card flex-between" style={{ padding: "1rem 1.5rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "50%" }}>
                   <Search size={18} style={{ color: "var(--text-secondary)" }} />
-                  <input 
-                    type="text" 
-                    placeholder="작업 제목이나 원본 경로 검색..." 
+                  <input
+                    type="text"
+                    placeholder="작업 제목이나 원본 경로 검색..."
                     className="form-input"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     style={{ border: "none", padding: "0.5rem 0", background: "transparent" }}
                   />
                 </div>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => setActiveTab("transcribe")}
-                >
+                <button className="btn btn-primary" onClick={() => setActiveTab("transcribe")}>
                   <Plus size={16} />
                   <span>새 작업 만들기</span>
                 </button>
               </div>
 
               <div className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
-                <div className="job-item" style={{ background: "rgba(255,255,255,0.02)", fontWeight: 600, fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                <div
+                  className="job-item"
+                  style={{
+                    background: "rgba(255,255,255,0.02)",
+                    fontWeight: 600,
+                    fontSize: "0.8rem",
+                    color: "var(--text-secondary)",
+                  }}
+                >
                   <div>설교 제목 및 원본 오디오</div>
                   <div>STT 모델</div>
                   <div>전처리 프리셋</div>
@@ -674,117 +629,140 @@ function App() {
                 {isLoadingJobs ? (
                   <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-secondary)" }}>
                     <RefreshCw className="animate-spin" size={24} style={{ margin: "0 auto 1rem" }} />
-                    <span>로컬 DB에서 최근 작업들을 로딩 중입니다...</span>
+                    <span>로컬 DB에서 최근 작업들을 로딩 중...</span>
                   </div>
-                ) : jobs.length === 0 ? (
+                ) : filteredJobs.length === 0 ? (
                   <div className="empty-state">
                     <AlertTriangle size={34} />
                     <h3>아직 변환 작업이 없습니다.</h3>
-                    <p>오디오 파일 경로를 준비한 뒤 첫 STT 변환을 시작하세요.</p>
+                    <p>오디오 파일이나 YouTube URL을 준비한 뒤 첫 STT 변환을 시작하세요.</p>
                     <button className="btn btn-primary" onClick={() => setActiveTab("transcribe")}>
                       <Plus size={17} />
                       <span>첫 작업 만들기</span>
                     </button>
                   </div>
                 ) : (
-                  jobs
-                    .filter(job => job.title.toLowerCase().includes(searchQuery.toLowerCase()) || job.source_path.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((job) => (
-                      <div className="job-item" key={job.id}>
-                        <div>
-                          <div style={{ fontWeight: 600 }}>{job.title}</div>
-                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", marginTop: "0.25rem", wordBreak: "break-all" }}>
-                            {job.source_path}
-                          </div>
-                        </div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{job.model_name}</div>
-                        <div>{job.preset}</div>
-                        <div>{getStatusBadge(job.status)}</div>
-                        <div>
-                          {job.status === "completed" ? (
-                            <button 
-                              className="btn btn-secondary btn-outline" 
-                              style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
-                              onClick={() => loadJobIntoEditor(job.id)}
-                            >
-                              검수 에디터 열기
-                              <ArrowRight size={12} style={{ marginLeft: "0.4rem" }} />
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>준비 중</span>
-                          )}
+                  filteredJobs.map((job) => (
+                    <div className="job-item" key={job.id}>
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{job.title}</div>
+                        <div
+                          style={{
+                            fontSize: "0.75rem",
+                            color: "var(--text-muted)",
+                            fontFamily: "var(--font-mono)",
+                            marginTop: "0.25rem",
+                            wordBreak: "break-all",
+                          }}
+                        >
+                          {job.source_path}
                         </div>
                       </div>
-                    ))
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
+                        {job.model_name}
+                      </div>
+                      <div>{job.preset}</div>
+                      <div>{getStatusBadge(job.status)}</div>
+                      <div>
+                        {job.status === "completed" ? (
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
+                            onClick={() => loadJobIntoEditor(job.id)}
+                          >
+                            검수 에디터 열기
+                            <ArrowRight size={12} style={{ marginLeft: "0.4rem" }} />
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>준비 중</span>
+                        )}
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           )}
 
-          {/* TAB 2: TRANSCRIBE */}
           {activeTab === "transcribe" && (
             <div className="grid-2">
               <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                <h2 style={{ fontSize: "1.1rem", fontWeight: 600, borderBottom: "1px solid var(--border-light)", paddingBottom: "0.75rem" }}>변환 파라미터 셋업</h2>
-                
+                <h2
+                  style={{
+                    fontSize: "1.05rem",
+                    fontWeight: 600,
+                    borderBottom: "1px solid var(--border-light)",
+                    paddingBottom: "0.75rem",
+                  }}
+                >
+                  변환 파라미터 셋업
+                </h2>
+
                 <div className="form-group">
-                  <label className="form-label">1. 원본 오디오 파일 절대 경로 *</label>
-                  <input 
-                    type="text" 
-                    placeholder="예: D:\Media\sermon_audio.mp3" 
-                    className="form-input"
+                  <label className="form-label">1. 원본 오디오 파일</label>
+                  <PathPicker
                     value={audioPath}
-                    onChange={(e) => setAudioPath(e.target.value)}
+                    onChange={setAudioPath}
+                    placeholder="예: D:\Media\sermon_audio.mp3"
+                    filters={[
+                      {
+                        name: "오디오/비디오",
+                        extensions: ["mp3", "wav", "m4a", "aac", "flac", "ogg", "mp4"],
+                      },
+                    ]}
                   />
-                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                    Windows 파일 탐색기에서 오디오 파일을 선택한 뒤 경로를 붙여넣어 주세요.
-                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ alignSelf: "flex-start", marginTop: "0.5rem" }}
+                    onClick={() => setYoutubeDialogOpen(true)}
+                  >
+                    <Video size={14} style={{ color: "#ef4444" }} />
+                    YouTube URL로 변환
+                  </button>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">2. 설교 원문 텍스트 파일 절대 경로 (선택)</label>
-                  <input 
-                    type="text" 
-                    placeholder="예: D:\Text\sermon_note.md" 
-                    className="form-input"
+                  <label className="form-label">2. 설교 원문 텍스트 파일 (선택)</label>
+                  <PathPicker
                     value={referencePath}
-                    onChange={(e) => setReferencePath(e.target.value)}
+                    onChange={setReferencePath}
+                    placeholder="예: D:\Text\sermon_note.md"
+                    filters={[{ name: "텍스트/마크다운", extensions: ["txt", "md", "markdown"] }]}
                   />
                   <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                    Markdown/TXT 원문을 대조하여 자동 성경 교정 및 Fuzzy 고유명사 매칭 후보를 추출합니다.
+                    Markdown/TXT 원문을 대조해 자동 성경 교정 및 Fuzzy 매칭 후보를 추출합니다.
                   </span>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">3. 사용자 정의 용어 사전 경로 (선택)</label>
-                  <input 
-                    type="text" 
-                    placeholder="예: C:\Users\jeiel\dict.json" 
-                    className="form-input"
+                  <label className="form-label">3. 사용자 정의 용어 사전 (선택)</label>
+                  <PathPicker
                     value={userDictPath}
-                    onChange={(e) => setUserDictPath(e.target.value)}
+                    onChange={setUserDictPath}
+                    placeholder="비워두면 기본 사용자 사전 사용"
+                    filters={[{ name: "JSON", extensions: ["json"] }]}
                   />
                 </div>
 
                 <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">STT 연산 모델</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
                     >
                       <option value="tiny">Tiny (가장 빠름)</option>
                       <option value="base">Base</option>
-                      <option value="small">Small (권장 - 성능/속도 균형)</option>
+                      <option value="small">Small (권장)</option>
                       <option value="medium">Medium</option>
                       <option value="large-v3">Large v3 (최고 정확도)</option>
                     </select>
                   </div>
-
                   <div className="form-group">
-                    <label className="form-label">전처리 오디오 프리셋</label>
-                    <select 
+                    <label className="form-label">전처리 프리셋</label>
+                    <select
                       className="form-select"
                       value={selectedPreset}
                       onChange={(e) => setSelectedPreset(e.target.value)}
@@ -797,29 +775,38 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ background: "rgba(139, 92, 246, 0.05)", border: "1px solid rgba(139, 92, 246, 0.15)", borderRadius: "8px", padding: "1rem" }}>
+                <div
+                  style={{
+                    background: "rgba(139, 92, 246, 0.05)",
+                    border: "1px solid rgba(139, 92, 246, 0.15)",
+                    borderRadius: "8px",
+                    padding: "1rem",
+                  }}
+                >
                   <div className="flex-between" style={{ marginBottom: "0.5rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <Sparkles size={16} style={{ color: "var(--color-accent)" }} />
                       <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>한글 자모(Jamo) Fuzzy 매칭</span>
                     </div>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={isFuzzyEnabled}
                       onChange={(e) => setIsFuzzyEnabled(e.target.checked)}
                       style={{ cursor: "pointer", width: "16px", height: "16px" }}
                     />
                   </div>
                   <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                    STT 오인식(예: "이에수" ➔ "예수")을 자모 구조 단위로 분석하는 Fuzzy Scorer 임계값을 제어합니다.
+                    STT 오인식(예: "이에수" → "예수")을 자모 구조 단위로 분석하는 Fuzzy Scorer 임계값을 제어합니다.
                   </p>
                   {isFuzzyEnabled && (
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "0.75rem" }}>
-                      <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>임계값: {fuzzyThreshold.toFixed(2)}</span>
-                      <input 
-                        type="range" 
-                        min="0.60" 
-                        max="0.90" 
+                      <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
+                        임계값: {fuzzyThreshold.toFixed(2)}
+                      </span>
+                      <input
+                        type="range"
+                        min="0.60"
+                        max="0.90"
                         step="0.05"
                         value={fuzzyThreshold}
                         onChange={(e) => setFuzzyThreshold(parseFloat(e.target.value))}
@@ -829,36 +816,30 @@ function App() {
                   )}
                 </div>
 
-                <button 
+                <button
                   className="btn btn-primary"
                   onClick={startTranscription}
-                  disabled={isTranscribing}
-                  style={{ width: "100%", padding: "0.85rem", marginTop: "0.5rem" }}
+                  disabled={!audioPath.trim()}
+                  style={{ width: "100%", padding: "0.85rem", marginTop: "0.25rem" }}
                 >
-                  {isTranscribing ? (
-                    <>
-                      <RefreshCw className="animate-spin" size={16} />
-                      <span>백그라운드에서 인공지능 STT 변환 작동 중...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FileAudio size={16} />
-                      <span>전처리 및 STT 파이프라인 변환 기동</span>
-                    </>
-                  )}
+                  <FileAudio size={16} />
+                  <span>큐에 추가하고 변환 시작</span>
                 </button>
               </div>
 
-              {/* Logger Console Display */}
               <div className="glass-card" style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: "450px" }}>
                 <div className="flex-between" style={{ borderBottom: "1px solid var(--border-light)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
-                  <h2 style={{ fontSize: "1.1rem", fontWeight: 600 }}>실시간 사이드카 통신 콘솔</h2>
-                  {isTranscribing && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <h2 style={{ fontSize: "1.05rem", fontWeight: 600 }}>배치 큐 및 사이드카 콘솔</h2>
+                  <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                    {isTranscribing && (
                       <span className="badge badge-accent animate-pulse">{transcribeStatusText}</span>
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{transcribeProgress}%</span>
-                    </div>
-                  )}
+                    )}
+                    {batchItems.some((it) => it.status === "completed" || it.status === "failed") && (
+                      <button className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }} onClick={clearCompletedBatches}>
+                        완료/실패 정리
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {isTranscribing && (
@@ -867,15 +848,56 @@ function App() {
                   </div>
                 )}
 
-                <div 
-                  className="log-console" 
+                {batchItems.length > 0 && (
+                  <div className="batch-queue">
+                    <div className="batch-summary">
+                      <span>대기 {batchSummary.pending}</span>
+                      <span>진행 {batchSummary.running}</span>
+                      <span style={{ color: "var(--color-success)" }}>완료 {batchSummary.completed}</span>
+                      {batchSummary.failed > 0 && (
+                        <span style={{ color: "var(--color-danger)" }}>실패 {batchSummary.failed}</span>
+                      )}
+                    </div>
+                    <div className="batch-list">
+                      {batchItems.map((item) => (
+                        <div key={item.id} className={`batch-item batch-${item.status}`}>
+                          <div className="batch-item-main">
+                            <div className="batch-item-path" title={item.audio_path}>
+                              {item.audio_path}
+                            </div>
+                            <div className="batch-item-status">
+                              {item.status === "running" && (
+                                <RefreshCw size={12} className="animate-spin" />
+                              )}
+                              {item.status === "completed" && <CheckCircle2 size={12} />}
+                              {item.status === "failed" && <AlertTriangle size={12} />}
+                              <span>{item.status_text}</span>
+                              {item.status === "running" && <span>· {item.progress}%</span>}
+                            </div>
+                          </div>
+                          {(item.status === "pending" || item.status === "failed" || item.status === "completed") && (
+                            <button
+                              className="icon-btn batch-remove"
+                              onClick={() => removeBatchItem(item.id)}
+                              title="목록에서 제거"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  className="log-console"
                   ref={logConsoleRef}
-                  style={{ flex: 1, height: "350px" }}
+                  style={{ flex: 1, height: "300px", marginTop: batchItems.length > 0 ? "1rem" : 0 }}
                 >
                   {sidecarLogs.length === 0 ? (
                     <div style={{ color: "var(--text-muted)", padding: "2rem", textAlign: "center" }}>
-                      변환 기동 버튼을 클릭하면, 여기에 백그라운드 Python 엔진(enhancement, faster-whisper, alignment)의 
-                      실시간 로그 스트림과 진행 단계가 안전하게 수신됩니다.
+                      변환을 시작하면 백그라운드 Python 엔진(enhancement, faster-whisper, alignment)의 실시간 로그가 여기에 표시됩니다.
                     </div>
                   ) : (
                     sidecarLogs.map((log, i) => (
@@ -889,82 +911,137 @@ function App() {
             </div>
           )}
 
-          {/* TAB 3: EDITOR */}
           {activeTab === "editor" && (
             <div style={{ height: "100%" }}>
               {!selectedJob ? (
-                <div className="glass-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "6rem 2rem", textAlign: "center", color: "var(--text-muted)" }}>
+                <div
+                  className="glass-card"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "6rem 2rem",
+                    textAlign: "center",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   <Sparkles size={48} style={{ color: "var(--color-accent)", marginBottom: "1.5rem" }} />
-                  <h2 style={{ fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 600, marginBottom: "0.5rem" }}>검수 대상 작업 미지정</h2>
-                  <p>최근 작업 목록(Dashboard) 탭으로 이동하셔서</p>
+                  <h2 style={{ fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 600, marginBottom: "0.5rem" }}>
+                    검수 대상 작업 미지정
+                  </h2>
+                  <p>최근 작업 목록(Dashboard)에서</p>
                   <p>"검수 에디터 열기" 버튼을 통해 편집할 설교를 로드해 주세요.</p>
                 </div>
               ) : (
-                <div className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
-                  {/* Editor Layout Grid */}
+                <div className="glass-card editor-shell">
+                  <div className="editor-waveform">
+                    <WaveformPlayer
+                      ref={waveformRef}
+                      audioPath={selectedJob.source_path}
+                    />
+                  </div>
+
                   <div className="editor-layout">
-                    {/* Left: Interactive segments */}
                     <div className="editor-left">
                       <div className="panel-header">
                         <span className="panel-title">STT 세그먼트 타임라인 ({segments.length})</span>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <span className="badge badge-success">DB 연결 정상</span>
-                        </div>
+                        <span className="badge badge-success">DB 연결 정상</span>
                       </div>
 
                       <div className="panel-scroll">
                         {segments.map((seg, i) => {
-                          const hasSuggested = corrections.filter(c => c.segment_id === (seg.id || i + 1) && c.status === "pending");
+                          const segId = seg.id ?? i + 1;
+                          const segCorrections = corrections.filter(
+                            (c) => c.segment_id === segId && c.status === "pending"
+                          );
                           const isNeedsReview = seg.needs_review === 1;
-
                           return (
-                            <div 
+                            <div
                               className={`segment-card ${activeSegmentIndex === i ? "active" : ""}`}
-                              key={i}
-                              onClick={() => setActiveSegmentIndex(i)}
+                              key={segId}
+                              onClick={() => seekToSegment(i)}
                               style={isNeedsReview ? { borderLeft: "3px solid var(--color-warning)" } : {}}
                             >
                               <div className="segment-meta">
-                                <span className="timestamp">{formatTime(seg.start_sec)} - {formatTime(seg.end_sec)}</span>
+                                <button
+                                  type="button"
+                                  className="timestamp"
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    playSegmentRange(i);
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    seekToSegment(i);
+                                  }}
+                                  title="더블클릭: 이 구간만 재생 / 클릭: 위치 이동"
+                                >
+                                  {formatTime(seg.start_sec)} - {formatTime(seg.end_sec)}
+                                </button>
                                 {seg.speaker && <span className="badge">화자: {seg.speaker}</span>}
-                                {isNeedsReview && <span className="badge badge-warning" style={{ fontSize: "0.6rem" }}>인공지능 검수 대상</span>}
+                                {isNeedsReview && (
+                                  <span className="badge badge-warning" style={{ fontSize: "0.6rem" }}>
+                                    검수 대상
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  className="icon-btn"
+                                  style={{ width: 28, height: 28 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    playSegmentRange(i);
+                                  }}
+                                  title="이 구간만 재생"
+                                >
+                                  <PlayCircle size={14} />
+                                </button>
                               </div>
-
                               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                                <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", textDecoration: "line-through" }}>
+                                <div
+                                  style={{
+                                    fontSize: "0.78rem",
+                                    color: "var(--text-muted)",
+                                    textDecoration: "line-through",
+                                  }}
+                                >
                                   {seg.raw_text}
                                 </div>
-                                <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                                <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
                                   {seg.clean_text}
                                 </div>
-                                <textarea 
+                                <textarea
                                   className="segment-editor"
                                   value={seg.edited_text !== "" ? seg.edited_text : seg.clean_text}
                                   onChange={(e) => handleSegmentChange(i, e.target.value)}
                                   placeholder="검수 편집 텍스트 입력..."
                                   rows={2}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
 
-                              {/* Correction Suggestions Bubble */}
-                              {hasSuggested.length > 0 && (
-                                <div style={{ marginTop: "0.75rem", borderTop: "1px dashed var(--border-light)", paddingTop: "0.5rem" }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.75rem", color: "var(--color-warning)", fontWeight: 600, marginBottom: "0.25rem" }}>
+                              {segCorrections.length > 0 && (
+                                <div className="correction-bubble">
+                                  <div className="correction-bubble-head">
                                     <Sparkles size={12} />
-                                    <span>설교 원문 Fuzzy 매칭 교정 제안:</span>
+                                    <span>Fuzzy 매칭 교정 제안:</span>
                                   </div>
-                                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                                    {hasSuggested.map((corr) => (
-                                      <button 
+                                  <div className="correction-bubble-list">
+                                    {segCorrections.map((corr) => (
+                                      <button
                                         key={corr.id}
-                                        className="btn btn-secondary" 
-                                        style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.2)", color: "#fbbf24" }}
+                                        type="button"
+                                        className="correction-pill"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           applyCorrection(corr.id, i, corr.original_text, corr.suggested_text);
                                         }}
                                       >
-                                        "{corr.original_text}" → <strong style={{ textDecoration: "underline" }}>{corr.suggested_text}</strong>
+                                        "{corr.original_text}" →{" "}
+                                        <strong style={{ textDecoration: "underline" }}>
+                                          {corr.suggested_text}
+                                        </strong>
                                       </button>
                                     ))}
                                   </div>
@@ -976,23 +1053,22 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Right: Original reference text */}
                     <div className="editor-right">
                       <div className="panel-header">
                         <span className="panel-title">설교 원문 대조 패널</span>
                         <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>원문 하이라이트</span>
                       </div>
-
                       <div className="panel-scroll" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
                         <div className="reference-content">
                           {referenceParagraphs.map((para, i) => {
-                            // Highlighting matching sentences if selected segment matches reference paragraph partially
-                            const isMatched = activeSegmentIndex !== null && 
-                              (segments[activeSegmentIndex].clean_text.includes(para.slice(0, 8)) || para.includes(segments[activeSegmentIndex].clean_text.slice(0, 8)));
-
+                            const isMatched =
+                              activeSegmentIndex !== null &&
+                              segments[activeSegmentIndex] != null &&
+                              (segments[activeSegmentIndex].clean_text.includes(para.slice(0, 8)) ||
+                                para.includes(segments[activeSegmentIndex].clean_text.slice(0, 8)));
                             return (
-                              <p 
-                                className={`reference-paragraph ${isMatched ? "matched" : ""}`} 
+                              <p
+                                className={`reference-paragraph ${isMatched ? "matched" : ""}`}
                                 key={i}
                               >
                                 {para}
@@ -1004,88 +1080,77 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Player controls */}
-                  <div className="player-bar">
-                    <div className="player-controls">
-                      <button 
-                        className="play-btn"
-                        onClick={() => setIsPlaying(!isPlaying)}
-                      >
-                        {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                      </button>
-                      <Volume2 size={18} style={{ color: "var(--text-secondary)" }} />
-                      <span style={{ fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                      </span>
-                    </div>
-
-                    <div className="progress-container">
-                      <div 
-                        className="progress-bg"
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const pos = (e.clientX - rect.left) / rect.width;
-                          setCurrentTime(pos * duration);
-                        }}
-                      >
-                        <div className="progress-fill" style={{ width: `${(currentTime / duration) * 100}%` }}>
-                          <div className="progress-handle"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <button 
-                        className="btn btn-primary"
-                        style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
-                        onClick={async () => {
-                          alert("검수 수정본이 로컬 데이터베이스와 export 목록에 안전하게 내보내기 갱신되었습니다!");
-                          // call jobs export inside sidecar
-                          try {
-                            await invoke("run_pulpit_ink_sidecar_sync", {
-                              args: ["jobs", "export", selectedJob.id]
-                            });
-                          } catch (err) {
-                            console.warn(err);
-                          }
-                        }}
-                      >
-                        검수 완료 및 Export 실행
-                      </button>
-                    </div>
+                  <div className="editor-footer">
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      더블클릭으로 구간 재생 · 텍스트 수정 시 자동 저장
+                    </span>
+                    <button
+                      className="btn btn-primary"
+                      style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
+                      onClick={async () => {
+                        try {
+                          await sidecarSync(["jobs", "export", selectedJob.id]);
+                          alert("검수 수정본이 export 디렉터리에 다시 저장되었습니다.");
+                        } catch (err) {
+                          alert(`Export 실패: ${String(err)}`);
+                        }
+                      }}
+                    >
+                      검수 완료 및 Export 실행
+                    </button>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* TAB 4: SETTINGS */}
+          {activeTab === "glossary" && <GlossaryTab />}
+
           {activeTab === "settings" && (
             <div className="grid-2">
               <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                <h2 style={{ fontSize: "1.1rem", fontWeight: 600, borderBottom: "1px solid var(--border-light)", paddingBottom: "0.75rem" }}>Tauri + Python Sidecar 환경 설정</h2>
-                
+                <h2
+                  style={{
+                    fontSize: "1.05rem",
+                    fontWeight: 600,
+                    borderBottom: "1px solid var(--border-light)",
+                    paddingBottom: "0.75rem",
+                  }}
+                >
+                  Tauri + Python Sidecar 환경 설정
+                </h2>
+
                 <div className="form-group">
                   <label className="form-label">기본 SQLite DB 저장 위치</label>
-                  <div style={{ backgroundColor: "rgba(0,0,0,0.3)", border: "1px solid var(--border-light)", borderRadius: "8px", padding: "0.75rem 1rem", fontSize: "0.8rem", fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
-                    {dbPath}
+                  <div
+                    style={{
+                      backgroundColor: "rgba(0,0,0,0.3)",
+                      border: "1px solid var(--border-light)",
+                      borderRadius: "8px",
+                      padding: "0.75rem 1rem",
+                      fontSize: "0.8rem",
+                      fontFamily: "var(--font-mono)",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {dbPath || "(로딩 중)"}
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">기본 STT 모델 디렉토리 경로</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={settings.model_cache_dir || "System Default (Local\\PulpitInk\\PulpitInk\\models)"}
-                    onChange={(e) => setSettings({ ...settings, model_cache_dir: e.target.value })}
+                  <PathPicker
+                    value={settings.model_cache_dir}
+                    onChange={(p) => setSettings({ ...settings, model_cache_dir: p })}
+                    placeholder="비워두면 %LOCALAPPDATA%/PulpitInk/models 사용"
+                    mode="directory"
                   />
                 </div>
 
                 <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">기본 언어</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={settings.language}
                       onChange={(e) => setSettings({ ...settings, language: e.target.value })}
@@ -1094,10 +1159,9 @@ function App() {
                       <option value="en">English (en)</option>
                     </select>
                   </div>
-
                   <div className="form-group">
                     <label className="form-label">추론 디바이스</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={settings.device}
                       onChange={(e) => setSettings({ ...settings, device: e.target.value })}
@@ -1109,17 +1173,17 @@ function App() {
                   </div>
                 </div>
 
-                <button 
+                <button
                   className="btn btn-primary"
                   onClick={async () => {
-                    // call settings set command
                     try {
-                      await invoke("run_pulpit_ink_sidecar_sync", {
-                        args: ["settings", "set", "model", settings.model]
-                      });
-                      alert("사용자 설정이 영속적으로 저장되었습니다.");
+                      await sidecarSync(["settings", "set", "model", settings.model]);
+                      await sidecarSync(["settings", "set", "preset", settings.preset]);
+                      await sidecarSync(["settings", "set", "language", settings.language]);
+                      await sidecarSync(["settings", "set", "device", settings.device]);
+                      alert("사용자 설정이 저장되었습니다.");
                     } catch (err) {
-                      alert("설정 저장 성공 (로컬 UI 동기화 완료)");
+                      alert(`설정 저장 실패: ${String(err)}`);
                     }
                   }}
                   style={{ width: "100%", padding: "0.75rem" }}
@@ -1129,12 +1193,11 @@ function App() {
                 </button>
               </div>
 
-              {/* System Diagnostics */}
               <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 <div className="flex-between" style={{ borderBottom: "1px solid var(--border-light)", paddingBottom: "0.75rem" }}>
-                  <h2 style={{ fontSize: "1.1rem", fontWeight: 600 }}>PulpitInk Doctor 시스템 진단</h2>
-                  <button 
-                    className="btn btn-secondary btn-outline" 
+                  <h2 style={{ fontSize: "1.05rem", fontWeight: 600 }}>PulpitInk Doctor 시스템 진단</h2>
+                  <button
+                    className="btn btn-outline"
                     style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
                     onClick={runDoctorDiagnostic}
                     disabled={isDiagnosing}
@@ -1155,10 +1218,15 @@ function App() {
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                     {doctorReport.map((row, i) => (
-                      <div 
-                        className="flex-between" 
+                      <div
+                        className="flex-between"
                         key={i}
-                        style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid var(--border-light)", borderRadius: "8px" }}
+                        style={{
+                          padding: "0.75rem 1rem",
+                          backgroundColor: "rgba(255,255,255,0.02)",
+                          border: "1px solid var(--border-light)",
+                          borderRadius: "8px",
+                        }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                           {row.ok ? (
@@ -1168,7 +1236,13 @@ function App() {
                           )}
                           <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>{row.name}</span>
                         </div>
-                        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+                        <span
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "var(--text-secondary)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
                           {row.detail}
                         </span>
                       </div>
@@ -1180,6 +1254,31 @@ function App() {
           )}
         </div>
       </main>
+
+      <YouTubeDialog
+        open={youtubeDialogOpen}
+        onClose={() => setYoutubeDialogOpen(false)}
+        onSubmit={handleYoutubeSubmit}
+      />
+    </div>
+  );
+}
+
+function NavItem({
+  icon,
+  active,
+  onClick,
+  children,
+}: {
+  icon: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`nav-item ${active ? "active" : ""}`} onClick={onClick}>
+      {icon}
+      <span>{children}</span>
     </div>
   );
 }

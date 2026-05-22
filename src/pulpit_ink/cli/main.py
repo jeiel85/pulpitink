@@ -17,15 +17,22 @@ from rich.table import Table
 from pulpit_ink import __version__
 from pulpit_ink.app.exceptions import PulpitInkError
 from pulpit_ink.app.logging_config import configure_logging
+from pulpit_ink.app.paths import get_app_paths
 from pulpit_ink.core.audio.enhancement_presets import PRESETS
 from pulpit_ink.core.audio.ffmpeg_runner import DEFAULT_PRESET
+from pulpit_ink.core.audio.youtube_downloader import (
+    install_yt_dlp,
+    is_yt_dlp_available,
+)
 from pulpit_ink.core.export.base import ExportFormat
 from pulpit_ink.core.export.pipeline import ExportPipeline
+from pulpit_ink.core.postprocess.lexicon import save_user_lexicon
 from pulpit_ink.core.reference.corrections import apply_correction_to_segment
 from pulpit_ink.core.transcription.base import (
     TranscriptionResult,
     TranscriptSegment,
 )
+from pulpit_ink.core.utils.update_checker import check_for_updates
 from pulpit_ink.services.diagnostics import DoctorReport, run_doctor
 from pulpit_ink.services.model_service import list_models, model_cache_dir
 from pulpit_ink.services.settings_service import SettingsService
@@ -706,6 +713,295 @@ def db_path() -> None:
     """PulpitInk SQLite DB 파일 경로를 표시합니다."""
 
     console.print(str(default_db_path()))
+
+
+# ---------- Tauri/Frontend IPC helpers ----------
+
+user_dict_app = typer.Typer(help="사용자 사전(Glossary) 관리", no_args_is_help=True)
+youtube_app = typer.Typer(help="YouTube 입력 보조 도구", no_args_is_help=True)
+segments_app = typer.Typer(help="세그먼트 편집 영속화", no_args_is_help=True)
+
+app.add_typer(user_dict_app, name="user-dict")
+app.add_typer(youtube_app, name="youtube")
+app.add_typer(segments_app, name="segments")
+
+
+def _default_user_dict_path() -> Path:
+    return get_app_paths().ensure().data_dir / "user_dict.json"
+
+
+def _load_user_dict_entries(path: Path) -> dict[str, list[str]]:
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise typer.BadParameter(f"사용자 사전 JSON 파싱 실패: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise typer.BadParameter("사용자 사전 JSON은 객체(dict)여야 합니다.")
+    result: dict[str, list[str]] = {}
+    for canonical, forms in raw.items():
+        if not isinstance(canonical, str):
+            continue
+        if isinstance(forms, str):
+            result[canonical] = [forms]
+        elif isinstance(forms, list):
+            result[canonical] = [str(f) for f in forms if isinstance(f, str)]
+        else:
+            result[canonical] = []
+    return result
+
+
+@user_dict_app.command("path")
+def user_dict_path() -> None:
+    """기본 사용자 사전 파일 경로를 출력합니다."""
+
+    console.print(str(_default_user_dict_path()))
+
+
+@user_dict_app.command("list")
+def user_dict_list(
+    path: Path | None = typer.Option(
+        None, "--path", help="사용자 사전 JSON 경로 (기본: %LOCALAPPDATA%/PulpitInk/user_dict.json)"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Tauri/자동화용 JSON으로 출력합니다."),
+) -> None:
+    """사용자 사전 항목 목록을 출력합니다."""
+
+    target = path or _default_user_dict_path()
+    entries = _load_user_dict_entries(target)
+
+    if json_output:
+        print(json.dumps({"path": str(target), "entries": entries}, ensure_ascii=False))
+        return
+
+    if not entries:
+        console.print(f"[yellow]사용자 사전이 비어 있습니다.[/yellow] (경로: {target})")
+        return
+
+    table = Table(title=f"사용자 사전 ({len(entries)}개)")
+    table.add_column("표준 단어", style="bold")
+    table.add_column("STT 오인식 후보")
+    for canonical, forms in sorted(entries.items()):
+        table.add_row(canonical, ", ".join(forms) if forms else "—")
+    console.print(table)
+
+
+@user_dict_app.command("add")
+def user_dict_add(
+    canonical: str = typer.Argument(..., help="표준(정답) 단어"),
+    wrong_forms: list[str] = typer.Argument(  # noqa: B008
+        None, help="STT가 잘못 인식하는 후보 (공백으로 여러 개 지정)"
+    ),
+    path: Path | None = typer.Option(None, "--path", help="사용자 사전 JSON 경로"),
+    json_output: bool = typer.Option(False, "--json", help="JSON으로 결과를 출력합니다."),
+) -> None:
+    """사용자 사전에 새 항목을 추가하거나 기존 항목을 갱신합니다."""
+
+    target = path or _default_user_dict_path()
+    entries = _load_user_dict_entries(target)
+    existing = list(entries.get(canonical, []))
+    for form in wrong_forms or []:
+        if form and form != canonical and form not in existing:
+            existing.append(form)
+    entries[canonical] = existing
+    save_user_lexicon(target, entries)
+
+    if json_output:
+        print(json.dumps({"ok": True, "path": str(target), "canonical": canonical, "wrong_forms": existing}, ensure_ascii=False))
+        return
+    console.print(f"[green]추가:[/green] {canonical} → {existing}")
+
+
+@user_dict_app.command("remove")
+def user_dict_remove(
+    canonical: str = typer.Argument(..., help="삭제할 표준 단어"),
+    path: Path | None = typer.Option(None, "--path", help="사용자 사전 JSON 경로"),
+    json_output: bool = typer.Option(False, "--json", help="JSON으로 결과를 출력합니다."),
+) -> None:
+    """사용자 사전에서 항목을 제거합니다."""
+
+    target = path or _default_user_dict_path()
+    entries = _load_user_dict_entries(target)
+    removed = entries.pop(canonical, None)
+    save_user_lexicon(target, entries)
+
+    if json_output:
+        print(json.dumps({"ok": removed is not None, "path": str(target), "canonical": canonical}, ensure_ascii=False))
+        return
+    if removed is None:
+        console.print(f"[yellow]해당 항목이 없습니다:[/yellow] {canonical}")
+    else:
+        console.print(f"[green]삭제:[/green] {canonical}")
+
+
+@user_dict_app.command("import")
+def user_dict_import(
+    csv_path: Path = typer.Argument(..., help="가져올 CSV 파일 경로"),
+    path: Path | None = typer.Option(None, "--path", help="대상 사용자 사전 JSON 경로"),
+    merge: bool = typer.Option(
+        True, "--merge/--replace", help="기본은 병합(merge), --replace 시 기존 항목 모두 대체"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="JSON 결과를 출력합니다."),
+) -> None:
+    """CSV(첫 열: 표준, 이후 열: 오인식 후보)에서 사용자 사전을 가져옵니다."""
+
+    import csv
+
+    target = path or _default_user_dict_path()
+    existing = _load_user_dict_entries(target) if merge else {}
+
+    if not csv_path.exists():
+        raise typer.BadParameter(f"CSV 파일을 찾을 수 없습니다: {csv_path}")
+
+    added = 0
+    with csv_path.open(encoding="utf-8") as fp:
+        reader = csv.reader(fp)
+        for row in reader:
+            if not row:
+                continue
+            canonical = row[0].strip()
+            if not canonical:
+                continue
+            forms = [cell.strip() for cell in row[1:] if cell.strip()]
+            existing[canonical] = forms
+            added += 1
+
+    save_user_lexicon(target, existing)
+    if json_output:
+        print(json.dumps({"ok": True, "path": str(target), "imported": added, "total": len(existing)}, ensure_ascii=False))
+        return
+    console.print(f"[green]가져오기 완료:[/green] {added}개 항목 (총 {len(existing)}개)")
+
+
+@user_dict_app.command("export")
+def user_dict_export(
+    csv_path: Path = typer.Argument(..., help="내보낼 CSV 파일 경로"),
+    path: Path | None = typer.Option(None, "--path", help="대상 사용자 사전 JSON 경로"),
+    json_output: bool = typer.Option(False, "--json", help="JSON 결과를 출력합니다."),
+) -> None:
+    """사용자 사전을 CSV로 내보냅니다."""
+
+    import csv
+
+    target = path or _default_user_dict_path()
+    entries = _load_user_dict_entries(target)
+
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    with csv_path.open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.writer(fp)
+        for canonical, forms in sorted(entries.items()):
+            writer.writerow([canonical, *forms])
+
+    if json_output:
+        print(json.dumps({"ok": True, "path": str(csv_path), "exported": len(entries)}, ensure_ascii=False))
+        return
+    console.print(f"[green]내보내기 완료:[/green] {len(entries)}개 항목 → {csv_path}")
+
+
+@app.command("update-check")
+def update_check(
+    force: bool = typer.Option(False, "--force", "-f", help="24시간 캐시를 무시하고 강제로 조회합니다."),
+    current: str = typer.Option(__version__, "--current", help="비교 기준 버전 (기본: 현재 버전)"),
+    json_output: bool = typer.Option(False, "--json", help="Tauri/자동화용 JSON으로 출력합니다."),
+) -> None:
+    """GitHub Releases에서 최신 버전을 조회하고 결과를 출력합니다."""
+
+    has_update, latest, url, err = check_for_updates(current, force=force)
+    payload = {
+        "has_update": has_update,
+        "current_version": current,
+        "latest_version": latest,
+        "download_url": url,
+        "error": err,
+    }
+    if json_output:
+        print(json.dumps(payload, ensure_ascii=False))
+        return
+    if err:
+        console.print(f"[yellow]업데이트 확인 실패:[/yellow] {err}")
+        return
+    if has_update:
+        console.print(f"[green]신규 버전:[/green] {latest} (현재 {current}) → {url}")
+    else:
+        console.print(f"[dim]최신 버전입니다.[/dim] (현재 {current})")
+
+
+@youtube_app.command("check")
+def youtube_check(
+    json_output: bool = typer.Option(False, "--json", help="Tauri/자동화용 JSON으로 출력합니다."),
+) -> None:
+    """yt-dlp 라이브러리 설치 여부를 진단합니다."""
+
+    available = is_yt_dlp_available()
+    if json_output:
+        print(json.dumps({"available": available}, ensure_ascii=False))
+        return
+    if available:
+        console.print("[green]yt-dlp 설치됨[/green]")
+    else:
+        console.print("[yellow]yt-dlp 미설치 — `pulpit-ink youtube install` 명령으로 설치할 수 있습니다.[/yellow]")
+
+
+@youtube_app.command("install")
+def youtube_install(
+    json_output: bool = typer.Option(False, "--json", help="Tauri/자동화용 JSON으로 출력합니다."),
+) -> None:
+    """현재 Python 환경에 yt-dlp를 pip로 설치합니다 (사용자 동의 후 호출)."""
+
+    if is_yt_dlp_available():
+        if json_output:
+            print(json.dumps({"ok": True, "already": True}, ensure_ascii=False))
+            return
+        console.print("[dim]yt-dlp가 이미 설치되어 있습니다.[/dim]")
+        return
+
+    ok = install_yt_dlp()
+    if json_output:
+        print(json.dumps({"ok": ok, "already": False}, ensure_ascii=False))
+        return
+    if ok:
+        console.print("[green]yt-dlp 설치 완료.[/green]")
+    else:
+        console.print("[red]yt-dlp 설치 실패. 수동으로 `pip install yt-dlp`를 시도하세요.[/red]")
+        raise typer.Exit(code=1)
+
+
+@segments_app.command("update")
+def segments_update(
+    segment_id: int = typer.Argument(..., help="segments.id"),
+    edited_text: str | None = typer.Option(None, "--edited-text", help="edited_text 값"),
+    clean_text: str | None = typer.Option(None, "--clean-text", help="clean_text 값"),
+    speaker: str | None = typer.Option(None, "--speaker", help="화자 식별자"),
+    json_output: bool = typer.Option(False, "--json", help="JSON 결과를 출력합니다."),
+) -> None:
+    """단일 세그먼트의 편집 필드를 갱신합니다 (raw_text는 변경 불가)."""
+
+    if edited_text is None and clean_text is None and speaker is None:
+        raise typer.BadParameter("적어도 하나의 필드(--edited-text/--clean-text/--speaker)를 지정하세요.")
+
+    conn, repo = _open_repo()
+    try:
+        segment = repo.get_segment(segment_id)
+        if segment is None:
+            if json_output:
+                print(json.dumps({"ok": False, "error": "segment not found"}, ensure_ascii=False))
+                return
+            console.print(f"[red]세그먼트를 찾을 수 없습니다: {segment_id}[/red]")
+            raise typer.Exit(code=1)
+        repo.update_segment_text(
+            segment_id,
+            edited_text=edited_text,
+            clean_text=clean_text,
+            speaker=speaker,
+        )
+    finally:
+        conn.close()  # type: ignore
+
+    if json_output:
+        print(json.dumps({"ok": True, "segment_id": segment_id}, ensure_ascii=False))
+        return
+    console.print(f"[green]갱신:[/green] segment={segment_id}")
 
 
 if __name__ == "__main__":

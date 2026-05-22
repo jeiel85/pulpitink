@@ -1,5 +1,33 @@
 # HISTORY.md
 
+## 2026-05-23 (Tauri 하이브리드 UI 기능 parity 2차 포팅 완료 — v0.5.0)
+- 작업: PySide6 메인 윈도우의 핵심 기능을 React/Tauri 셸로 일괄 이식하고 자동 빌드/테스트 게이트를 통과시킨 뒤 main 브랜치로 머지하고 v0.5.0 태그 생성.
+- 구현 범위:
+  - **네이티브 파일/폴더 선택**: `@tauri-apps/plugin-dialog` + `tauri-plugin-dialog` (Rust) + `dialog:allow-open/save` capability. 신설 `PathPicker.tsx`로 경로 입력 필드를 OS 다이얼로그 트리거 버튼과 일체화.
+  - **2단 대조 오디오 싱크 편집기**: `wavesurfer.js`를 `WaveformPlayer.tsx`로 캡슐화. `convertFileSrc` + `assetProtocol`(scope=`**`) 조합으로 로컬 mp3/wav/m4a를 그대로 스트리밍. 세그먼트 카드에서 타임스탬프 클릭→seek, 더블클릭/PlayCircle 버튼→구간 재생. Fuzzy 교정 후보 팝오버는 클릭 즉시 `segments update --edited-text` + `corrections apply` 호출로 SQLite 영속화.
+  - **배치 큐**: `BatchItem` 상태 배열 + `processBatchQueue()` 루프. 사이드카 `sidecar-terminated` 이벤트 수신 시 다음 항목으로 자동 진행, 실패 시에도 멈추지 않음. 진행률·상태·실패 사유를 항목별로 표시.
+  - **YouTube opt-in 모달**: `YouTubeDialog.tsx`. 저작권 고지 + URL 정규식 검증(`youtube.com|youtu.be`) + yt-dlp 진단/원클릭 자동 설치(pip) + 동의 체크박스. 동의 후 큐에 URL을 그대로 enqueue하면 사이드카 `transcribe` 명령이 `http(s)://` 분기로 yt-dlp 다운로드 후 STT 파이프라인 실행.
+  - **Glossary 탭**: `GlossaryTab.tsx`. 표준 단어 + 오인식 후보 추가/삭제/검색 + CSV import/export. 모든 동작은 사이드카 `user-dict` 서브명령에 위임하므로 백엔드 `lexicon.save_user_lexicon` 단일 진실 공급원 유지.
+  - **업데이트 배너**: `UpdateBanner.tsx`. 부팅 시 `update-check --json` 호출 → `has_update=true`일 때 상단 배너 노출. 사용자 dismiss는 `localStorage[pulpitink-update-dismissed]`에 해당 버전을 저장해 같은 버전이 다시 표시되지 않도록 함.
+  - **사이드카 IPC 신규 서브명령** (`src/pulpit_ink/cli/main.py`):
+    - `user-dict list/add/remove/import/export/path [--json]`
+    - `update-check [--current X] [--force] [--json]`
+    - `youtube check/install [--json]`
+    - `segments update <id> [--edited-text/--clean-text/--speaker] [--json]`
+- 변경 파일:
+  - 프론트엔드: `frontend/package.json` (wavesurfer.js, @tauri-apps/plugin-dialog 의존성 추가), `frontend/src-tauri/Cargo.toml`/`Cargo.lock`/`src/lib.rs`/`capabilities/default.json`/`tauri.conf.json` (dialog 플러그인 + asset 프로토콜 활성화 + 윈도우 1280×820), `frontend/src/App.tsx` 재작성(약 760줄), `frontend/src/App.css` (모달/배치 큐/Glossary/Waveform/배너 스타일 추가), 신규 `lib/sidecar.ts`, `lib/types.ts`, `components/PathPicker.tsx`, `components/WaveformPlayer.tsx`, `components/YouTubeDialog.tsx`, `components/GlossaryTab.tsx`, `components/UpdateBanner.tsx`.
+  - 백엔드: `src/pulpit_ink/__init__.py` 버전 0.5.0, `src/pulpit_ink/cli/main.py` 신규 IPC 서브명령, `pyproject.toml` 버전 범프, 신규 `tests/test_cli_tauri_helpers.py` (8건 PASS).
+  - 문서: `CHANGELOG.md`, `HISTORY.md` 갱신.
+- 검증:
+  - `npx tsc --noEmit`: PASS (Type 에러 0)
+  - `npm run build` (vite): PASS, dist 285KB JS / 19KB CSS
+  - `cargo check` (frontend/src-tauri): PASS (`tauri-plugin-dialog v2.7.1` + `rfd v0.16.0` 추가됨)
+  - `pytest`: 144/144 PASS (신규 8건 포함)
+  - `ruff check .`: 0건
+- 후속 작업:
+  - Tauri 설치본 수동 E2E 검증 (`PulpitInk_0.5.0_x64-setup.exe` 첫 실행 → 변환 → 검수 → export)
+  - 실시간 마이크 녹음 + 오프라인 스트리밍 STT (GitHub Issue #1, v0.6.0 마일스톤)
+
 ## 2026-05-21 (Tauri 하이브리드 브랜치 재개 및 온보딩 UI 적용)
 - 작업: 중단되어 있던 `feat/tauri-hybrid` 브랜치에 현재 `main` 기능을 병합하고, PulpitInk Python 코어를 Tauri/React 셸에서 호출할 수 있도록 사이드카 명칭, 앱 메타데이터, JSON CLI 출력을 정리. 첫 사용자 경험 개선을 위해 온보딩 패널과 라이트/다크 테마 전환도 함께 적용.
 - 변경 파일:
