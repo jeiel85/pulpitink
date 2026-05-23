@@ -38,8 +38,8 @@
 ## 3. 미결 사항 (실행 전 확인 필요)
 
 ### Q1. GitHub 저장소 이름 변경 여부
-- 현재: `jeiel85/pulpit-ink`
-- 옵션 A: `jeiel85/pulpit-ink`로 변경 (기존 URL은 GitHub이 리다이렉트)
+- 현재: `jeiel85/pulpit-ink-desktop`
+- 옵션 A: `jeiel85/pulpit-ink-desktop`로 변경 (기존 URL은 GitHub이 리다이렉트)
 - 옵션 B: 유지 (내부 이름만 변경)
 - **영향**: CI 설정, 외부 링크, README 배지 등
 

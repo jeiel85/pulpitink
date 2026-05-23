@@ -42,8 +42,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://jeiel85.github.io/pulpit-ink/"
-Issues = "https://github.com/jeiel85/pulpit-ink/issues"
+Homepage = "https://jeiel85.github.io/pulpit-ink-desktop/"
+Issues = "https://github.com/jeiel85/pulpit-ink-desktop/issues"
 
 [project.scripts]
 pulpit-ink = "pulpit_ink.cli.main:app"

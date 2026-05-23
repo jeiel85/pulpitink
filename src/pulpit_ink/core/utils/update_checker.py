@@ -15,7 +15,7 @@ from pulpit_ink.app.paths import get_app_paths
 
 logger = logging.getLogger("pulpit_ink.utils.update_checker")
 
-GITHUB_API_URL = "https://api.github.com/repos/jeiel85/pulpit-ink/releases/latest"
+GITHUB_API_URL = "https://api.github.com/repos/jeiel85/pulpit-ink-desktop/releases/latest"
 CACHE_FILE_NAME = "update_cache.json"
 
 
@@ -113,7 +113,7 @@ def check_for_updates(
                 raise ValueError("tag_name not found in GitHub API response")
             if not download_url:
                 # Fallback URL
-                download_url = "https://github.com/jeiel85/pulpit-ink/releases"
+                download_url = "https://github.com/jeiel85/pulpit-ink-desktop/releases"
 
             has_update = is_new_version_available(current_version, latest_version)
 

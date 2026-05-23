@@ -8,7 +8,7 @@
 
 ```text
 Project Name: PulpitInk
-Repository: https://github.com/jeiel85/pulpit-ink.git
+Repository: https://github.com/jeiel85/pulpit-ink-desktop.git
 Main Branch: main
 Primary Spec: docs/product-spec.md
 History Document: HISTORY.md

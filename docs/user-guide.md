@@ -35,8 +35,8 @@ FFmpeg 가 설치되어 있지 않다면 [공식 빌드](https://www.gyan.dev/ff
 ### 1.2 소스로 설치
 
 ```powershell
-git clone https://github.com/jeiel85/pulpit-ink.git
-cd pulpit-ink
+git clone https://github.com/jeiel85/pulpit-ink-desktop.git
+cd pulpit-ink-desktop
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[gui,reference,dev]"

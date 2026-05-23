@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## Unreleased - 2026-05-23
+
+### Changed
+- GitHub 저장소 URL을 `jeiel85/pulpit-ink-desktop` 기준으로 갱신했습니다.
+- README 배지, 릴리즈/이슈/Pages 링크, 소스 설치 안내, Inno Setup URL, 앱 업데이트 확인용 GitHub Releases API URL을 새 저장소로 전환했습니다.
+
 ## [0.5.0] - 2026-05-23
 
 ### Added — Tauri 하이브리드 UI 기능 parity 2차 포팅
@@ -208,7 +214,7 @@
 - 클래스: `SermonScriptError` → `PulpitInkError`
 - PyInstaller spec: `pulpit-ink.spec`, `pulpit-ink-sidecar.spec`
 - 빌드 산출물: `PulpitInk_Portable_*.zip`, EXE: `PulpitInk.exe`
-- GitHub 저장소: `jeiel85/sermon-script` → `jeiel85/pulpit-ink`
+- GitHub 저장소: `jeiel85/sermon-script` → `jeiel85/pulpit-ink-desktop`
 - 데이터 경로: `%LOCALAPPDATA%\PulpitInk\PulpitInk\`
 - DB/로그: `pulpit_ink.db`, `pulpit_ink.log`
 - 환경변수: `PULPITINK_ROOT`
@@ -230,14 +236,14 @@
 - GitHub Pages에서 정적 파일을 그대로 제공하도록 `docs/.nojekyll`을 추가했습니다.
 
 ### Changed
-- README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/pulpit-ink/` 기준으로 갱신했습니다.
+- README와 프로젝트 홈페이지 URL을 `https://jeiel85.github.io/pulpit-ink-desktop/` 기준으로 갱신했습니다.
 
 ### Documentation: GitHub landing page
 
 ### Changed
 - `README.md`를 GitHub 랜딩 페이지 역할에 맞게 갱신했습니다.
   사용자가 제공한 랜딩 이미지를 상단에 배치하고, 현재 구현된 GUI/CLI/STT/편집/Export/배포 상태를 기준으로 빠른 시작과 기능표를 정리했습니다.
-- 프로젝트 메타데이터의 GitHub URL을 실제 저장소인 `https://github.com/jeiel85/pulpit-ink`로 정정했습니다.
+- 프로젝트 메타데이터의 GitHub URL을 실제 저장소인 `https://github.com/jeiel85/pulpit-ink-desktop`로 정정했습니다.
 
 ### Added
 - `docs/assets/pulpit-ink-landing.png` 랜딩 이미지를 추가했습니다.

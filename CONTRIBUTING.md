@@ -3,8 +3,8 @@
 ## Development Setup
 
 ```bash
-git clone https://github.com/yourname/pulpit_ink.git
-cd pulpit-ink
+git clone https://github.com/jeiel85/pulpit-ink-desktop.git
+cd pulpit-ink-desktop
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt

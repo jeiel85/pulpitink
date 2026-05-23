@@ -1,5 +1,25 @@
 # HISTORY.md
 
+## 2026-05-23 (GitHub 저장소 URL 변경 반영)
+- 작업: GitHub 저장소 주소 변경(`jeiel85/pulpit-ink` → `jeiel85/pulpit-ink-desktop`) 영향 범위를 분석하고 문서, 패키지 메타데이터, 설치 안내, 업데이트 확인 URL, 설치 관리자 URL, Git 원격 URL을 새 주소로 전환.
+- 변경 파일:
+  - AGENTS.md, README.md, CONTRIBUTING.md
+  - pyproject.toml
+  - src/pulpit_ink/core/utils/update_checker.py
+  - scripts/pulpit-ink.iss
+  - docs/index.html, docs/user-guide.md, docs/branding-rename-plan.md
+  - CHANGELOG.md, HISTORY.md
+- 검증:
+  - `rg --pcre2` 기반 기존 저장소 URL 잔여 참조 검색: 의도된 이력 설명 1건 외 잔여 없음
+  - `git ls-remote --heads origin main`: 새 원격 저장소 접근 확인
+  - `python -m ruff check .`: PASS
+  - `$env:PYTHONPATH="src"; python -m pytest`: 144/144 PASS
+  - `$env:PYTHONPATH="src"; python -m pulpit_ink.cli.main doctor`: PASS
+  - `python -m pytest`: 패키지 미설치 환경에서 `pulpit_ink` import 실패 확인 후 `PYTHONPATH=src`로 재검증
+- 결과: 성공. 코드 동작을 바꾸는 기능 변경 없이 저장소 주소 참조와 원격 URL을 새 GitHub 저장소 기준으로 정렬.
+- 후속 작업:
+  - 로컬 폴더명 `pulpit-ink` → `pulpit-ink-desktop` 변경
+
 ## 2026-05-23 (Tauri 하이브리드 UI 기능 parity 2차 포팅 완료 — v0.5.0)
 - 작업: PySide6 메인 윈도우의 핵심 기능을 React/Tauri 셸로 일괄 이식하고 자동 빌드/테스트 게이트를 통과시킨 뒤 main 브랜치로 머지하고 v0.5.0 태그 생성.
 - 구현 범위:
@@ -248,7 +268,7 @@
   - CLI: `sermonscript` → `pulpit-ink` 명령
   - GUI: 타이틀바 `설교필기 (PulpitInk)`, 다이얼로그 제목 `설교필기`
   - 빌드/CI: 환경변수 `PULPITINK_ROOT`, 산출물 `PulpitInk_Portable_*.zip`
-  - GitHub: 저장소 `jeiel85/sermon-script` → `jeiel85/pulpit-ink` 리네이밍 완료
+  - GitHub: 저장소 `jeiel85/sermon-script` → `jeiel85/pulpit-ink-desktop` 리네이밍 완료
   - 문서: README, AGENTS, CHANGELOG, HISTORY, user-guide 등 30+ 문서 갱신
   - 테스트: 모든 import/참조 갱신
 - 검증:
@@ -258,7 +278,7 @@
 - 결과: 성공. GitHub 저장소 리네이밍 및 원격 URL 변경 완료.
 - 후속 작업:
   - 로컬 폴더명 변경 (`sermon-script` → `pulpit-ink`) — IDE/프로세스 잠금 해제 후 수동 진행 필요
-  - GitHub Pages 설정 확인 (새 URL: `jeiel85.github.io/pulpit-ink`)
+  - GitHub Pages 설정 확인 (새 URL: `jeiel85.github.io/pulpit-ink-desktop`)
 
 ## 2026-05-20 (브랜딩 — 앱 정식 명칭 확정)
 - 작업: 이전 세션(993b96d1)에서 논의된 앱 이름 한글화 후보 5개에 대해 브랜드 충돌 조사를 실시하고, 최종 이름을 확정.
@@ -296,7 +316,7 @@
   - docs/index.html (GitHub Pages용 랜딩 페이지 신규)
   - docs/.nojekyll (GitHub Pages 정적 파일 직접 제공)
   - README.md (공식 랜딩 페이지 링크 추가)
-  - pyproject.toml (Homepage URL을 `https://jeiel85.github.io/pulpit-ink/`로 변경)
+  - pyproject.toml (Homepage URL을 `https://jeiel85.github.io/pulpit-ink-desktop/`로 변경)
   - CHANGELOG.md
   - HISTORY.md
 - 검증:
@@ -304,8 +324,8 @@
   - `python -m pytest`: 95/95 PASS
   - `python -m pulpit_ink.cli.main doctor`: PASS
 - GitHub Pages:
-  - `gh api repos/jeiel85/pulpit-ink/pages`: `status=built`, source `main` `/docs`
-  - `Invoke-WebRequest https://jeiel85.github.io/pulpit-ink/`: HTTP 200, title/image 참조 확인
+  - `gh api repos/jeiel85/pulpit-ink-desktop/pages`: `status=built`, source `main` `/docs`
+  - `Invoke-WebRequest https://jeiel85.github.io/pulpit-ink-desktop/`: HTTP 200, title/image 참조 확인
 - 결과: 성공. GitHub Pages 랜딩 페이지 공개 완료.
 - 후속 작업:
   - GitHub Actions Node.js 20 deprecation 경고 대응
@@ -315,14 +335,14 @@
 - 변경 파일:
   - README.md (랜딩 이미지, 배지, 핵심 기능표, GUI/CLI 빠른 시작, 프라이버시/배포 안내 갱신)
   - docs/assets/pulpit-ink-landing.png (사용자 제공 랜딩 이미지 추가)
-  - pyproject.toml (GitHub URL을 `jeiel85/pulpit-ink`로 정정)
+  - pyproject.toml (GitHub URL을 `jeiel85/pulpit-ink-desktop`로 정정)
   - CHANGELOG.md
   - HISTORY.md
 - 검증:
   - `python -m ruff check .`: PASS
   - `python -m pytest`: 95/95 PASS
   - `python -m pulpit_ink.cli.main doctor`: PASS
-  - `gh repo view jeiel85/pulpit-ink --json description,homepageUrl,repositoryTopics,url`: description/homepage/topics 반영 확인
+  - `gh repo view jeiel85/pulpit-ink-desktop --json description,homepageUrl,repositoryTopics,url`: description/homepage/topics 반영 확인
 - 결과: 성공
 - 후속 작업:
   - GitHub 저장소 social preview 이미지는 웹 UI/추가 API 권한이 필요하면 별도 확인

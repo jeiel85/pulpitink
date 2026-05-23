@@ -2,13 +2,13 @@
 
 설교, 강의, 회의 녹음 파일을 로컬 PC에서 전처리하고 텍스트로 변환한 뒤 검수, 편집, 출력까지 지원하는 Windows 데스크톱 STT 도구입니다.
 
-[![Test](https://github.com/jeiel85/pulpit-ink/actions/workflows/test.yml/badge.svg)](https://github.com/jeiel85/pulpit-ink/actions/workflows/test.yml)
-[![Build Windows Portable](https://github.com/jeiel85/pulpit-ink/actions/workflows/build-windows.yml/badge.svg)](https://github.com/jeiel85/pulpit-ink/actions/workflows/build-windows.yml)
+[![Test](https://github.com/jeiel85/pulpit-ink-desktop/actions/workflows/test.yml/badge.svg)](https://github.com/jeiel85/pulpit-ink-desktop/actions/workflows/test.yml)
+[![Build Windows Portable](https://github.com/jeiel85/pulpit-ink-desktop/actions/workflows/build-windows.yml/badge.svg)](https://github.com/jeiel85/pulpit-ink-desktop/actions/workflows/build-windows.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](pyproject.toml)
 
-- 공식 랜딩 페이지: <https://jeiel85.github.io/pulpit-ink/>
-- 릴리즈 다운로드: <https://github.com/jeiel85/pulpit-ink/releases>
+- 공식 랜딩 페이지: <https://jeiel85.github.io/pulpit-ink-desktop/>
+- 릴리즈 다운로드: <https://github.com/jeiel85/pulpit-ink-desktop/releases>
 - 사용자 가이드: [docs/user-guide.md](docs/user-guide.md)
 
 ## 개요
@@ -44,8 +44,8 @@ PulpitInk는 긴 한국어 설교 녹음처럼 검수가 필요한 STT 작업을
 ### 소스 설치
 
 ```powershell
-git clone https://github.com/jeiel85/pulpit-ink.git
-cd pulpit-ink
+git clone https://github.com/jeiel85/pulpit-ink-desktop.git
+cd pulpit-ink-desktop
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[gui,reference,dev]"

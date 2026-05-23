@@ -4,7 +4,7 @@
   #define MyAppVersion "0.4.5"
 #endif
 #define MyAppPublisher "jeiel85"
-#define MyAppURL "https://github.com/jeiel85/pulpit-ink"
+#define MyAppURL "https://github.com/jeiel85/pulpit-ink-desktop"
 #define MyAppExeName "PulpitInk.exe"
 
 [Setup]
